@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
+       xmlns:jeda-persistentqueue="http://www.intervale.ru/schema/jeda-persistentqueue"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+        http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd
+        http://www.intervale.ru/schema/jeda-persistentqueue http://www.intervale.ru/schema/jeda-persistentqueue.xsd">
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+
+    <jeda-core:stage path="TestPath">
+        <jeda-core:tx-memory-queue maxSize="100000"/>
+    </jeda-core:stage>
+
+    <jeda-core:stage path="TestPath3" transacted="true">
+        <jeda-core:memory-queue maxSize="100000"/>
+    </jeda-core:stage>
+
+    <!--<jeda-core:stage path="TestPath5">-->
+    <!--<jeda-core:queue id="myQueue" class="ru.kwanza.jedae.springintegration.MemoryQueue">-->
+    <!--<property name="limitSize" value="1000"/>-->
+    <!--</jeda-core:queue>-->
+    <!--</jeda-core:stage>-->
+
+
+    <jeda-core:stage path="TestPath6">
+        <jeda-persistentqueue:jdbc-queue maxSize="1000"
+                                             idColumn="msg_id"
+                                             dataColumn="request_data"
+                                             tableName="msg_request"/>
+    </jeda-core:stage>
+
+
+</beans>

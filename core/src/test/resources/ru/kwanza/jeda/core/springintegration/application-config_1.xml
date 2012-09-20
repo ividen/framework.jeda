@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+               http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd">
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+    <bean id="testBean" class="ru.kwanza.jeda.core.springintegration.TestObject"
+          jeda-core:registered="true">
+        <property name="name" value="TestObject"/>
+    </bean>
+
+    <jeda-core:flow-bus name="CPAReqFlowBus"
+                            class="ru.kwanza.jeda.core.springintegration.CPAReqFlowBus"/>
+
+    <jeda-core:flow-bus name="CPAResFlowBus"
+                            class="ru.kwanza.jeda.core.springintegration.CPAResFlowBus">
+        <property name="parent" ref="CPAReqFlowBus"/>
+        <property name="controller" ref="TestContext"/>
+    </jeda-core:flow-bus>
+
+    <jeda-core:context-controller name="TestContext"
+                                      class="ru.kwanza.jeda.core.springintegration.TestContextController"/>
+    <jeda-core:timer name="TestTimer" class="ru.kwanza.jeda.core.springintegration.TestTimer"/>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool" threadNamePrefix="SharedPool-1">
+        <jeda-core:share-strategy-by-input-rate/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool1" threadNamePrefix="SharedPool-2">
+        <jeda-core:share-strategy-by-thread-count/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool2" threadNamePrefix="SharedPool-3">
+        <jeda-core:share-strategy-by-waiting-time/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool3" threadNamePrefix="SharedPool-4">
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool4" threadNamePrefix="SharedPool-5">
+        <jeda-core:share-strategy-by-input-rate-and-waiting-time maxWaitingTime="1000"/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool5" threadNamePrefix="SharedPool-3"
+                                         maxThreadCount="2"
+                                         idleTimeout="1000" maxSingleEventAttempt="10000">
+        <jeda-core:share-strategy-by-input-rate-and-waiting-time/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool6" threadNamePrefix="SharedPool-3"
+                                         maxThreadCount="2"
+                                         idleTimeout="1000" maxSingleEventAttempt="10000">
+        <jeda-core:share-strategy-by-thread-count-and-waiting-time maxWaitingTime="2000"/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool7" threadNamePrefix="SharedPool-3"
+                                         maxThreadCount="2"
+                                         idleTimeout="1000" maxSingleEventAttempt="10000">
+        <jeda-core:share-strategy-by-thread-count-and-waiting-time/>
+    </jeda-core:shared-thread-manager>
+
+
+    <jeda-core:shared-thread-manager id="ProtocolSchaedPool8" threadNamePrefix="SharedPool-3"
+                                         maxThreadCount="2"
+                                         idleTimeout="1000" maxSingleEventAttempt="10000">
+        <jeda-core:share-strategy class="ru.kwanza.jeda.core.springintegration.TestComparator"/>
+    </jeda-core:shared-thread-manager>
+
+    <jeda-core:stage name="TestStage20" transaction="true">
+        <jeda-core:tx-priority-memory-queue cloneType="SERIALIZE"/>
+        <jeda-core:static-resource-controller/>
+        <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor">
+        </jeda-core:event-processor>
+        <jeda-core:thread-manager ref="ProtocolSchaedPool8"/>
+    </jeda-core:stage>
+
+
+    <jeda-core:stage name="TestStage21" transaction="true">
+        <jeda-core:tx-priority-memory-queue cloneType="SERIALIZE"/>
+        <jeda-core:static-resource-controller/>
+        <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor1">
+            <property name="nextStage" ref="TestStage20"/>
+        </jeda-core:event-processor>
+        <jeda-core:thread-manager ref="ProtocolSchaedPool8"/>
+    </jeda-core:stage>
+
+
+</beans>

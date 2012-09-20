@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:autokey-mock-config.xml"/>
+    <import resource="classpath:trx-mock-config.xml"/>
+
+    <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
+
+    <bean id="jdbcObjectContextController" class="ru.kwanza.jeda.context.jdbc.JDBCObjectContextController">
+        <constructor-arg index="0" value="ru.kwanza.jeda.context.TestObject"/>
+        <constructor-arg index="1">
+            <map>
+                <entry key="data1" value="data_1"/>
+            </map>
+        </constructor-arg>
+        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="versionGenerator" ref="versionGenerator"/>
+    </bean>
+
+    <bean id="jdbcObjectContextControllerWithTerm" class="ru.kwanza.jeda.context.jdbc.JDBCObjectContextController">
+        <constructor-arg index="0" value="ru.kwanza.jeda.context.TestObject"/>
+        <constructor-arg index="1">
+            <map>
+                <entry key="data1" value="data_1"/>
+            </map>
+        </constructor-arg>
+        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="versionGenerator" ref="versionGenerator"/>
+        <property name="tableName" value="object_context_with_term"/>
+        <property name="terminator" value="termName"/>
+    </bean>
+
+    <bean id="propertyPlaceholderConfigurer1"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db_mssql.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${dbunit.driverClass}"/>
+        <property name="url" value="${dbunit.connectionUrl}"/>
+        <property name="username" value="${dbunit.username}"/>
+        <property name="password" value="${dbunit.password}"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+    <bean id="connectionFactory"
+          class="ru.kwanza.jeda.jeconnection.JEConnectionFactory">
+        <constructor-arg ref="ru.kwanza.jeda.api.internal.ISystemManager"/>
+        <property name="lockingTimeout" value="1000"/>
+        <property name="path" value="./target/berkeley_db/"/>
+    </bean>
+
+    <bean id="connectionFactory2"
+          class="ru.kwanza.jeda.jeconnection.JEConnectionFactory">
+        <constructor-arg ref="ru.kwanza.jeda.api.internal.ISystemManager"/>
+        <property name="path" value="./target/berkeley_db/"/>
+        <property name="lockingTimeout" value="1000"/>
+    </bean>
+
+    <bean id="bpqController" class="ru.kwanza.jeda.persistentqueue.berkeley.BerkeleyQueuePersistenceController">
+        <constructor-arg index="0" value="test_db"/>
+        <constructor-arg index="1" ref="connectionFactory"/>
+    </bean>
+
+</beans>

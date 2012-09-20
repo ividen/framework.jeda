@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-nio"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:beans="http://www.springframework.org/schema/beans"
+            xmlns:flexflow-core="http://www.intervale.ru/schema/flexflow-core"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.intervale.ru/schema/flexflow-nio"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+    <xsd:import namespace="http://www.intervale.ru/schema/flexflow-core"
+                schemaLocation="http://www.intervale.ru/schema/flexflow-core.xsd"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"
+                schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
+
+
+    <xsd:complexType name="client-transport-flow-bus-type">
+        <xsd:complexContent>
+            <xsd:extension base="flexflow-core:flexflow-flow-bus-type">
+                <xsd:attribute name="name" type="xsd:string" use="required"/>
+                <xsd:attribute name="threadCount" type="xsd:int" use="optional"/>
+                <xsd:attribute name="transport" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type type="org.glassfish.grizzly.nio.transport.TCPNIOTransport"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="connectionPoolConfigurator" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type
+                                        type="ru.kwanza.jeda.nio.client.IConnectionPoolConfigurator"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+                <xsd:attribute name="directionQueueFactory" type="xsd:string" use="optional">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type
+                                        type="ru.kwanza.jeda.nio.client.IDirectionQueueFactory"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:attribute>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+
+    <xsd:element name="client-transport-flow-bus" substitutionGroup="flexflow-core:flexflow-flow-bus"
+                 type="client-transport-flow-bus-type">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation>
+                    <tool:exports
+                            type="ru.kwanza.jeda.api.IFlowBus"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:complexType name="entry-point-keystore-type"/>
+
+
+    <xsd:element name="entry-point-keystore" abstract="true" type="entry-point-keystore-type"/>
+
+    <xsd:element name="jks-keystore" substitutionGroup="entry-point-keystore">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="entry-point-keystore-type">
+                    <xsd:attribute name="keystoreFile" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="keystorePassword" type="xsd:string" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="keystore" substitutionGroup="entry-point-keystore">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation>
+                    <tool:exports type="ru.kwanza.jeda.api.ITimer"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="entry-point-keystore-type">
+                    <xsd:group ref="beans:beanElements"/>
+                    <xsd:attributeGroup ref="beans:beanAttributes"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="entry-point">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="entry-point-keystore" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+
+            <xsd:attribute name="host" type="xsd:string" use="optional"/>
+            <xsd:attribute name="port" type="xsd:int" use="optional"/>
+            <xsd:attribute name="useAJP" type="xsd:boolean" use="optional" default="false"/>
+            <xsd:attribute name="keepAliveIdleTimeout" type="xsd:int" use="optional"/>
+            <xsd:attribute name="keepAliveMaxRequestsCount" type="xsd:int" use="optional"/>
+            <xsd:attribute name="threadCount" type="xsd:int" use="optional"/>
+            <xsd:attribute name="serverConnectionBacklog" type="xsd:int" use="optional"/>
+            <xsd:attribute name="connectionIdleTimeout" type="xsd:long" use="optional"/>
+            <xsd:attribute name="serverSocketSoTimeout" type="xsd:int" use="optional"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="http-server">
+        <xsd:annotation>
+            <xsd:appinfo>
+                <tool:annotation>
+                    <tool:exports
+                            type="ru.kwanza.jeda.nio.server.http.IHttpServer"/>
+                </tool:annotation>
+            </xsd:appinfo>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="entry-point" minOccurs="1" maxOccurs="unbounded"/>
+            </xsd:sequence>
+
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+            <xsd:attribute name="keepAliveIdleTimeout" type="xsd:int" use="optional"/>
+            <xsd:attribute name="keepAliveMaxRequestsCount" type="xsd:int" use="optional"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="http-handler">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:choice minOccurs="1" maxOccurs="1">
+                    <xsd:element name="uri" type="xsd:string"/>
+                    <xsd:element name="pattern" type="xsd:string"/>
+                </xsd:choice>
+                <xsd:choice minOccurs="1" maxOccurs="1">
+                    <xsd:element name="stage" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.jeda.api.IStage"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:element>
+                    <xsd:element name="flowBus" type="xsd:string">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.jeda.api.IFlowBus"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:sequence>
+            <xsd:attribute name="server" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <tool:annotation kind="ref">
+                            <tool:expected-type type="ru.kwanza.jeda.nio.server.http.IHttpServer"/>
+                        </tool:annotation>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:attribute>
+            <xsd:attribute name="timeout" type="xsd:long" use="optional"/>
+            <xsd:attribute name="timedOutHandler" use="optional">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <tool:annotation kind="ref">
+                            <tool:expected-type type="ru.kwanza.jeda.nio.server.http.ITimedOutHandler"/>
+                        </tool:annotation>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:attribute>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>
+

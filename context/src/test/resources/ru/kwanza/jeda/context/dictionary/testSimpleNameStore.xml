@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <ctx_dictionary name="prop1" id="1"/>
+    <ctx_dictionary name="prop2" id="2"/>
+    <ctx_dictionary name="prop3" id="3"/>
+    <ctx_dictionary name="prop4" id="4"/>
+    <ctx_dictionary name="prop5" id="5"/>
+</dataset>

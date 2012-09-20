@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-context"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:flexflow-core="http://www.intervale.ru/schema/flexflow-core"
+            xmlns:tool="http://www.springframework.org/schema/tool"
+            targetNamespace="http://www.intervale.ru/schema/flexflow-context"
+            elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+    <xsd:import namespace="http://www.springframework.org/schema/beans"
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+    <xsd:import namespace="http://www.intervale.ru/schema/flexflow-core"/>
+    <xsd:import namespace="http://www.springframework.org/schema/tool"
+                schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
+
+
+    <xsd:element name="jdbc-blob-context-controller"
+                 substitutionGroup="flexflow-core:flexflow-context-controller">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                    <xsd:attribute name="dbTool">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.DBTool"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="versionGenerator">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="terminator" type="xsd:string"/>
+                    <xsd:attribute name="tableName" type="xsd:string"/>
+                    <xsd:attribute name="idColumnName" type="xsd:string"/>
+                    <xsd:attribute name="versionColumnName" type="xsd:string"/>
+                    <xsd:attribute name="terminatorColumnName" type="xsd:string"/>
+                    <xsd:attribute name="contextDataColumnName" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="jdbc-blob-context-controller-with-dict">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                    <xsd:attribute name="dbTool">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.DBTool"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="versionGenerator">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="autoKey">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.autokey.api.IAutoKey"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="terminator" type="xsd:string"/>
+                    <xsd:attribute name="tableName" type="xsd:string"/>
+                    <xsd:attribute name="idColumnName" type="xsd:string"/>
+                    <xsd:attribute name="versionColumnName" type="xsd:string"/>
+                    <xsd:attribute name="terminatorColumnName" type="xsd:string"/>
+                    <xsd:attribute name="contextDataColumnName" type="xsd:string"/>
+                    <xsd:attribute name="dictionaryTableName" type="xsd:string" use="required"/>
+                    <xsd:attribute name="dictionaryPropertyColumnName" type="xsd:string" use="required"/>
+                    <xsd:attribute name="dictionaryIdColumnName" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="jdbc-object-context-controller">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                    <xsd:attribute name="dbTool">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.DBTool"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="versionGenerator">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="terminator" type="xsd:string"/>
+                    <xsd:attribute name="tableName" type="xsd:string"/>
+                    <xsd:attribute name="idColumnName" type="xsd:string"/>
+                    <xsd:attribute name="versionColumnName" type="xsd:string"/>
+                    <xsd:attribute name="terminatorColumnName" type="xsd:string"/>
+                    <xsd:attribute name="clazz" type="xsd:string" use="required"/>
+                    <xsd:attribute name="tableColumnByPropertyName">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="java.util.Map"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="berkeley-blob-context-controller"
+                 substitutionGroup="flexflow-core:flexflow-context-controller">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                    <xsd:attribute name="connectionFactory" use="required">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type
+                                            type="ru.kwanza.jeda.jeconnection.JEConnectionFactory"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="versionGenerator">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="databaseName" type="xsd:string"/>
+                    <xsd:attribute name="terminator" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="berkeley-blob-context-controller-with-dict"
+                 substitutionGroup="flexflow-core:flexflow-context-controller">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                    <xsd:attribute name="connectionFactory" use="required">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type
+                                            type="ru.kwanza.jeda.jeconnection.JEConnectionFactory"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="versionGenerator">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                    <xsd:attribute name="databaseName" type="xsd:string"/>
+                    <xsd:attribute name="dictionaryTableName" type="xsd:string" use="required"/>
+                    <xsd:attribute name="terminator" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

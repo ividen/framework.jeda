@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <import resource="classpath:trx-mock-config.xml"/>
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
+    <import resource="classpath:jeda-context-berkeley-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+
+    <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
+
+    <bean id="berkeleyBlobContextController"
+          class="ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController">
+        <property name="versionGenerator" ref="versionGenerator"/>
+        <property name="connectionFactory" ref="jeConnectionFactory"/>
+        <property name="databaseName" value="test_berkeley_db"/>
+    </bean>
+
+    <bean id="berkeleyBlobContextControllerWithDict"
+          class="ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextControllerWithDictionary">
+        <constructor-arg index="0"
+                         ref="ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor"/>
+        <constructor-arg index="1" value="ctx_dictionary"/>
+        <property name="versionGenerator" ref="versionGenerator"/>
+        <property name="connectionFactory" ref="jeConnectionFactory"/>
+    </bean>
+
+    <bean id="berkeleyBlobContextControllerWithTerm"
+          class="ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController">
+        <property name="terminator" value="termName"/>
+        <property name="versionGenerator" ref="versionGenerator"/>
+        <property name="connectionFactory" ref="jeConnectionFactory"/>
+    </bean>
+
+    <bean id="jeConnectionFactory"
+          class="ru.kwanza.jeda.jeconnection.JEConnectionFactory" destroy-method="destroy">
+        <constructor-arg ref="ru.kwanza.jeda.api.internal.ISystemManager"/>
+        <property name="lockingTimeout" value="1000"/>
+        <property name="path" value="./target/test_berkeley_db/"/>
+    </bean>
+
+</beans>

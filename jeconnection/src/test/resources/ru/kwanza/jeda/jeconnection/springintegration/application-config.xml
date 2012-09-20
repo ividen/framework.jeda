@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jeda-jeconnection="http://www.intervale.ru/schema/jeda-jeconnection"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+               http://www.intervale.ru/schema/jeda-jeconnection http://www.intervale.ru/schema/jeda-jeconnection.xsd">
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+
+    <jeda-jeconnection:factory id="berkeleyFactory" path="./target/berkeley_db/"/>
+
+    <bean id="envConfig" class="com.sleepycat.je.EnvironmentConfig">
+    </bean>
+    <bean id="trxConfig" class="com.sleepycat.je.TransactionConfig"/>
+
+    <jeda-jeconnection:factory id="berkeleyFactory2" path="./target/berkeley_db_2/"
+                                   lockingTimeout="1000" envConfig="envConfig" txConfig="trxConfig"/>
+
+</beans>
