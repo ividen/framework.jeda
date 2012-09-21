@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-jeconnection"
+<xsd:schema xmlns="http://www.kwanza-systems.ru/schema/jeda-jeconnection"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.intervale.ru/schema/flexflow-jeconnection"
+            targetNamespace="http://www.kwanza-systems.ru/schema/jeda-jeconnection"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
     <xsd:import namespace="http://www.springframework.org/schema/beans"

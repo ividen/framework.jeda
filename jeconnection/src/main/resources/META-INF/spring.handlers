@@ -1,1 +1,1 @@
-http\://www.intervale.ru/schema/flexflow-jeconnection=ru.kwanza.flexflow.jeconnection.springintegration.FlexFlowJEConnectionNamespaceHandler
+http\://www.kwanza-systems.ru/schema/jeda-jeconnection=ru.kwanza.jeda.jeconnection.springintegration.JedaJEConnectionNamespaceHandler
