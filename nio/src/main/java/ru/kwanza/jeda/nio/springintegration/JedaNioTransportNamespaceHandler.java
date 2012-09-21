@@ -5,7 +5,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 /**
  * @author Guzanov Alexander
  */
-public class FlexFlowNioTransportNamespaceHandler extends NamespaceHandlerSupport {
+public class JedaNioTransportNamespaceHandler extends NamespaceHandlerSupport {
     public void init() {
         registerBeanDefinitionParser("client-transport-flow-bus", new ClientTransportParser());
         registerBeanDefinitionParser("http-server", new HttpServerParser());

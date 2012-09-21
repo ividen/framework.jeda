@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-nio"
+<xsd:schema xmlns="http://www.kwanza-systems.ru/schema/jeda-nio"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
-            xmlns:flexflow-core="http://www.intervale.ru/schema/flexflow-core"
+            xmlns:flexflow-core="http://www.kwanza-systems.ru/schema/jeda-core"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.intervale.ru/schema/flexflow-nio"
+            targetNamespace="http://www.kwanza-systems.ru/schema/jeda-nio"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
 
     <xsd:import namespace="http://www.springframework.org/schema/beans"
                 schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
-    <xsd:import namespace="http://www.intervale.ru/schema/flexflow-core"
-                schemaLocation="http://www.intervale.ru/schema/flexflow-core.xsd"/>
+    <xsd:import namespace="http://www.kwanza-systems.ru/schema/jeda-core"
+                schemaLocation="http://www.kwanza-systems.ru/schema/jeda-core.xsd"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"
                 schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 

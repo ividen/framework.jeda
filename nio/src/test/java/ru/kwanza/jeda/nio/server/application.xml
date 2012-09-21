@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:nio="http://www.intervale.ru/schema/jeda-nio"
+       xmlns:nio="http://www.kwanza-systems.ru/schema/jeda-nio"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:core="http://www.intervale.ru/schema/jeda-core"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-               http://www.intervale.ru/schema/jeda-nio http://www.intervale.ru/schema/jeda-nio.xsd
-               http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd">
+               http://www.kwanza-systems.ru/schema/jeda-nio http://www.kwanza-systems.ru/schema/jeda-nio.xsd
+               http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
 
     <nio:http-server name="HttpServer" keepAliveIdleTimeout="60" keepAliveMaxRequestsCount="-1">
         <nio:entry-point host="localhost" port="18081"/>

@@ -1,1 +1,1 @@
-http\://www.intervale.ru/schema/flexflow-nio=ru.kwanza.flexflow.nio.springintegration.FlexFlowNioTransportNamespaceHandler
+http\://www.kwanza-systems.ru/schema/jeda-nio=ru.kwanza.jeda.nio.springintegration.JedaNioTransportNamespaceHandler
