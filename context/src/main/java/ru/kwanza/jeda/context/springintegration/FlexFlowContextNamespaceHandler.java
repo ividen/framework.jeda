@@ -2,9 +2,6 @@ package ru.kwanza.jeda.context.springintegration;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class FlexFlowContextNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {

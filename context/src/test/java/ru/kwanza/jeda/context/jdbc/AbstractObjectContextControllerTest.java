@@ -14,9 +14,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.sql.Connection;
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractObjectContextControllerTest extends TestCase {
 
     protected static final Long[] CONTEXT_IDS = new Long[]{1020l, 1030l, 1040l, 1050l, 1060l};

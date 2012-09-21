@@ -10,9 +10,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestAbstractJDBCContextController extends TestCase {
 
     private TestJDBCContextController ctxController = new TestJDBCContextController();

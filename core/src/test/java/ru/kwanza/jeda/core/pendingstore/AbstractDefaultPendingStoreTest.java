@@ -21,9 +21,6 @@ import java.util.*;
 import static ru.kwanza.jeda.core.pendingstore.env.FlowBusBehaviour.SinkExceptionType.OTHER;
 import static java.util.Arrays.asList;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractDefaultPendingStoreTest extends TestCase {
 
     protected static final String TEST_FLOW_BUS_1 = "TestFlowBus1";

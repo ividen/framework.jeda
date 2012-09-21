@@ -14,9 +14,6 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class DBUnitUtil {
 
     private DatabaseConnection connection;

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
+       xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-
-               http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd">
+               http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
@@ -56,9 +55,9 @@
     <jeda-core:stage name="TestStage6" transaction="true">
         <jeda-core:tx-memory-queue maxSize="1000" cloneType="SERIALIZE"/>
         <jeda-core:smart-resource-controller startBatchSize="1" maxBatchSize="500"
-                                                 maxThreadCount="10" processingTimeThreshold="8000"
-                                                 adjustmentCount="2000" adjustmentInterval="2000" maxElementCount="100"
-                                                 waitForFillingTimeout="2000"/>
+                                             maxThreadCount="10" processingTimeThreshold="8000"
+                                             adjustmentCount="2000" adjustmentInterval="2000" maxElementCount="100"
+                                             waitForFillingTimeout="2000"/>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage6"/>
     </jeda-core:stage>
@@ -80,7 +79,7 @@
     <jeda-core:stage name="TestStage9" transaction="true">
         <jeda-core:tx-memory-queue cloneType="SERIALIZE"/>
         <jeda-core:smart-resource-controller startBatchSize="1" maxBatchSize="500"
-                                                 maxThreadCount="10" processingTimeThreshold="9000"/>
+                                             maxThreadCount="10" processingTimeThreshold="9000"/>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage9"/>
 
@@ -123,12 +122,12 @@
 
     <jeda-core:stage name="TestStage15">
         <jeda-core:queue id="TestQueue2" class="ru.kwanza.jeda.core.springintegration.TestQueue2"
-                             factory-method="create">
+                         factory-method="create">
             <constructor-arg index="0" value="1"/>
             <constructor-arg index="1" value="2"/>
         </jeda-core:queue>
         <jeda-core:resource-controller id="ResourceController1"
-                                           class="ru.kwanza.jeda.core.springintegration.ResourceController1">
+                                       class="ru.kwanza.jeda.core.springintegration.ResourceController1">
             <constructor-arg index="0" value="1"/>
             <constructor-arg index="1" value="2"/>
         </jeda-core:resource-controller>
@@ -142,15 +141,15 @@
             <constructor-arg index="1" value="2"/>
         </jeda-core:queue>
         <jeda-core:resource-controller id="ResourceController2"
-                                           class="ru.kwanza.jeda.core.springintegration.ResourceController2"
-                                           factory-method="create">
+                                       class="ru.kwanza.jeda.core.springintegration.ResourceController2"
+                                       factory-method="create">
             <constructor-arg index="0" value="1" type="java.lang.Long"/>
             <constructor-arg index="1" value="2" type="java.lang.Long"/>
         </jeda-core:resource-controller>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage1" idleTimeout="1000"
-                                            maxSingleEventAttempt="100"
-                                            maxThreadCount="10"/>
+                                        maxSingleEventAttempt="100"
+                                        maxThreadCount="10"/>
     </jeda-core:stage>
 
     <jeda-core:stage name="TestStage17" transaction="true">
@@ -163,7 +162,7 @@
     <jeda-core:stage name="TestStage18" transaction="true">
         <jeda-core:tx-priority-memory-queue maxSize="1000"/>
         <jeda-core:fixed-batch-size-resource-controller batchSize="1000" adjustmentCount="1000"
-                                                            adjustmentInterval="2000" waitForFillingTimeout="1000"/>
+                                                        adjustmentInterval="2000" waitForFillingTimeout="1000"/>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage13"/>
     </jeda-core:stage>

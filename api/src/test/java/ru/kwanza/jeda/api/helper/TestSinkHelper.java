@@ -14,9 +14,6 @@ import java.util.List;
 import static ru.kwanza.jeda.api.helper.SinkHelper.*;
 import static org.mockito.Mockito.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestSinkHelper extends TestCase {
 
     private static final String sinkName1 = "sinkName1";

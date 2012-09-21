@@ -6,12 +6,12 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 /**
  * @author Guzanov Alexander
  */
-public class FlexFlowBeanDefinition extends AbstractBeanDefinition {
+public class JedaBeanDefinition extends AbstractBeanDefinition {
     private Class type;
     private String id;
     private String parentName;
 
-    public FlexFlowBeanDefinition(String id, Class type, AbstractBeanDefinition beanDefinition) {
+    public JedaBeanDefinition(String id, Class type, AbstractBeanDefinition beanDefinition) {
         super((BeanDefinition) beanDefinition);
         this.type = type;
         this.id = id;
@@ -34,6 +34,6 @@ public class FlexFlowBeanDefinition extends AbstractBeanDefinition {
     }
 
     public AbstractBeanDefinition cloneBeanDefinition() {
-        return new FlexFlowBeanDefinition(id, type, this);
+        return new JedaBeanDefinition(id, type, this);
     }
 }

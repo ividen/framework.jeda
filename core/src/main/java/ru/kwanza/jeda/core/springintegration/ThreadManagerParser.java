@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class ThreadManagerParser extends FlexFlowBeanDefinitionParser {
+class ThreadManagerParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         String ref = element.getAttribute("ref");

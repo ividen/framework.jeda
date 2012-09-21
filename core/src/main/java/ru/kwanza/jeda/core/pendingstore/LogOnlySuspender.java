@@ -13,9 +13,6 @@ import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_ID_ATTR;
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_SINK_NAME_ATTR;
 import static ru.kwanza.jeda.api.Manager.resolveObjectName;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class LogOnlySuspender<E extends IEvent> implements ISuspender<E> {
 
     private static final Logger log = LoggerFactory.getLogger(LogOnlySuspender.class);

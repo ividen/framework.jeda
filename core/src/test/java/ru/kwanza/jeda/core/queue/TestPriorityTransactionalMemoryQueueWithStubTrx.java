@@ -5,6 +5,7 @@ import ru.kwanza.jeda.api.internal.*;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import javax.transaction.*;
 import javax.transaction.xa.XAResource;
 import java.util.*;
 

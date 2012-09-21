@@ -7,9 +7,6 @@ import ru.kwanza.jeda.api.internal.ISystemManager;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
 
-/**
- * @author Dmitry Zagorovsky
- */
 abstract class AbstractJDBCContextControllerFactory
         implements SmartFactoryBean<IContextController>, BeanNameAware {
 

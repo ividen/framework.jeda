@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.FlexFlowHttpHandler;
 import ru.kwanza.jeda.nio.server.http.IHttpHandler;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class HttpHandlerParser extends FlexFlowBeanDefinitionParser {
+class HttpHandlerParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
@@ -47,7 +47,7 @@ class HttpHandlerParser extends FlexFlowBeanDefinitionParser {
             definitionBuilder.addConstructorArgValue(timeout);
         }
 
-        FlexFlowBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class,
+        JedaBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class,
                 element, parserContext);
 
         String server = element.getAttribute("server");

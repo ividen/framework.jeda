@@ -11,9 +11,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractJDBCBlobContextControllerTest extends AbstractBlobContextControllerTest {
 
     protected DBUnitUtil dbUnitUtil;

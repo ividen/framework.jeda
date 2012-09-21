@@ -6,9 +6,6 @@ import ru.kwanza.jeda.api.ResumeException;
 
 import java.util.Collection;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class LogOnlyPendingStore implements IPendingStore {
 
     public <E extends IEvent> LogOnlySuspender<E> getSuspender() {

@@ -3,9 +3,6 @@ package ru.kwanza.jeda.core.pendingstore;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestPendingStoreSqlBuilder extends TestCase {
 
     private PendingStoreSqlBuilder sqlBuilder;

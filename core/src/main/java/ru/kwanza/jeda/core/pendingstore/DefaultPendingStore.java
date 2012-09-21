@@ -17,9 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class DefaultPendingStore implements IPendingStore {
 
     private static final SuspendedEventRemoveSetter SUSPENDED_EVENT_REMOVE_SETTER = new SuspendedEventRemoveSetter();

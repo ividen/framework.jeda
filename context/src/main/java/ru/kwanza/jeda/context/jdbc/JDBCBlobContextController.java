@@ -18,9 +18,6 @@ import java.util.Map;
 
 import static ru.kwanza.jeda.context.MapContextImpl.KEY;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class JDBCBlobContextController extends AbstractJDBCContextController<String, MapContextImpl> {
 
     private static final IdVersionRowMapper ID_VERSION_ROW_MAPPER = new IdVersionRowMapper();

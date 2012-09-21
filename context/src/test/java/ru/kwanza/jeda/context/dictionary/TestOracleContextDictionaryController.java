@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.context.dictionary;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestOracleContextDictionaryController extends AbstractContextDictionaryControllerTest {
 
     @Override

@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.core.pendingstore;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class PendingStoreSqlBuilder {
 
     private static final String INSERT_SQL = "INSERT INTO %s (%s, %s, %s, %s) VALUES(?, ?, ?, ?)";

@@ -17,9 +17,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractContextDictionaryControllerTest extends TestCase {
 
     protected static final String[] PROP_NAMES = new String[]{"prop1", "prop2", "prop3", "prop4", "prop5"};

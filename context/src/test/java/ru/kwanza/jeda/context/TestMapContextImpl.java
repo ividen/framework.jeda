@@ -6,9 +6,6 @@ import junit.framework.TestCase;
 
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestMapContextImpl extends TestCase {
 
     private final String id = "id";

@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <import resource="classpath:trx-mock-config.xml"/>
+    <import resource="classpath:txn-mock-config.xml"/>
     <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
     <import resource="classpath:jeda-context-berkeley-config.xml"/>
     <import resource="berkeley-blob-context-controller-test-config.xml"/>

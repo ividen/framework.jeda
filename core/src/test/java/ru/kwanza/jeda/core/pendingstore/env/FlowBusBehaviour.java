@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.core.pendingstore.env;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class FlowBusBehaviour {
 
     private static FlowBusBehaviour instance = new FlowBusBehaviour();

@@ -6,9 +6,6 @@ import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestSpringIntegrationExplicitPropSet extends TestCase {
 
     private ISystemManager manager;

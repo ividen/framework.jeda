@@ -2,9 +2,6 @@ package ru.kwanza.jeda.api;
 
 import java.util.Collection;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public interface ISuspender<E extends IEvent> {
 
     public E suspend(ISink<E> sink, E event);

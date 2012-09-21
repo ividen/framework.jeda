@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * @author Guzanov Alexander
  */
-class StageParser extends FlexFlowBeanDefinitionParser {
+class StageParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemStageFactory.class);
         List<Element> childElements = DomUtils.getChildElements(element);
@@ -34,8 +34,8 @@ class StageParser extends FlexFlowBeanDefinitionParser {
                         " for XML schema namespace [" + namespaceURI + "]", e);
             } else {
                 BeanDefinition bean = handler.parse(e, parserContext);
-                if (bean instanceof FlexFlowBeanDefinition) {
-                    beanBuilder.addBean((FlexFlowBeanDefinition) bean);
+                if (bean instanceof JedaBeanDefinition) {
+                    beanBuilder.addBean((JedaBeanDefinition) bean);
                 }
             }
         }

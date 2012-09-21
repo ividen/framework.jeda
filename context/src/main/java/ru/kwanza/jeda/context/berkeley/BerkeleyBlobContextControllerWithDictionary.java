@@ -9,9 +9,6 @@ import java.util.Map;
 import static ru.kwanza.toolbox.SerializationHelper.bytesToObject;
 import static ru.kwanza.toolbox.SerializationHelper.objectToBytes;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class BerkeleyBlobContextControllerWithDictionary extends BerkeleyBlobContextController {
 
     private ContextDictionaryController dictionaryController;

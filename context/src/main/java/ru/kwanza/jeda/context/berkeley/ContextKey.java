@@ -4,9 +4,6 @@ import ru.kwanza.jeda.context.MapContextImpl;
 
 import java.io.Serializable;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class ContextKey implements Serializable {
 
     private String contextId;

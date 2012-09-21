@@ -18,9 +18,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static ru.kwanza.toolbox.SerializationHelper.bytesToLong;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class BerkeleyDictionaryDbInteractor implements DictionaryDbInteractor {
 
     private static final Logger log = LoggerFactory.getLogger(BerkeleyDictionaryDbInteractor.class);

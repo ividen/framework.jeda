@@ -9,9 +9,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerParser {
     
     private static final String DICT_TABLE_NAME = "dictionaryTableName";

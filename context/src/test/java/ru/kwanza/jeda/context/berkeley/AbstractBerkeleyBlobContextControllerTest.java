@@ -11,9 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractBerkeleyBlobContextControllerTest extends AbstractBlobContextControllerTest {
 
 

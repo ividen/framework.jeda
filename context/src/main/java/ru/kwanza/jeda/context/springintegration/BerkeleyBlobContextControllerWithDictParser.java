@@ -9,9 +9,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobContextControllerParser {
 
     private static final String DB_INTERACTOR = "dbInteractor";

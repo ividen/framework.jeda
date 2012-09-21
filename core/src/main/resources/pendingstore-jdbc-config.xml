@@ -5,11 +5,11 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="suspenderDbInteraction" class="ru.kwanza.jeda.core.pendingstore.SuspenderDbInteraction">
-        <constructor-arg index="0" ref="dbtool.dbtool"/>
+        <constructor-arg index="0" ref="dbtool.DBTool"/>
     </bean>
 
     <bean id="pendingStore" class="ru.kwanza.jeda.core.pendingstore.DefaultPendingStore">
-        <constructor-arg index="0" ref="dbtool.dbtool"/>
+        <constructor-arg index="0" ref="dbtool.DBTool"/>
         <constructor-arg index="1" ref="autokey.IAutoKey"/>
         <constructor-arg index="2" ref="suspenderDbInteraction"/>
     </bean>

@@ -8,9 +8,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCObjectContextControllerParser extends AbstractJDBCContextControllerParser {
 
     private static final String CLAZZ = "clazz";

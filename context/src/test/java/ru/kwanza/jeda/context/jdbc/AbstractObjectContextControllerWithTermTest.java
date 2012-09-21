@@ -7,9 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractObjectContextControllerWithTermTest extends AbstractObjectContextControllerTest {
 
     protected JDBCObjectContextController<TestObject> ctxControllerWithTerm;

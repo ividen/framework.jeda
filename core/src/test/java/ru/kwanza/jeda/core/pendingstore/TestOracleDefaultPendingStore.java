@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.core.pendingstore;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestOracleDefaultPendingStore extends AbstractDefaultPendingStoreTest {
 
     @Override

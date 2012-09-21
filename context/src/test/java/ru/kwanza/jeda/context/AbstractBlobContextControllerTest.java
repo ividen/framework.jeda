@@ -11,9 +11,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractBlobContextControllerTest extends TestCase {
 
     protected static final String[] CONTEXT_IDS = new String[]{"context1", "context2", "context3", "context4", "context5"};

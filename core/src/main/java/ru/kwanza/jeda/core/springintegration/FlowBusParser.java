@@ -13,13 +13,13 @@ import org.w3c.dom.Element;
  */
 class FlowBusParser implements BeanDefinitionParser {
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        FlexFlowBeanDefinition originalBean = new CustomBeanDefinitionParserDelegate(parserContext)
+        JedaBeanDefinition originalBean = new CustomBeanDefinitionParserDelegate(parserContext)
                 .parseBeanDefinitionElement(element, null, IFlowBus.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);
         factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
         factoryBuilder.addPropertyReference("original", originalBean.getId());
-        FlexFlowBeanDefinition result = new FlexFlowBeanDefinition(element.getAttribute("name"), IFlowBus.class,
+        JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"), IFlowBus.class,
                 factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);
 

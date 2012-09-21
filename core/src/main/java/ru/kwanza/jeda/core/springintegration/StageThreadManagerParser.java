@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class StageThreadManagerParser extends FlexFlowBeanDefinitionParser {
+class StageThreadManagerParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder

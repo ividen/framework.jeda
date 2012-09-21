@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.EntryPoint;
 import ru.kwanza.jeda.nio.server.http.IEntryPoint;
 import ru.kwanza.jeda.nio.server.http.IEntryPointKeystore;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author: Guzanov Alexander
  */
-class EntryPointParser extends FlexFlowBeanDefinitionParser {
+class EntryPointParser extends JedaBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
@@ -76,10 +76,10 @@ class EntryPointParser extends FlexFlowBeanDefinitionParser {
                         " for XML schema namespace [" + namespaceURI + "]", e);
             } else {
                 BeanDefinition bean = handler.parse(e, parserContext);
-                if (bean instanceof FlexFlowBeanDefinition) {
-                    FlexFlowBeanDefinition flexFlowBeanDefinition = (FlexFlowBeanDefinition) bean;
-                    if (flexFlowBeanDefinition.getType() == IEntryPointKeystore.class) {
-                        definitionBuilder.addPropertyReference("keystore", flexFlowBeanDefinition.getId());
+                if (bean instanceof JedaBeanDefinition) {
+                    JedaBeanDefinition jedaBeanDefinition = (JedaBeanDefinition) bean;
+                    if (jedaBeanDefinition.getType() == IEntryPointKeystore.class) {
+                        definitionBuilder.addPropertyReference("keystore", jedaBeanDefinition.getId());
                     }
                 }
             }

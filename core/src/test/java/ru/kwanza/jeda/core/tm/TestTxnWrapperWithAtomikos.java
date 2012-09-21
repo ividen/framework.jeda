@@ -6,11 +6,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * @author Guzanov Alexander
  */
-public class TestTransactionalWrapperWithArjuna extends TestTransactionalWrapper {
+public class TestTxnWrapperWithAtomikos extends TestTxnWrapper {
 
     protected void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext("application-context-tb-arjuna.xml", TestTransactionalWrapper.class);
-        manager = ctx.getBean(TestTransactionalBean.class);
+        ctx = new ClassPathXmlApplicationContext("application-context-tb-atomikos.xml", TestTxnWrapper.class);
+        manager = ctx.getBean(TestTxnBean.class);
         tm = (BaseTransactionManager) Manager.getTM();
     }
 

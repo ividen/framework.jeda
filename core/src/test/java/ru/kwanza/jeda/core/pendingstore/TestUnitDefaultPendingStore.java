@@ -5,9 +5,6 @@ import junit.framework.TestCase;
 
 import java.util.List;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestUnitDefaultPendingStore extends TestCase {
 
     public void testInitIfAbsent() throws Exception {

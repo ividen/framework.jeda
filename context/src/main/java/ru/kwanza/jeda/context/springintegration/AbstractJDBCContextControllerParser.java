@@ -1,14 +1,11 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
-abstract class AbstractJDBCContextControllerParser extends FlexFlowBeanDefinitionParser {
+abstract class AbstractJDBCContextControllerParser extends JedaBeanDefinitionParser {
 
     protected static final String MANAGER = "manager";
     protected static final String DBTOOL = "dbTool";

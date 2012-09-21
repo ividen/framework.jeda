@@ -9,9 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class MapContextImpl implements IMapContext<String, Long, String, Object> {
 
     private String id;

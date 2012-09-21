@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class ContextDictionaryController {
 
     public DictionaryDbInteractor dbInteractor;

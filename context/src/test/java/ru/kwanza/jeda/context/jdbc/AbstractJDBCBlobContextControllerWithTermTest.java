@@ -7,16 +7,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Тесты работы JDBCBlobContextController с терминатором заключается в запуске тестов базовой версии тестов контроллера
- * с пред и пост-обработкой.
- * <p/>
- * В тестах используется 2 контроллера: основной (из базовых тестов) и дополнительный (у всех установлены разные терминаторы и одна таблица БД)
- * Перед запуском каждого теста происходит добавление контекстов с использованием дополнительного контроллера.
- * После отработки теста, происходит проверка данных, добавленных с использованием дполнительного контроллера -- данные должны остаться неизмененными.
- *
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractJDBCBlobContextControllerWithTermTest extends AbstractJDBCBlobContextControllerTest {
 
     protected JDBCBlobContextController ctxControllerWithTerm;

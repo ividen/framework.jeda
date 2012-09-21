@@ -7,9 +7,9 @@ import org.springframework.context.ApplicationContext;
 /**
  * @author Guzanov Alexander
  */
-public abstract class TestTransactionalWrapper extends TestCase {
+public abstract class TestTxnWrapper extends TestCase {
     protected ApplicationContext ctx;
-    protected TestTransactionalBean manager;
+    protected TestTxnBean manager;
     protected BaseTransactionManager tm;
 
 

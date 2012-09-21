@@ -4,9 +4,6 @@ import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextControllerWithDictionary;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class BerkeleyBlobContextControllerWithDictFactory extends AbstractBerkeleyBlobContextControllerFactory {
 
     private BerkeleyDictionaryDbInteractor dbInteractor;

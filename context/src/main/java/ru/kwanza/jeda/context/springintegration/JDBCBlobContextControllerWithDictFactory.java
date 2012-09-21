@@ -4,9 +4,6 @@ import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextControllerWithDictionary;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCBlobContextControllerWithDictFactory extends AbstractJDBCContextControllerFactory {
 
     private JDBCDictionaryDbInteractor dbInteractor;

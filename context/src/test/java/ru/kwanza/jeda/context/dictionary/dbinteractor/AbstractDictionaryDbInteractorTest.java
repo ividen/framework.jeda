@@ -10,9 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractDictionaryDbInteractorTest extends TestCase {
 
     protected static final String[] PROPERTY_NAMES = new String[]{"prop1", "prop2", "prop3"};

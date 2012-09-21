@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class SmartResourceControllerParser extends FlexFlowBeanDefinitionParser {
+class SmartResourceControllerParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(SmartResourceController.class);

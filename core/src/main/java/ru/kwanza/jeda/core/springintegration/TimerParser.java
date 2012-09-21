@@ -13,13 +13,13 @@ import org.w3c.dom.Element;
  */
 class TimerParser implements BeanDefinitionParser {
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        FlexFlowBeanDefinition originalBean = new CustomBeanDefinitionParserDelegate(parserContext)
+        JedaBeanDefinition originalBean = new CustomBeanDefinitionParserDelegate(parserContext)
                 .parseBeanDefinitionElement(element, null, ITimer.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemTimerFactory.class);
         factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
         factoryBuilder.addPropertyReference("original", originalBean.getId());
-        FlexFlowBeanDefinition result = new FlexFlowBeanDefinition(element.getAttribute("name"),
+        JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 ITimer.class, factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);
 

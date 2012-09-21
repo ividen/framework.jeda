@@ -7,9 +7,6 @@ import ru.kwanza.toolbox.fieldhelper.FieldHelper.Field;
 
 import java.util.Collection;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public interface IPendingStore {
 
     public static final IAttribute<Long> SUSPEND_ID_ATTR = AttributeFactory.create();

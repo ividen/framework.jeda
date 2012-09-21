@@ -3,9 +3,6 @@ package ru.kwanza.jeda.context.dictionary;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class ContextDictionaryCache {
 
     private final ConcurrentHashMap<String, Long> propIdByName = new ConcurrentHashMap<String, Long>();

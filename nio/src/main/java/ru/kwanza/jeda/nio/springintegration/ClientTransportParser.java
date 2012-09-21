@@ -3,8 +3,8 @@ package ru.kwanza.jeda.nio.springintegration;
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.internal.IResourceController;
 import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.core.springintegration.SystemFlowBusFactory;
 import ru.kwanza.jeda.nio.client.ClientTransportFlowBus;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class ClientTransportParser extends FlexFlowBeanDefinitionParser {
+class ClientTransportParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
@@ -48,14 +48,14 @@ class ClientTransportParser extends FlexFlowBeanDefinitionParser {
 
 
         definitionBuilder.setInitMethodName("init");
-        final FlexFlowBeanDefinition originalBean = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
+        final JedaBeanDefinition originalBean = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
                 IFlowBus.class, element, parserContext);
 
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(originalBean.getId(), originalBean);
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);
         factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
         factoryBuilder.addPropertyReference("original", originalBean.getId());
-        FlexFlowBeanDefinition result = new FlexFlowBeanDefinition(name, IResourceController.class, factoryBuilder.getBeanDefinition());
+        JedaBeanDefinition result = new JedaBeanDefinition(name, IResourceController.class, factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);
 
         return result;

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.IEntryPointKeystore;
 import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 /**
  * @author: Guzanov Alexander
  */
-class JKSEntryPointKeystoreParser extends FlexFlowBeanDefinitionParser {
+class JKSEntryPointKeystoreParser extends JedaBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =

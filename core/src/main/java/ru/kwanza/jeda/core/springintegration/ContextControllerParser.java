@@ -14,13 +14,13 @@ import org.w3c.dom.Element;
  */
 class ContextControllerParser implements BeanDefinitionParser {
     public BeanDefinition parse(Element element, ParserContext parserContext) {
-        FlexFlowBeanDefinition originalBean = (FlexFlowBeanDefinition) new CustomBeanDefinitionParserDelegate(parserContext)
+        JedaBeanDefinition originalBean = (JedaBeanDefinition) new CustomBeanDefinitionParserDelegate(parserContext)
                 .parseBeanDefinitionElement(element, null, IContext.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemContextControllerFactory.class);
         factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
         factoryBuilder.addPropertyReference("original", originalBean.getId());
-        FlexFlowBeanDefinition result = new FlexFlowBeanDefinition(element.getAttribute("name"),
+        JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 IContextController.class, factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);
 

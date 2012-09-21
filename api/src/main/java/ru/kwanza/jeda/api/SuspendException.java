@@ -2,9 +2,6 @@ package ru.kwanza.jeda.api;
 
 import java.util.List;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class SuspendException extends RuntimeException {
 
     private List<IEvent> failedToSuspendEvents;

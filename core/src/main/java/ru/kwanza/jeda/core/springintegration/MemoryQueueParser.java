@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class MemoryQueueParser extends FlexFlowBeanDefinitionParser {
+class MemoryQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(MemoryQueue.class);
         String maxSize = element.getAttribute("maxSize");

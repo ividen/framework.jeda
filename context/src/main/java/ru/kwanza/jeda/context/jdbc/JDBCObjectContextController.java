@@ -18,9 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class JDBCObjectContextController<T extends ObjectContext> extends AbstractJDBCContextController<Long, T> {
 
     private static final Logger log = LoggerFactory.getLogger(JDBCObjectContextController.class);

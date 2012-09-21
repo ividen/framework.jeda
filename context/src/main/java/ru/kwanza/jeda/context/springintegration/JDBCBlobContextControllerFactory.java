@@ -3,9 +3,6 @@ package ru.kwanza.jeda.context.springintegration;
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextController;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCBlobContextControllerFactory extends AbstractJDBCContextControllerFactory {
 
     public IContextController getObject() throws Exception {

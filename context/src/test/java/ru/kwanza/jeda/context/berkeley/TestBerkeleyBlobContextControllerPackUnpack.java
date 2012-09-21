@@ -9,9 +9,6 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestBerkeleyBlobContextControllerPackUnpack extends TestCase {
 
     private static final String TERMINATOR_NAME = "termName1";

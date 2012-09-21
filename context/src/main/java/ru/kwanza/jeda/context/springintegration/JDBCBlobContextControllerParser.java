@@ -8,9 +8,6 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCBlobContextControllerParser extends AbstractJDBCContextControllerParser {
 
     protected static final String CONTEXT_DATA_COLUMN_NAME = "contextDataColumnName";

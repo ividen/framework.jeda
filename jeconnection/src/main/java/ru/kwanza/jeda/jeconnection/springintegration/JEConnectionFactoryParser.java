@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.jeconnection.springintegration;
 
 import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class JEConnectionFactoryParser extends FlexFlowBeanDefinitionParser {
+class JEConnectionFactoryParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =

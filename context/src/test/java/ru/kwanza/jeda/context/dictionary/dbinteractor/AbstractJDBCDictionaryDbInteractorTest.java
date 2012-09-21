@@ -5,9 +5,6 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import java.sql.Connection;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractJDBCDictionaryDbInteractorTest extends AbstractDictionaryDbInteractorTest {
 
     @Override

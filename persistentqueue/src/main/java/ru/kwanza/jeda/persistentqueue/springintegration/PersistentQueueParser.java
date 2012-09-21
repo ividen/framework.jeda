@@ -3,8 +3,8 @@ package ru.kwanza.jeda.persistentqueue.springintegration;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.CustomBeanDefinitionParserDelegate;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author Guzanov Alexander
  */
-class PersistentQueueParser extends FlexFlowBeanDefinitionParser {
+class PersistentQueueParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
@@ -46,9 +46,9 @@ class PersistentQueueParser extends FlexFlowBeanDefinitionParser {
                 if ("persistence-controller".equals(e.getLocalName())) {
                     CustomBeanDefinitionParserDelegate delegate =
                             new CustomBeanDefinitionParserDelegate(parserContext);
-                    FlexFlowBeanDefinition flexFlowBeanDefinition = (FlexFlowBeanDefinition) delegate
+                    JedaBeanDefinition jedaBeanDefinition = (JedaBeanDefinition) delegate
                             .parseBeanDefinition(e, null, IQueuePersistenceController.class).getBeanDefinition();
-                    definitionBuilder.addConstructorArgReference(flexFlowBeanDefinition.getId());
+                    definitionBuilder.addConstructorArgReference(jedaBeanDefinition.getId());
                 } else {
                     readerContext.error("Wrong definition of persistent queue", e);
                 }

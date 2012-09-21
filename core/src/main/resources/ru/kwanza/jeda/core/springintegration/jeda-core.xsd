@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-core"
+<xsd:schema xmlns="http://www.kwanza-systems.ru/schema/jeda-core"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
             xmlns:tool="http://www.springframework.org/schema/tool"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            targetNamespace="http://www.intervale.ru/schema/flexflow-core"
+            targetNamespace="http://www.kwanza-systems.ru/schema/jeda-core"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified"
             xsi:schemaLocation="http://www.springframework.org/schema/beans

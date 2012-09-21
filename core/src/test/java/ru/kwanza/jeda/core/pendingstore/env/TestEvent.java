@@ -3,9 +3,6 @@ package ru.kwanza.jeda.core.pendingstore.env;
 import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.api.IEvent;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestEvent  extends AbstractEvent {
 
     private Integer id;

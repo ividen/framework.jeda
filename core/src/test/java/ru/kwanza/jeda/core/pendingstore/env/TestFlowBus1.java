@@ -10,9 +10,6 @@ import java.util.List;
 
 import static ru.kwanza.jeda.core.pendingstore.env.FlowBusBehaviour.SinkExceptionType;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestFlowBus1 implements IFlowBus<TestEvent> {
 
     public void put(Collection<TestEvent> events) throws SinkException {

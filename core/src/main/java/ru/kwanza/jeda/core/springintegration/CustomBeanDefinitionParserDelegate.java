@@ -40,7 +40,7 @@ public class CustomBeanDefinitionParserDelegate extends BeanDefinitionParserDele
     }
 
     private BeanDefinitionHolder parse(Element ele, BeanDefinition containingBean, Class type, String id, String nameAttr) {
-        final FlexFlowBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, containingBean, type, id, nameAttr);
+        final JedaBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, containingBean, type, id, nameAttr);
         final BeanDefinitionHolder result = new BeanDefinitionHolder(beanDefinition, beanDefinition.getId(), null);
         final XmlReaderContext readerContext = getReaderContext();
         final NamespaceHandlerResolver namespaceHandlerResolver = readerContext.getNamespaceHandlerResolver();
@@ -65,12 +65,12 @@ public class CustomBeanDefinitionParserDelegate extends BeanDefinitionParserDele
         return result;
     }
 
-    public FlexFlowBeanDefinition parseBeanDefinitionElement(Element ele, BeanDefinition containingBean,
+    public JedaBeanDefinition parseBeanDefinitionElement(Element ele, BeanDefinition containingBean,
                                                      Class type) {
-        return (FlexFlowBeanDefinition) parse(ele, containingBean, type, null, null).getBeanDefinition();
+        return (JedaBeanDefinition) parse(ele, containingBean, type, null, null).getBeanDefinition();
     }
 
-    private FlexFlowBeanDefinition parseBeanDefinitionElement(Element ele, BeanDefinition containingBean,
+    private JedaBeanDefinition parseBeanDefinitionElement(Element ele, BeanDefinition containingBean,
                                                              Class type, String id, String nameAttr) {
         List<String> aliases = new ArrayList<String>();
         if (StringUtils.hasLength(nameAttr)) {
@@ -121,7 +121,7 @@ public class CustomBeanDefinitionParserDelegate extends BeanDefinitionParserDele
                 }
             }
 
-            FlexFlowBeanDefinition result = new FlexFlowBeanDefinition(beanName, type, beanDefinition);
+            JedaBeanDefinition result = new JedaBeanDefinition(beanName, type, beanDefinition);
             getReaderContext().getRegistry().registerBeanDefinition(beanName, result);
             return result;
         }

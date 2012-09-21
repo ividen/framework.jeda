@@ -4,9 +4,6 @@ import ru.kwanza.jeda.context.MapContextImpl;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestContextKey extends TestCase {
 
     private static final String ctxId = "testCtxId";

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 /**
  * @author Guzanov Alexander
  */
-public class FlexFlowCoreNamespaceHandler extends NamespaceHandlerSupport {
+public class JedaCoreNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
         registerBeanDefinitionParser("stage", new StageParser());

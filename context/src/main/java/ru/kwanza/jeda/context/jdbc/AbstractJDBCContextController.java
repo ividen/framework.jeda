@@ -13,9 +13,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class AbstractJDBCContextController<ID, C extends IContext<ID, ?>>
         implements IContextController<ID, C> {
 

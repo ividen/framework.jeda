@@ -13,7 +13,7 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-class TxMemoryQueueParser extends FlexFlowBeanDefinitionParser {
+class TxMemoryQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(TransactionalMemoryQueue.class);

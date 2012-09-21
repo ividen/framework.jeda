@@ -9,9 +9,9 @@ import java.io.IOException;
 /**
  * @author Guzanov Alexander
  */
-public class TestTransactionalBean {
+public class TestTxnBean {
     @Resource(name = "testTransactionalBean")
-    private TestTransactionalBean bean;
+    private TestTxnBean bean;
 
 
     @Transactional(TransactionalType.REQUIRES_NEW)

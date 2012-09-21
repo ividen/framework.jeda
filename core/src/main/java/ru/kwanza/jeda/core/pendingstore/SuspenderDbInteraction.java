@@ -16,9 +16,6 @@ import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_ID_ATTR;
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_SINK_NAME_ATTR;
 import static ru.kwanza.toolbox.SerializationHelper.objectToBytes;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class SuspenderDbInteraction {
 
     private static final EventInsertSetter EVENT_INSERT_SETTER = new EventInsertSetter();

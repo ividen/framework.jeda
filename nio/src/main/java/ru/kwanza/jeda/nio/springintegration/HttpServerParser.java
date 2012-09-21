@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.HttpServer;
 import ru.kwanza.jeda.nio.server.http.IEntryPoint;
 import ru.kwanza.jeda.nio.server.http.IHttpServer;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * @author Guzanov Alexander
  */
-class HttpServerParser extends FlexFlowBeanDefinitionParser {
+class HttpServerParser extends JedaBeanDefinitionParser {
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
@@ -48,7 +48,7 @@ class HttpServerParser extends FlexFlowBeanDefinitionParser {
 
         definitionBuilder.setInitMethodName("init");
         definitionBuilder.setDestroyMethodName("destroy");
-        FlexFlowBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
+        JedaBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
                 IHttpServer.class, element, parserContext);
 
         for (Element e : childElements) {
@@ -59,13 +59,13 @@ class HttpServerParser extends FlexFlowBeanDefinitionParser {
                         " for XML schema namespace [" + namespaceURI + "]", e);
             } else {
                 BeanDefinition bean = handler.parse(e, parserContext);
-                if (bean instanceof FlexFlowBeanDefinition) {
-                    FlexFlowBeanDefinition flexFlowBeanDefinition = (FlexFlowBeanDefinition) bean;
-                    if (flexFlowBeanDefinition.getType() == IEntryPoint.class) {
+                if (bean instanceof JedaBeanDefinition) {
+                    JedaBeanDefinition jedaBeanDefinition = (JedaBeanDefinition) bean;
+                    if (jedaBeanDefinition.getType() == IEntryPoint.class) {
                         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(RegistrationFactory.class);
                         builder.setFactoryMethod("registerEntryPoint");
                         builder.addConstructorArgReference(name);
-                        builder.addConstructorArgReference(flexFlowBeanDefinition.getId());
+                        builder.addConstructorArgReference(jedaBeanDefinition.getId());
                         AbstractBeanDefinition fakeBeanDefinition = builder.getBeanDefinition();
                         parserContext.getRegistry().registerBeanDefinition(
                                 parserContext.getReaderContext().generateBeanName(fakeBeanDefinition), fakeBeanDefinition);

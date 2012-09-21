@@ -5,9 +5,6 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestJDBCContextSqlBuilder extends TestCase {
 
     private JDBCContextSqlBuilder sqlBuilder;

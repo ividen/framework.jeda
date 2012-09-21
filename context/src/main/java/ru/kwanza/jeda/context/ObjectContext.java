@@ -4,9 +4,6 @@ import ru.kwanza.dbtool.VersionGenerator;
 import ru.kwanza.jeda.api.IContext;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public abstract class ObjectContext implements IContext<Long, Long> {
 
     protected Long id;

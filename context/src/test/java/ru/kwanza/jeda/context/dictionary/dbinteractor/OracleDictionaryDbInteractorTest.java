@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.context.dictionary.dbinteractor;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class OracleDictionaryDbInteractorTest extends AbstractJDBCDictionaryDbInteractorTest {
 
     @Override

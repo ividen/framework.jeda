@@ -9,8 +9,8 @@ import org.w3c.dom.Element;
 /**
  * @author Guzanov Alexander
  */
-public abstract class FlexFlowBeanDefinitionParser extends AbstractBeanDefinitionParser {
-    protected FlexFlowBeanDefinition createFlexFlowDefinition(AbstractBeanDefinition originalDefinition,
+public abstract class JedaBeanDefinitionParser extends AbstractBeanDefinitionParser {
+    protected JedaBeanDefinition createFlexFlowDefinition(AbstractBeanDefinition originalDefinition,
                                                               Class type,
                                                               Element e,
                                                               ParserContext parserContext) {
@@ -20,13 +20,13 @@ public abstract class FlexFlowBeanDefinitionParser extends AbstractBeanDefinitio
     }
 
 
-    protected FlexFlowBeanDefinition createFlexFlowDefinition(String name,
+    protected JedaBeanDefinition createFlexFlowDefinition(String name,
                                                               AbstractBeanDefinition originalDefinition,
                                                               Class type,
                                                               Element e,
                                                               ParserContext parserContext) {
 
-        return new FlexFlowBeanDefinition(name, type, originalDefinition);
+        return new JedaBeanDefinition(name, type, originalDefinition);
     }
 
     protected String generateId(Element element, ParserContext parserContext, AbstractBeanDefinition rawBeanDefinition) {
@@ -35,8 +35,8 @@ public abstract class FlexFlowBeanDefinitionParser extends AbstractBeanDefinitio
 
     @Override
     protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) throws BeanDefinitionStoreException {
-        if (definition instanceof FlexFlowBeanDefinition) {
-            return ((FlexFlowBeanDefinition) definition).getId();
+        if (definition instanceof JedaBeanDefinition) {
+            return ((JedaBeanDefinition) definition).getId();
         }
 
         return generateId(element, parserContext, definition);

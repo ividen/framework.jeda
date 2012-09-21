@@ -1,1 +1,5 @@
 **/target
+target
+.idea
+*.epoch
+*.iml

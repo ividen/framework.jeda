@@ -2,9 +2,6 @@ package ru.kwanza.jeda.core.pendingstore.env;
 
 import java.util.*;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class FlowBusEventStore {
 
     private static FlowBusEventStore instance = new FlowBusEventStore();

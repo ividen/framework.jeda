@@ -2,9 +2,6 @@ package ru.kwanza.jeda.api;
 
 import java.util.List;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class ResumeException extends Exception {
 
     private List<Long> unableToResumeEventIds;

@@ -6,9 +6,6 @@ import ru.kwanza.jeda.context.jdbc.JDBCObjectContextController;
 
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 class JDBCObjectContextControllerFactory extends AbstractJDBCContextControllerFactory {
 
     private Class<? extends ObjectContext> clazz;

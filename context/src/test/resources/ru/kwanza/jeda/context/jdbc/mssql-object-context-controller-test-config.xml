@@ -17,7 +17,7 @@
                 <entry key="data1" value="data_1"/>
             </map>
         </constructor-arg>
-        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="dbTool" ref="dbtool.dbTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
     </bean>
 
@@ -28,7 +28,7 @@
                 <entry key="data1" value="data_1"/>
             </map>
         </constructor-arg>
-        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="dbTool" ref="dbtool.dbTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
         <property name="tableName" value="object_context_with_term"/>
         <property name="terminator" value="termName"/>

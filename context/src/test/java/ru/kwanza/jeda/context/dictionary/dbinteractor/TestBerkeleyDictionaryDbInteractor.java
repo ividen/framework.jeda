@@ -5,9 +5,6 @@ import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestBerkeleyDictionaryDbInteractor extends AbstractDictionaryDbInteractorTest {
 
     @Override

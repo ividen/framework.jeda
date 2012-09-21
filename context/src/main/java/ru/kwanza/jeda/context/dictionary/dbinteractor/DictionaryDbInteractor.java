@@ -4,9 +4,6 @@ import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public interface DictionaryDbInteractor {
 
     Long storeNewProperty(String propertyName, ContextDictionaryController dictCtrl);

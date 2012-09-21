@@ -9,18 +9,18 @@ import org.springframework.util.StringUtils;
  * @author Guzanov Alexander
  */
 class StageBeanBuilder {
-    private FlexFlowBeanDefinition admissionControllerDef = null;
-    private FlexFlowBeanDefinition eventProcessorDef = null;
-    private FlexFlowBeanDefinition queueDef = null;
-    private FlexFlowBeanDefinition resourceControllerDef = null;
-    private FlexFlowBeanDefinition threadManagerDef = null;
+    private JedaBeanDefinition admissionControllerDef = null;
+    private JedaBeanDefinition eventProcessorDef = null;
+    private JedaBeanDefinition queueDef = null;
+    private JedaBeanDefinition resourceControllerDef = null;
+    private JedaBeanDefinition threadManagerDef = null;
     private String transaction;
 
     public StageBeanBuilder(String transaction) {
         this.transaction = transaction;
     }
 
-    public void addBean(FlexFlowBeanDefinition beanDefinition) {
+    public void addBean(JedaBeanDefinition beanDefinition) {
         if (IQueue.class.isAssignableFrom(beanDefinition.getType())) {
             queueDef = beanDefinition;
         } else if (IAdmissionController.class.isAssignableFrom(beanDefinition.getType())) {
@@ -47,14 +47,14 @@ class StageBeanBuilder {
                 Boolean.valueOf(StringUtils.hasText(transaction) ? "true" : transaction));
     }
 
-    private void addPropertyReference(String name, BeanDefinitionBuilder definitionBuilder, FlexFlowBeanDefinition beanDefinition) {
+    private void addPropertyReference(String name, BeanDefinitionBuilder definitionBuilder, JedaBeanDefinition beanDefinition) {
         String id = getId(beanDefinition);
         if (id != null) {
             definitionBuilder.addPropertyReference(name, id);
         }
     }
 
-    private String getId(FlexFlowBeanDefinition beanDefinition) {
+    private String getId(JedaBeanDefinition beanDefinition) {
         return beanDefinition != null ? beanDefinition.getId() : null;
     }
 }

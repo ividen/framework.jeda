@@ -16,9 +16,6 @@ import static ru.kwanza.jeda.clusterservice.ClusterService.getNodeId;
 import static ru.kwanza.toolbox.SerializationHelper.bytesToObject;
 import static ru.kwanza.toolbox.SerializationHelper.objectToBytes;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class BerkeleyBlobContextController implements IContextController<String, MapContextImpl> {
 
     private static final DatabaseConfig databaseConfig = new DatabaseConfig().setAllowCreate(true).setTransactional(true);

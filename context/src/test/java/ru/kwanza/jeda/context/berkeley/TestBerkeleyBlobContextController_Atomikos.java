@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.context.berkeley;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestBerkeleyBlobContextController_Atomikos extends AbstractBerkeleyBlobContextControllerTest {
 
     @Override

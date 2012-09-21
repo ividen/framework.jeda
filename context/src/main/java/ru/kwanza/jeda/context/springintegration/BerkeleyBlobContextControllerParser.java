@@ -2,17 +2,14 @@ package ru.kwanza.jeda.context.springintegration;
 
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController;
-import ru.kwanza.jeda.core.springintegration.FlexFlowBeanDefinitionParser;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.w3c.dom.Element;
 
-/**
- * @author Dmitry Zagorovsky
- */
-class BerkeleyBlobContextControllerParser extends FlexFlowBeanDefinitionParser {
+class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
 
     protected static final String MANAGER = "manager";
     protected static final String DATABASE_NAME = "databaseName";

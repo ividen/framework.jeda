@@ -1,10 +1,11 @@
 package ru.kwanza.jeda.core.queue;
 
-import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.*;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.internal.*;
 
+import javax.transaction.*;
 import javax.transaction.xa.XAResource;
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class JDBCBlobContextControllerWithDictionary extends JDBCBlobContextController {
 
     private ContextDictionaryController dictionaryController;

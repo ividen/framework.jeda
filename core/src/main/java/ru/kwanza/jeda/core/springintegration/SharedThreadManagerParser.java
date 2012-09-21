@@ -18,9 +18,9 @@ import java.util.List;
 /**
  * @author Guzanov Alexander
  */
-class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
+class SharedThreadManagerParser extends JedaBeanDefinitionParser {
 
-    public static class InputRateStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class InputRateStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(InputRateComparator.class);
@@ -31,7 +31,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
     }
 
 
-    public static class ThreadCountStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class ThreadCountStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(ThreadCountComparator.class);
@@ -41,7 +41,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
         }
     }
 
-    public static class WaitingTimeStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class WaitingTimeStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(WaitingTimeComparator.class);
@@ -51,7 +51,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
         }
     }
 
-    public static class InputRateAndWaitingTimeStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class InputRateAndWaitingTimeStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(InputRateAndWaitingTimeComparator.class);
@@ -67,7 +67,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
         }
     }
 
-    public static class ThreadCountAndWaitingTimeStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class ThreadCountAndWaitingTimeStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(ThreadCountAndWaitingTimeComparator.class);
@@ -82,7 +82,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
         }
     }
 
-    public static class QueueSizeStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class QueueSizeStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(QueueSizeComparator.class);
@@ -92,7 +92,7 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
         }
     }
 
-    public static class RoundRobinStrategyParser extends FlexFlowBeanDefinitionParser {
+    public static class RoundRobinStrategyParser extends JedaBeanDefinitionParser {
         protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(RoundRobinComparator.class);
@@ -140,10 +140,10 @@ class SharedThreadManagerParser extends FlexFlowBeanDefinitionParser {
                         " for XML schema namespace [" + namespaceURI + "]", e);
             } else {
                 BeanDefinition bean = handler.parse(e, parserContext);
-                if (bean instanceof FlexFlowBeanDefinition) {
-                    FlexFlowBeanDefinition flexFlowBeanDefinition = (FlexFlowBeanDefinition) bean;
-                    if (flexFlowBeanDefinition.getType() == Comparator.class) {
-                        definitionBuilder.addPropertyReference("stageComparator", flexFlowBeanDefinition.getId());
+                if (bean instanceof JedaBeanDefinition) {
+                    JedaBeanDefinition jedaBeanDefinition = (JedaBeanDefinition) bean;
+                    if (jedaBeanDefinition.getType() == Comparator.class) {
+                        definitionBuilder.addPropertyReference("stageComparator", jedaBeanDefinition.getId());
                     } else {
                         throw new RuntimeException("Unsupported element definition!");
                     }

@@ -3,9 +3,6 @@ package ru.kwanza.jeda.context.jdbc;
 import java.util.Arrays;
 import java.util.Collection;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class JDBCContextSqlBuilder {
 
     private static final String SELECT_SQL = "SELECT %s, %s, %s FROM %s WHERE %s IN(?)";

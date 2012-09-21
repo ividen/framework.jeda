@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 /**
  * @author: Guzanov Alexander
  */
-class FixedBatchSizeResourceControllerParser extends FlexFlowBeanDefinitionParser {
+class FixedBatchSizeResourceControllerParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(FixedBatchSizeResourceController.class);

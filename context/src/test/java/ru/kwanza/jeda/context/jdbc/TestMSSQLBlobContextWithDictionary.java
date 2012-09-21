@@ -1,8 +1,5 @@
 package ru.kwanza.jeda.context.jdbc;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestMSSQLBlobContextWithDictionary extends AbstractJDBCBlobContextControllerTest {
 
     protected static final String DICTIONARY_TABLE_NAME = "ctx_dictionary";

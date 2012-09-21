@@ -7,9 +7,6 @@ import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
 
-/**
- * @author Dmitry Zagorovsky
- */
 abstract class AbstractBerkeleyBlobContextControllerFactory
         implements SmartFactoryBean<IContextController>, BeanNameAware {
 

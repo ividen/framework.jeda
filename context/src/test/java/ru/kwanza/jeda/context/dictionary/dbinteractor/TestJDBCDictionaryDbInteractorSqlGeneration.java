@@ -4,9 +4,6 @@ import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestJDBCDictionaryDbInteractorSqlGeneration extends TestCase {
 
     private ContextDictionaryController ctxDictionary = new ContextDictionaryController();

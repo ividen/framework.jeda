@@ -13,9 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * @author Dmitry Zagorovsky
- */
 public class TestLogOnlyPendingStore extends TestCase {
 
     private static final String CONTEXT_FILE_NAME = "pendingstore-logonly-config.xml";
