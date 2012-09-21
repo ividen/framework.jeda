@@ -10,7 +10,7 @@ import java.io.IOException;
  * @author Guzanov Alexander
  */
 public class TestTxnBean {
-    @Resource(name = "testTransactionalBean")
+    @Resource(name = "testTxnBean")
     private TestTxnBean bean;
 
 

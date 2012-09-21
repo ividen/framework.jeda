@@ -16,6 +16,6 @@
     </bean>
 
 
-    <bean id="testtrxBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>
+    <bean id="testTxnBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>
 
 </beans>

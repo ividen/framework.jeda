@@ -14,6 +14,6 @@
         <constructor-arg index="0" type="boolean" value="true"/>
     </bean>
 
-    <bean id="testtrxBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>
+    <bean id="testTxnBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>
 
 </beans>
