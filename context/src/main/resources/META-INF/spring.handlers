@@ -1,1 +1,1 @@
-http\://www.kwanza-systems.ru/schema/jeda-context=ru.kwanza.jeda.context.springintegration.FlexFlowContextNamespaceHandler
+http\://www.kwanza-systems.ru/schema/jeda-context=ru.kwanza.jeda.context.springintegration.JedaContextNamespaceHandler

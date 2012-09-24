@@ -2,7 +2,7 @@ package ru.kwanza.jeda.context.springintegration;
 
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
-public class FlexFlowContextNamespaceHandler extends NamespaceHandlerSupport {
+public class JedaContextNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
         registerBeanDefinitionParser("jdbc-blob-context-controller", new JDBCBlobContextControllerParser());

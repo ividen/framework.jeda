@@ -1,5 +1,7 @@
 package ru.kwanza.jeda.context.dictionary;
 
+import org.dbunit.database.QueryDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSet;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.autokey.mock.MockAutoKeyImpl;
 import ru.kwanza.dbtool.DBTool;
@@ -12,6 +14,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -32,6 +35,7 @@ public abstract class AbstractContextDictionaryControllerTest extends TestCase {
     protected ContextDictionaryController dictionaryController;
 
     protected abstract String getContextFileName();
+
 
     @Override
     public void setUp() throws Exception {
@@ -57,6 +61,7 @@ public abstract class AbstractContextDictionaryControllerTest extends TestCase {
     public void testSimpleGetNameAndId() throws Exception {
         Assert.assertEquals(getTestIdByName(), dictionaryController.getPropertyIds(getTestPropNames()));
         Assert.assertEquals(getTestNameById(), dictionaryController.getPropertyNames(getTestIds()));
+
 
         dbUnitUtil.assertDBTable("ctx_dictionary", "dictionary/testSimpleNameStore.xml");
     }

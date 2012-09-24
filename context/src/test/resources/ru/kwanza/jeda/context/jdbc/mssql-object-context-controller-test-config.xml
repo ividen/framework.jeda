@@ -6,7 +6,7 @@
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:autokey-mock-config.xml"/>
-    <import resource="classpath:trx-mock-config.xml"/>
+    <import resource="classpath:txn-mock-config.xml"/>
 
     <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
 
@@ -17,7 +17,7 @@
                 <entry key="data1" value="data_1"/>
             </map>
         </constructor-arg>
-        <property name="dbTool" ref="dbtool.dbTool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
     </bean>
 
@@ -28,7 +28,7 @@
                 <entry key="data1" value="data_1"/>
             </map>
         </constructor-arg>
-        <property name="dbTool" ref="dbtool.dbTool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
         <property name="tableName" value="object_context_with_term"/>
         <property name="terminator" value="termName"/>

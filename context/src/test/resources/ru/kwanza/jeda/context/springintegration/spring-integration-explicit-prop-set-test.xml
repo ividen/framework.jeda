@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
-       xmlns:jeda-jeconnection="http://www.intervale.ru/schema/jeda-jeconnection"
-       xmlns:jeda-context="http://www.intervale.ru/schema/jeda-context"
+       xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xmlns:jeda-jeconnection="http://www.kwanza-systems.ru/schema/jeda-jeconnection"
+       xmlns:jeda-context="http://www.kwanza-systems.ru/schema/jeda-context"
        xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-               http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd
-               http://www.intervale.ru/schema/jeda-jeconnection http://www.intervale.ru/schema/jeda-jeconnection.xsd
-               http://www.intervale.ru/schema/jeda-context http://www.intervale.ru/schema/jeda-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+               http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd
+               http://www.kwanza-systems.ru/schema/jeda-context http://www.kwanza-systems.ru/schema/jeda-context.xsd
+               http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
@@ -27,17 +27,17 @@
 
     <jeda-context:jdbc-blob-context-controller
             tableName="table_name" terminator="termName" idColumnName="id" versionColumnName="version"
-            terminatorColumnName="terminator" dbtool="dbtool.dbtool" versionGenerator="dbtool.VersionGenerator"/>
+            terminatorColumnName="terminator" dbTool="dbtool.DBTool" versionGenerator="dbtool.VersionGenerator"/>
 
     <jeda-context:jdbc-blob-context-controller-with-dict
             dictionaryTableName="ctx_dictionary" dictionaryPropertyColumnName="name" dictionaryIdColumnName="id"
             terminator="terminator" tableName="table_name" idColumnName="id" versionColumnName="version"
-            terminatorColumnName="terminator" dbtool="dbtool.dbtool" versionGenerator="dbtool.VersionGenerator"/>
+            terminatorColumnName="terminator" dbTool="dbtool.DBTool" versionGenerator="dbtool.VersionGenerator"/>
 
     <jeda-context:jdbc-object-context-controller
             clazz="ru.kwanza.jeda.context.TestObject" tableColumnByPropertyName="myMap" terminator="termName"
             terminatorColumnName="terminator" idColumnName="id" tableName="table_name" versionColumnName="version"
-            dbtool="dbtool.dbtool" versionGenerator="dbtool.VersionGenerator"/>
+            dbTool="dbtool.DBTool" versionGenerator="dbtool.VersionGenerator"/>
     <util:map id="myMap">
         <entry key="data1" value="data_1" />
         <entry key="data2" value="data_2" />

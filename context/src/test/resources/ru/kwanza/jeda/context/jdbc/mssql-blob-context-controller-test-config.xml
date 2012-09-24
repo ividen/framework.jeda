@@ -12,14 +12,14 @@
     <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
 
     <bean id="jdbcBlobContextController" class="ru.kwanza.jeda.context.jdbc.JDBCBlobContextController">
-        <property name="dbTool" ref="dbtool.dbTool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
     </bean>
 
     <bean id="jdbcBlobContextControllerWithTerm" class="ru.kwanza.jeda.context.jdbc.JDBCBlobContextController">
         <property name="tableName" value="blob_context_with_term"/>
         <property name="terminator" value="termName"/>
-        <property name="dbTool" ref="dbtool.dbTool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
     </bean>
 
@@ -29,7 +29,7 @@
         <constructor-arg index="1" value="ctx_dictionary"/>
         <constructor-arg index="2" value="name"/>
         <constructor-arg index="3" value="id"/>
-        <property name="dbTool" ref="dbtool.dbTool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="versionGenerator" ref="versionGenerator"/>
     </bean>
 

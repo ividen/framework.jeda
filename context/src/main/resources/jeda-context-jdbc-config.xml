@@ -6,7 +6,7 @@
 
     <bean id="ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor"
           class="ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor">
-        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
         <property name="autoKey" ref="autokey.IAutoKey"/>
     </bean>
 
