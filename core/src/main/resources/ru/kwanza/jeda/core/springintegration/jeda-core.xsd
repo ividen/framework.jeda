@@ -15,17 +15,17 @@
 
     <xsd:attribute name="registered" xsi:type="xsd:boolean"/>
 
-    <xsd:complexType name="flexflow-queue-type">
+    <xsd:complexType name="jeda-queue-type">
     </xsd:complexType>
 
 
-    <xsd:element abstract="true" name="flexflow-queue" type="flexflow-queue-type">
+    <xsd:element abstract="true" name="jeda-queue" type="jeda-queue-type">
     </xsd:element>
 
-    <xsd:element name="queue" substitutionGroup="flexflow-queue">
+    <xsd:element name="queue" substitutionGroup="jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-queue-type">
+                <xsd:extension base="jeda-queue-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attribute name="id" type="xsd:ID"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
@@ -36,7 +36,7 @@
 
     <xsd:complexType name="memory-queue-type">
         <xsd:complexContent>
-            <xsd:extension base="flexflow-queue-type">
+            <xsd:extension base="jeda-queue-type">
                 <xsd:attribute name="maxSize" type="xsd:long"/>
             </xsd:extension>
         </xsd:complexContent>
@@ -51,34 +51,34 @@
 
     <xsd:complexType name="tx-memory-queue-type">
         <xsd:complexContent>
-            <xsd:extension base="flexflow-queue-type">
+            <xsd:extension base="jeda-queue-type">
                 <xsd:attribute name="maxSize" type="xsd:long"/>
                 <xsd:attribute name="cloneType" type="object-clone-type"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:element name="memory-queue" type="memory-queue-type" substitutionGroup="flexflow-queue"/>
+    <xsd:element name="memory-queue" type="memory-queue-type" substitutionGroup="jeda-queue"/>
 
-    <xsd:element name="priority-memory-queue" type="memory-queue-type" substitutionGroup="flexflow-queue"/>
+    <xsd:element name="priority-memory-queue" type="memory-queue-type" substitutionGroup="jeda-queue"/>
 
-    <xsd:element name="tx-memory-queue" type="tx-memory-queue-type" substitutionGroup="flexflow-queue"/>
+    <xsd:element name="tx-memory-queue" type="tx-memory-queue-type" substitutionGroup="jeda-queue"/>
 
-    <xsd:element name="tx-priority-memory-queue" type="tx-memory-queue-type" substitutionGroup="flexflow-queue"/>
+    <xsd:element name="tx-priority-memory-queue" type="tx-memory-queue-type" substitutionGroup="jeda-queue"/>
 
 
-    <xsd:complexType name="flexflow-resource-controller-type">
+    <xsd:complexType name="jeda-resource-controller-type">
     </xsd:complexType>
 
 
-    <xsd:element abstract="true" name="flexflow-resource-controller" type="flexflow-resource-controller-type">
+    <xsd:element abstract="true" name="jeda-resource-controller" type="jeda-resource-controller-type">
     </xsd:element>
 
 
-    <xsd:element name="resource-controller" substitutionGroup="flexflow-resource-controller">
+    <xsd:element name="resource-controller" substitutionGroup="jeda-resource-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-resource-controller-type">
+                <xsd:extension base="jeda-resource-controller-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attribute name="id" type="xsd:ID"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
@@ -88,10 +88,10 @@
     </xsd:element>
 
     <xsd:element name="static-resource-controller"
-                 substitutionGroup="flexflow-resource-controller">
+                 substitutionGroup="jeda-resource-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-resource-controller-type">
+                <xsd:extension base="jeda-resource-controller-type">
                     <xsd:attribute name="threadCount" type="xsd:integer"/>
                     <xsd:attribute name="batchSize" type="xsd:integer"/>
                     <xsd:attribute name="adjustmentCount" type="xsd:integer"/>
@@ -102,10 +102,10 @@
     </xsd:element>
 
     <xsd:element name="fixed-batch-size-resource-controller"
-                 substitutionGroup="flexflow-resource-controller">
+                 substitutionGroup="jeda-resource-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-resource-controller-type">
+                <xsd:extension base="jeda-resource-controller-type">
                     <xsd:attribute name="batchSize" type="xsd:integer" use="required"/>
                     <xsd:attribute name="waitForFillingTimeout" type="xsd:long"/>
                     <xsd:attribute name="adjustmentCount" type="xsd:integer"/>
@@ -117,10 +117,10 @@
     </xsd:element>
 
     <xsd:element name="smart-resource-controller"
-                 substitutionGroup="flexflow-resource-controller">
+                 substitutionGroup="jeda-resource-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-resource-controller-type">
+                <xsd:extension base="jeda-resource-controller-type">
                     <xsd:attribute name="startBatchSize" type="xsd:integer"/>
                     <xsd:attribute name="processingTimeThreshold" type="xsd:long"/>
                     <xsd:attribute name="maxThreadCount" type="xsd:integer"/>
@@ -134,16 +134,16 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="flexflow-admission-controller-type">
+    <xsd:complexType name="jeda-admission-controller-type">
     </xsd:complexType>
 
-    <xsd:element abstract="true" name="flexflow-admission-controller" type="flexflow-admission-controller-type">
+    <xsd:element abstract="true" name="jeda-admission-controller" type="jeda-admission-controller-type">
     </xsd:element>
 
-    <xsd:element name="admission-controller" substitutionGroup="flexflow-admission-controller">
+    <xsd:element name="admission-controller" substitutionGroup="jeda-admission-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-admission-controller-type">
+                <xsd:extension base="jeda-admission-controller-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attribute name="id" type="xsd:ID"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
@@ -153,16 +153,16 @@
     </xsd:element>
 
 
-    <xsd:complexType name="flexflow-event-processor-type">
+    <xsd:complexType name="jeda-event-processor-type">
     </xsd:complexType>
 
-    <xsd:element abstract="true" name="flexflow-event-processor" type="flexflow-event-processor-type">
+    <xsd:element abstract="true" name="jeda-event-processor" type="jeda-event-processor-type">
     </xsd:element>
 
-    <xsd:element name="event-processor" substitutionGroup="flexflow-event-processor">
+    <xsd:element name="event-processor" substitutionGroup="jeda-event-processor">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-event-processor-type">
+                <xsd:extension base="jeda-event-processor-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attribute name="id" type="xsd:ID"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
@@ -172,15 +172,15 @@
     </xsd:element>
 
 
-    <xsd:complexType name="flexflow-thread-manager-type">
+    <xsd:complexType name="jeda-thread-manager-type">
     </xsd:complexType>
 
-    <xsd:element abstract="true" name="flexflow-thread-manager" type="flexflow-thread-manager-type">
+    <xsd:element abstract="true" name="jeda-thread-manager" type="jeda-thread-manager-type">
     </xsd:element>
 
     <xsd:complexType name="base-thread-manager-type">
         <xsd:complexContent>
-            <xsd:extension base="flexflow-thread-manager-type">
+            <xsd:extension base="jeda-thread-manager-type">
                 <xsd:attribute name="threadNamePrefix" type="xsd:string" use="required"/>
                 <xsd:attribute name="idleTimeout" type="xsd:long"/>
                 <xsd:attribute name="maxThreadCount" type="xsd:long"/>
@@ -189,7 +189,7 @@
         </xsd:complexContent>
     </xsd:complexType>
 
-    <xsd:element name="stage-thread-manager" substitutionGroup="flexflow-thread-manager"
+    <xsd:element name="stage-thread-manager" substitutionGroup="jeda-thread-manager"
                  type="base-thread-manager-type"/>
 
     <xsd:complexType name="shared-thread-manager-strategy-type">
@@ -265,10 +265,10 @@
     </xsd:element>
 
 
-    <xsd:element name="thread-manager" substitutionGroup="flexflow-thread-manager">
+    <xsd:element name="thread-manager" substitutionGroup="jeda-thread-manager">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-thread-manager-type">
+                <xsd:extension base="jeda-thread-manager-type">
                     <xsd:attribute name="ref" type="xsd:string" use="required">
                         <xsd:annotation>
                             <xsd:appinfo>
@@ -288,11 +288,11 @@
     <xsd:element name="stage">
         <xsd:complexType>
             <xsd:sequence>
-                <xsd:element ref="flexflow-queue" minOccurs="1" maxOccurs="1"/>
-                <xsd:element ref="flexflow-resource-controller" minOccurs="1" maxOccurs="1"/>
-                <xsd:element ref="flexflow-admission-controller" minOccurs="0" maxOccurs="1"/>
-                <xsd:element ref="flexflow-event-processor" minOccurs="1" maxOccurs="1"/>
-                <xsd:element ref="flexflow-thread-manager" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="jeda-queue" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="jeda-resource-controller" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="jeda-admission-controller" minOccurs="0" maxOccurs="1"/>
+                <xsd:element ref="jeda-event-processor" minOccurs="1" maxOccurs="1"/>
+                <xsd:element ref="jeda-thread-manager" minOccurs="1" maxOccurs="1"/>
             </xsd:sequence>
 
             <xsd:attribute name="name" type="xsd:string" use="required"/>
@@ -300,14 +300,14 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="flexflow-flow-bus-type">
+    <xsd:complexType name="jeda-flow-bus-type">
     </xsd:complexType>
 
 
-    <xsd:element abstract="true" name="flexflow-flow-bus" type="flexflow-flow-bus-type">
+    <xsd:element abstract="true" name="jeda-flow-bus" type="jeda-flow-bus-type">
     </xsd:element>
 
-    <xsd:element name="flow-bus" substitutionGroup="flexflow-flow-bus">
+    <xsd:element name="flow-bus" substitutionGroup="jeda-flow-bus">
         <xsd:annotation>
             <xsd:appinfo>
                 <tool:annotation>
@@ -317,7 +317,7 @@
         </xsd:annotation>
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-flow-bus-type">
+                <xsd:extension base="jeda-flow-bus-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
                 </xsd:extension>
@@ -325,14 +325,14 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="flexflow-context-controller-type">
+    <xsd:complexType name="jeda-context-controller-type">
     </xsd:complexType>
 
 
-    <xsd:element abstract="true" name="flexflow-context-controller" type="flexflow-context-controller-type">
+    <xsd:element abstract="true" name="jeda-context-controller" type="jeda-context-controller-type">
     </xsd:element>
 
-    <xsd:element name="context-controller" substitutionGroup="flexflow-context-controller">
+    <xsd:element name="context-controller" substitutionGroup="jeda-context-controller">
         <xsd:annotation>
             <xsd:appinfo>
                 <tool:annotation>
@@ -342,7 +342,7 @@
         </xsd:annotation>
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-context-controller-type">
+                <xsd:extension base="jeda-context-controller-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
                 </xsd:extension>
@@ -350,13 +350,13 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="flexflow-timer-type">
+    <xsd:complexType name="jeda-timer-type">
     </xsd:complexType>
 
-    <xsd:element abstract="true" name="flexflow-timer" type="flexflow-timer-type">
+    <xsd:element abstract="true" name="jeda-timer" type="jeda-timer-type">
     </xsd:element>
 
-    <xsd:element name="timer" substitutionGroup="flexflow-timer">
+    <xsd:element name="timer" substitutionGroup="jeda-timer">
         <xsd:annotation>
             <xsd:appinfo>
                 <tool:annotation>
@@ -366,7 +366,7 @@
         </xsd:annotation>
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-timer-type">
+                <xsd:extension base="jeda-timer-type">
                     <xsd:group ref="beans:beanElements"/>
                     <xsd:attributeGroup ref="beans:beanAttributes"/>
                 </xsd:extension>

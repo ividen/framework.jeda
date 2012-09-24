@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-persistentqueue"
+<xsd:schema xmlns="http://www.kwanza-systems.ru/schema/jeda-persistentqueue"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
-            xmlns:flexflow-core="http://www.intervale.ru/schema/flexflow-core"
+            xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.intervale.ru/schema/flexflow-persistentqueue"
+            targetNamespace="http://www.kwanza-systems.ru/schema/jeda-persistentqueue"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
     <xsd:import namespace="http://www.springframework.org/schema/beans"
                 schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
-    <xsd:import namespace="http://www.intervale.ru/schema/flexflow-core"
-                schemaLocation="http://www.intervale.ru/schema/flexflow-core.xsd"/>
+    <xsd:import namespace="http://www.kwanza-systems.ru/schema/jeda-core"
+                schemaLocation="http://www.kwanza-systems.ru/schema/jeda-core.xsd"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"
                 schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 
 
     <xsd:element name="jdbc-queue"
-                 substitutionGroup="flexflow-core:flexflow-queue">
+                 substitutionGroup="jeda-core:jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-queue-type">
-                    <xsd:attribute name="dbTool">
+                <xsd:extension base="jeda-core:jeda-queue-type">
+                    <xsd:attribute name="dbtool">
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
@@ -89,10 +89,10 @@
     </xsd:element>
 
     <xsd:element name="berkeley-queue"
-                 substitutionGroup="flexflow-core:flexflow-queue">
+                 substitutionGroup="jeda-core:jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-queue-type">
+                <xsd:extension base="jeda-core:jeda-queue-type">
                     <xsd:attribute name="dbName" type="xsd:string" use="required"/>
                     <xsd:attribute name="maxSize" type="xsd:long" use="required"/>
                     <xsd:attribute name="connectionFactory" use="required">
@@ -114,10 +114,10 @@
     </xsd:complexType>
 
     <xsd:element name="queue"
-                 substitutionGroup="flexflow-core:flexflow-queue">
+                 substitutionGroup="jeda-core:jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-queue-type">
+                <xsd:extension base="jeda-core:jeda-queue-type">
                     <xsd:sequence>
                         <xsd:element name="persistence-controller">
                             <xsd:complexType>

@@ -24,7 +24,7 @@ public abstract class AbstractTestController extends TestCase {
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextFileName(), this.getClass());
-        ctx.getBean("dbhelper.DBTool", DBTool.class).getDataSource().getConnection().
+        ctx.getBean("dbtool.DBTool", DBTool.class).getDataSource().getConnection().
                 prepareStatement("delete from event_queue").execute();
         queueController = ctx.getBean("defaultQueueController", IQueuePersistenceController.class);
         evtList = createEvtList(100);
@@ -42,7 +42,7 @@ public abstract class AbstractTestController extends TestCase {
         JDBCQueuePersistenceController pc1 = new JDBCQueuePersistenceController("name");
         pc1.setAutoKey(ctx.getBean("autokey.IAutoKey", IAutoKey.class));
         pc1.setDbTool(ctx.getBean(DBTool.class));
-        ctx.getBean("dbhelper.DBTool", DBTool.class).getDataSource().getConnection().
+        ctx.getBean("dbtool.DBTool", DBTool.class).getDataSource().getConnection().
                 prepareStatement("delete from event_queue").execute();
         pc1.setTableName("event_queue");
         pc1.setIdColumn("id");

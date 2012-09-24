@@ -5,7 +5,7 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 /**
  * @author Guzanov Alexander
  */
-public class FlexFlowPersistentQueueNamespaceHandler extends NamespaceHandlerSupport {
+public class JedaPersistentQueueNamespaceHandler extends NamespaceHandlerSupport {
 
     public void init() {
         registerBeanDefinitionParser("queue", new PersistentQueueParser());

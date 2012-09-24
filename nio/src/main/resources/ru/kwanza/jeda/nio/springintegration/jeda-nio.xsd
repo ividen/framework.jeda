@@ -2,7 +2,7 @@
 <xsd:schema xmlns="http://www.kwanza-systems.ru/schema/jeda-nio"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             xmlns:beans="http://www.springframework.org/schema/beans"
-            xmlns:flexflow-core="http://www.kwanza-systems.ru/schema/jeda-core"
+            xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
             xmlns:tool="http://www.springframework.org/schema/tool"
             targetNamespace="http://www.kwanza-systems.ru/schema/jeda-nio"
             elementFormDefault="qualified"
@@ -18,7 +18,7 @@
 
     <xsd:complexType name="client-transport-flow-bus-type">
         <xsd:complexContent>
-            <xsd:extension base="flexflow-core:flexflow-flow-bus-type">
+            <xsd:extension base="jeda-core:jeda-flow-bus-type">
                 <xsd:attribute name="name" type="xsd:string" use="required"/>
                 <xsd:attribute name="threadCount" type="xsd:int" use="optional"/>
                 <xsd:attribute name="transport" type="xsd:string" use="optional">
@@ -55,7 +55,7 @@
     </xsd:complexType>
 
 
-    <xsd:element name="client-transport-flow-bus" substitutionGroup="flexflow-core:flexflow-flow-bus"
+    <xsd:element name="client-transport-flow-bus" substitutionGroup="jeda-core:jeda-flow-bus"
                  type="client-transport-flow-bus-type">
         <xsd:annotation>
             <xsd:appinfo>

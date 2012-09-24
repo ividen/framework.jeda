@@ -51,11 +51,11 @@ class JDBCQueueParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("tableName", tableName);
         }
 
-        String dbTool = element.getAttribute("dbTool");
+        String dbTool = element.getAttribute("dbtool");
         if (StringUtils.hasText(dbTool)) {
             definitionBuilder.addPropertyReference("dbTool", dbTool);
         } else {
-            definitionBuilder.addPropertyReference("dbTool", "dbhelper.DBTool");
+            definitionBuilder.addPropertyReference("dbTool", "dbtool.DBTool");
         }
 
         String autoKey = element.getAttribute("autoKey");

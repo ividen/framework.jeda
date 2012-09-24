@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsd:schema xmlns="http://www.intervale.ru/schema/flexflow-context"
+<xsd:schema xmlns="http://www.intervale.ru/schema/jeda-context"
             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            xmlns:flexflow-core="http://www.intervale.ru/schema/flexflow-core"
+            xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
             xmlns:tool="http://www.springframework.org/schema/tool"
-            targetNamespace="http://www.intervale.ru/schema/flexflow-context"
+            targetNamespace="http://www.intervale.ru/schema/jeda-context"
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
     <xsd:import namespace="http://www.springframework.org/schema/beans"
                 schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
-    <xsd:import namespace="http://www.intervale.ru/schema/flexflow-core"/>
+    <xsd:import namespace="http://www.intervale.ru/schema/jeda-core"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"
                 schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
 
 
     <xsd:element name="jdbc-blob-context-controller"
-                 substitutionGroup="flexflow-core:flexflow-context-controller">
+                 substitutionGroup="jeda-core:jeda-context-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                <xsd:extension base="jeda-core:jeda-context-controller-type">
                     <xsd:attribute name="dbTool">
                         <xsd:annotation>
                             <xsd:appinfo>
@@ -50,7 +50,7 @@
     <xsd:element name="jdbc-blob-context-controller-with-dict">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                <xsd:extension base="jeda-core:jeda-context-controller-type">
                     <xsd:attribute name="dbTool">
                         <xsd:annotation>
                             <xsd:appinfo>
@@ -95,7 +95,7 @@
     <xsd:element name="jdbc-object-context-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                <xsd:extension base="jeda-core:jeda-context-controller-type">
                     <xsd:attribute name="dbTool">
                         <xsd:annotation>
                             <xsd:appinfo>
@@ -135,10 +135,10 @@
     </xsd:element>
 
     <xsd:element name="berkeley-blob-context-controller"
-                 substitutionGroup="flexflow-core:flexflow-context-controller">
+                 substitutionGroup="jeda-core:jeda-context-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                <xsd:extension base="jeda-core:jeda-context-controller-type">
                     <xsd:attribute name="connectionFactory" use="required">
                         <xsd:annotation>
                             <xsd:appinfo>
@@ -166,10 +166,10 @@
     </xsd:element>
 
     <xsd:element name="berkeley-blob-context-controller-with-dict"
-                 substitutionGroup="flexflow-core:flexflow-context-controller">
+                 substitutionGroup="jeda-core:jeda-context-controller">
         <xsd:complexType>
             <xsd:complexContent>
-                <xsd:extension base="flexflow-core:flexflow-context-controller-type">
+                <xsd:extension base="jeda-core:jeda-context-controller-type">
                     <xsd:attribute name="connectionFactory" use="required">
                         <xsd:annotation>
                             <xsd:appinfo>

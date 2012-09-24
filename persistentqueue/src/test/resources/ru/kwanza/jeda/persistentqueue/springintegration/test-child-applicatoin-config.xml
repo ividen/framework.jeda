@@ -1,13 +1,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:jeda-core="http://www.intervale.ru/schema/jeda-core"
-       xmlns:jeda-jeconnection="http://www.intervale.ru/schema/jeda-jeconnection"
-       xmlns:jeda-persistentqueue="http://www.intervale.ru/schema/jeda-persistentqueue"
+       xmlns:jeda-core="http://www.kwanza-systems/schema/jeda-core"
+       xmlns:jeda-jeconnection="http://www.kwanza-systems/schema/jeda-jeconnection"
+       xmlns:jeda-persistentqueue="http://www.kwanza-systems/schema/jeda-persistentqueue"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-               http://www.intervale.ru/schema/jeda-core http://www.intervale.ru/schema/jeda-core.xsd
-               http://www.intervale.ru/schema/jeda-jeconnection http://www.intervale.ru/schema/jeda-jeconnection.xsd
-               http://www.intervale.ru/schema/jeda-persistentqueue http://www.intervale.ru/schema/jeda-persistentqueue.xsd">
+               http://www.kwanza-systems/schema/jeda-core http://www.kwanza-systems/schema/jeda-core.xsd
+               http://www.kwanza-systems/schema/jeda-jeconnection http://www.kwanza-systems/schema/jeda-jeconnection.xsd
+               http://www.kwanza-systems/schema/jeda-persistentqueue http://www.kwanza-systems/schema/jeda-persistentqueue.xsd">
 
     <jeda-core:stage path="TestStage31">
         <jeda-persistentqueue:jdbc-queue maxSize="500000"/>

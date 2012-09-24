@@ -1,1 +1,1 @@
-http\://www.intervale.ru/schema/flexflow-persistentqueue=ru.kwanza.flexflow.persistentqueue.springintegration.FlexFlowPersistentQueueNamespaceHandler
+http\://www.kwanza-systems.ru/schema/jeda-persistentqueue=ru.kwanza.jeda.persistentqueue.springintegration.JedaPersistentQueueNamespaceHandler
