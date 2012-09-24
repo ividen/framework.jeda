@@ -9,9 +9,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.util.ArrayList;
 import java.util.Collection;
 
-/**
- * @autor Sergey Shurinov 12.03.12 10:43
- */
 public abstract class TestController extends TestCase {
 
     private ApplicationContext ctx;

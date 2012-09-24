@@ -6,9 +6,6 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
 
-/**
- * @autor Sergey Shurinov 05.03.12 16:38
- */
 public abstract class TestJDBCController extends TestController {
 
     @Override
@@ -42,7 +39,7 @@ public abstract class TestJDBCController extends TestController {
 
     @Override
     protected void cleanForContext(ApplicationContext ctx) throws Exception {
-        ctx.getBean("dbhelper.DBTool", DBTool.class).getDataSource().getConnection().
+        ctx.getBean("dbtool.DBTool", DBTool.class).getDataSource().getConnection().
                 prepareStatement("delete from EVENT_TIMER").execute();
     }
 

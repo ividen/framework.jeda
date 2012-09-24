@@ -20,9 +20,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * @autor Sergey Shurinov 05.03.12 14:32
- */
+
 public class JDBCTimerPersistentController implements ITimerPersistentController {
 
     private class EventPersistSetter implements UpdateSetter<TimerItem> {

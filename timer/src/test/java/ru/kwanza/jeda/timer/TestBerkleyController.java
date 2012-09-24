@@ -9,9 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-/**
- * @autor Sergey Shurinov 06.03.12 13:23
- */
 public abstract class TestBerkleyController extends TestController {
 
     private JEConnectionFactory factoryJE;

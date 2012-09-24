@@ -2,9 +2,7 @@ package ru.kwanza.jeda.timer.berkeley;
 
 import java.io.Serializable;
 
-/**
- * @autor Sergey Shurinov 07.03.12 17:56
- */
+
 public class TimerKey implements Serializable {
 
     private long id;

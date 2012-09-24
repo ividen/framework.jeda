@@ -29,12 +29,6 @@
         <jeda-core:memory-queue maxSize="100000"/>
     </jeda-core:stage>
 
-    <!--<jeda-core:stage path="TestPath5">-->
-    <!--<jeda-core:queue id="myQueue" class="ru.kwanza.jedae.springintegration.MemoryQueue">-->
-    <!--<property name="limitSize" value="1000"/>-->
-    <!--</jeda-core:queue>-->
-    <!--</jeda-core:stage>-->
-
 
     <jeda-core:stage path="TestPath6">
         <jeda-persistentqueue:jdbc-queue maxSize="1000"

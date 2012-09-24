@@ -12,7 +12,7 @@
     <bean id="defaultTimerController" class="ru.kwanza.jeda.timer.jdbc.JDBCTimerPersistentController"
           scope="singleton">
         <property name="autoKey" ref="autokey.IAutoKey"/>
-        <property name="dbtool" ref="dbtool.dbtool"/>
+        <property name="dbTool" ref="dbtool.DBTool"/>
     </bean>
 
     <bean id="propertyPlaceholderConfigurer"

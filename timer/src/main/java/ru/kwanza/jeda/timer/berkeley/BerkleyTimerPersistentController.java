@@ -19,9 +19,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @autor Sergey Shurinov 06.03.12 9:21
- */
+
 public class BerkleyTimerPersistentController implements ITimerPersistentController {
 
     private static final class TimerComparator implements Comparator<byte[]>, Serializable {
