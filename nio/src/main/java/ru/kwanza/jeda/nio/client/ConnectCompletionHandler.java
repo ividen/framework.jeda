@@ -53,6 +53,7 @@ class ConnectCompletionHandler implements CompletionHandler<Connection> {
     }
 
     private void configConnection(Connection connection) {
+        //todo aguzanov конфигурирование сокета должно осуществляться в момент установки соединения
         if (connection instanceof NIOConnection) {
             NIOConnection nioConnection = (NIOConnection) connection;
             if (nioConnection.getChannel() instanceof SocketChannel) {

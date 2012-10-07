@@ -50,7 +50,7 @@ public class Main {
                         System.out.println(M * INT * 1000 / ts);
                     }
 
-
+                    // todo aguzanov Работа с client http обобшить код в части определения того, что делать с соединением: закрывать или возвращать  пул
                     if (HttpUtil.isMarkForClose(content)) {
                         closeConnection(ctx);
                     } else {

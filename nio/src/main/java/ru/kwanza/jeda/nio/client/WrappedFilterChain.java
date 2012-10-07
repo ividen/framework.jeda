@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
+ * //todo aguzanov Избавиться, лучше устанавливать контекст через с помощью атрибутов при установке соединения
+ *
  * @author Guzanov Alexander
  */
 class WrappedFilterChain implements FilterChain {

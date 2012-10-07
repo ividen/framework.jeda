@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 public class ConnectionConfig {
     private boolean keepAlive;
     private Boolean tcpNoDelay;
+    //todo aguzanov Возможность работы клиентских соединений через proxy
     private boolean useProxy;
 
     private InetSocketAddress socketAddress;

@@ -10,7 +10,7 @@ import static ru.kwanza.jeda.nio.server.http.HttpServer.logger;
  * @author Guzanov Alexander
  */
 public abstract class AsyncHttpHandler implements IHttpHandler {
-    protected final long timeout;
+    private final long timeout;
     private ITimedOutHandler timedOutHandler;
 
     public AsyncHttpHandler(long timeout) {

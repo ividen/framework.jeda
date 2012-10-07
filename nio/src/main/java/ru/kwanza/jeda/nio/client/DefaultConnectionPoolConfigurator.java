@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 
 /**
+ * //todo aguzanov возможность устанавливать через системные свойства параметры соединения к конкретному адресу через системные свойства
+ *
  * @author Guzanov Alexander
  */
 class DefaultConnectionPoolConfigurator implements IConnectionPoolConfigurator {

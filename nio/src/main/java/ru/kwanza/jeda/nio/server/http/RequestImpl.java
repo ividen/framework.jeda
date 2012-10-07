@@ -45,8 +45,8 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
 
     final Parameters parameters = new Parameters();
 
-    Collection<Cookie> cookies;
-    Cookies rawCookies;
+    private Collection<Cookie> cookies;
+    private Cookies rawCookies;
 
     RequestImpl(String uri, FilterChainContext context, HttpServer httpServer, EntryPoint entryPoint,
                 HttpContent content, ITimedOutHandler timedOutHandler, long timeout) {
@@ -88,6 +88,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return timestamp;
     }
 
+    //todo aguzanov кэшировать
     public String getRemoteAddress() {
         final Connection connection = context != null ? context.getConnection() : null;
         final Object peerAddress = connection != null ? connection.getPeerAddress() : null;
@@ -102,7 +103,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return content;
     }
 
-    public boolean finish(HttpPacket result) {
+    public final boolean finish(HttpPacket result) {
         if (finished) {
             if (HttpServer.logger.isDebugEnabled()) {
                 HttpServer.logger.trace("HttpServer({},{}) : Can't send Response."
@@ -128,6 +129,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return true;
     }
 
+    //todo aguzanov кэшировать
     public Map<String, String> getHeaderMap() {
         final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
         final MimeHeaders mimeHeaders = httpHeader != null ? httpHeader.getHeaders() : null;
@@ -144,6 +146,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return getHeaderMap().get(name);
     }
 
+    // todo aguzanov кэшировать
     public Map<String, String> getAttributeMap() {
         final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
         final AttributeHolder attributes = httpHeader != null ? httpHeader.getAttributes() : null;
@@ -161,6 +164,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return getAttributeMap().get(name);
     }
 
+    //todo aguzanov кэшировать
     public Map<String, String> getParameterMap() {
         final Map<String, String> resultMap = new LinkedHashMap<String, String>();
         for (final String name : getParameterNames()) {
@@ -199,6 +203,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return Collections.unmodifiableCollection(cookies);
     }
 
+    //todo aguzanov кэшировать
     public byte[] getBody() {
         final Buffer contentBuffer = content != null ? content.getContent() : null;
         final byte[] body = contentBuffer != null ? new byte[contentBuffer.capacity()] : null;
