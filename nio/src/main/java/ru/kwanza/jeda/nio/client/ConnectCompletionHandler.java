@@ -16,13 +16,10 @@ class ConnectCompletionHandler implements CompletionHandler<Connection> {
     private ITransportEvent event;
     private ConnectionPool connectionPool;
     private static final Logger logger = LoggerFactory.getLogger(ConnectionPool.class);
-    private WrappedFilterChain filterChain;
 
     ConnectCompletionHandler(ConnectionPool connectionPool, ITransportEvent event) {
         this.connectionPool = connectionPool;
         this.event = event;
-        this.filterChain = new WrappedFilterChain(event.
-                getProcessingFilterChain(), connectionPool);
     }
 
     public void cancelled() {
@@ -47,7 +44,8 @@ class ConnectCompletionHandler implements CompletionHandler<Connection> {
             connectionPool.registerConnection(result, event);
             result.addCloseListener(new ConnectionCloseListener(connectionPool, event.getConnectionConfig()));
             configConnection(result);
-            result.setProcessor(filterChain);
+            result.setProcessor(event.getProcessingFilterChain());
+
             result.write(event.getContent());
         }
     }

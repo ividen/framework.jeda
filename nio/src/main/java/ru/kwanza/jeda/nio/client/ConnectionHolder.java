@@ -7,7 +7,6 @@ import org.glassfish.grizzly.Connection;
  */
 final class ConnectionHolder {
     private ConnectionConfig connectionConfig;
-    private ConnectionContext context;
     private Connection connection;
     private long expiryTimestamp;
     private boolean useRequestCount = false;
@@ -16,7 +15,6 @@ final class ConnectionHolder {
     public ConnectionHolder(Connection connection, ConnectionConfig connectionConfig, long maxRequestCount) {
         this.connection = connection;
         this.connectionConfig = connectionConfig;
-        this.context = new ConnectionContext();
         this.expiryTimestamp = System.currentTimeMillis();
         if (maxRequestCount > 0) {
             this.useRequestCount = true;
@@ -32,17 +30,12 @@ final class ConnectionHolder {
         return connection;
     }
 
-    public ConnectionContext getContext() {
-        return context;
-    }
-
     public long getExpiryTimestamp() {
         return expiryTimestamp;
     }
 
     public void update(long keepAliveTimeout) {
         this.expiryTimestamp = System.currentTimeMillis() + keepAliveTimeout;
-        this.context.clear();
         if (useRequestCount) {
             this.requestCount--;
         }

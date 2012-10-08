@@ -1,5 +1,8 @@
 package ru.kwanza.jeda.nio.client;
 
+import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
+import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IStageInternal;
@@ -7,9 +10,6 @@ import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.core.manager.ObjectNotFoundException;
 import ru.kwanza.jeda.core.stage.Stage;
 import ru.kwanza.jeda.core.threadmanager.shared.SharedThreadManager;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

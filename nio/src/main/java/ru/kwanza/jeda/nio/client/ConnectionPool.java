@@ -1,8 +1,10 @@
 package ru.kwanza.jeda.nio.client;
 
-import ru.kwanza.jeda.api.internal.AbstractResourceController;
 import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.attributes.Attribute;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import ru.kwanza.jeda.api.internal.AbstractResourceController;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +22,8 @@ class ConnectionPool extends AbstractResourceController {
     private InetSocketAddress address;
     private IConnectionPoolConfigurator configurator;
     private volatile int maxBatchSize;
+
+    private static Attribute CONNECTION_POOL = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("jeda-nio:ConnectionPool");
 
     public ConnectionPool(InetSocketAddress address, IConnectionPoolConfigurator configurator) {
         this.address = address;
@@ -57,11 +61,6 @@ class ConnectionPool extends AbstractResourceController {
     }
 
 
-    public ConnectionContext getConnectionContext(Connection connection) {
-        ConnectionHolder connectionHolder = leasedConnections.get(connection);
-        return connectionHolder == null ? null : connectionHolder.getContext();
-    }
-
     public void write(TCPNIOTransport transport, ITransportEvent event) {
         ConnectionConfig connectionConfig = event.getConnectionConfig();
         if (connectionConfig.isKeepAlive()) {
@@ -92,13 +91,21 @@ class ConnectionPool extends AbstractResourceController {
     void registerConnectionHolder(ConnectionHolder holder, ITransportEvent event,
                                   long keepAliveTimeout) {
         holder.update(keepAliveTimeout);
-        holder.getContext().setRequestEvent(event);
         Connection connection = holder.getConnection();
+        ConnectionContext context = ConnectionContext.getContext(connection);
+        if (context == null) {
+            ConnectionContext.create(connection, event);
+        } else {
+            context.setRequestEvent(event);
+        }
         leasedConnections.put(connection, holder);
+        CONNECTION_POOL.set(connection, this);
     }
 
-    void releaseConnection(Connection result, ConnectionContext context) {
+    void releaseConnection(Connection result) {
+        ConnectionContext context = ConnectionContext.getContext(result);
         if (context != null && context.getRequestEvent().getConnectionConfig().isKeepAlive()) {
+            context.clear();
             returnConnection(result, context.getRequestEvent().getConnectionConfig());
         }
     }
@@ -119,5 +126,9 @@ class ConnectionPool extends AbstractResourceController {
         }
         int i = batchSize.incrementAndGet();
         getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
+    }
+
+    public static ConnectionPool getPool(Connection connection) {
+        return (ConnectionPool) CONNECTION_POOL.get(connection);
     }
 }

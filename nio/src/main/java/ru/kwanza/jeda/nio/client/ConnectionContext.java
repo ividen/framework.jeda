@@ -1,5 +1,9 @@
 package ru.kwanza.jeda.nio.client;
 
+import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.attributes.Attribute;
+
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
@@ -13,7 +17,13 @@ public class ConnectionContext implements Map<Object, Object> {
     private ConcurrentHashMap map = new ConcurrentHashMap();
     private ITransportEvent requestEvent;
 
+    private static Attribute CONNECTION_CONTEXT = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("jeda-nio:ConnectionContext");
+
     public ConnectionContext() {
+    }
+
+    public ConnectionContext(ITransportEvent requestEvent) {
+        this.requestEvent = requestEvent;
     }
 
     public ITransportEvent getRequestEvent() {
@@ -92,5 +102,15 @@ public class ConnectionContext implements Map<Object, Object> {
 
     public String toString() {
         return map.toString();
+    }
+
+    public static ConnectionContext getContext(Connection connection) {
+        return (ConnectionContext) CONNECTION_CONTEXT.get(connection);
+    }
+
+    public static ConnectionContext create(Connection connection, ITransportEvent event) {
+        ConnectionContext context = new ConnectionContext(event);
+        CONNECTION_CONTEXT.set(connection, context);
+        return context;
     }
 }

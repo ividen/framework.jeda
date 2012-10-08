@@ -9,23 +9,22 @@ import org.glassfish.grizzly.filterchain.FilterChainContext;
  */
 public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilter {
     public final ConnectionContext getConnectionContext(FilterChainContext ctx) {
-        ConnectionPool pool = getPool(ctx);
-        return pool.getConnectionContext(ctx.getConnection());
+        return ConnectionContext.getContext(ctx.getConnection());
     }
 
     public final void releaseConnection(FilterChainContext ctx) {
         ConnectionPool pool = getPool(ctx);
-        pool.releaseConnection(ctx.getConnection(), getConnectionContext(ctx));
+        pool.releaseConnection(ctx.getConnection());
     }
 
     public final void closeConnection(FilterChainContext ctx) {
         ConnectionPool pool = getPool(ctx);
         Connection connection = ctx.getConnection();
         connection.closeSilently();
-        pool.releaseConnection(ctx.getConnection(),getConnectionContext(ctx));
+        pool.releaseConnection(ctx.getConnection());
     }
 
     private ConnectionPool getPool(FilterChainContext ctx) {
-        return (ConnectionPool) ctx.getInternalContext().getAttributes().getAttribute(ConnectionPool.class.getName());
+        return ConnectionPool.getPool(ctx.getConnection());
     }
 }

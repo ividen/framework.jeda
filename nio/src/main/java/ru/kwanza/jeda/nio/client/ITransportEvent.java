@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.nio.client;
 
-import ru.kwanza.jeda.api.IEvent;
 import org.glassfish.grizzly.filterchain.FilterChain;
+import ru.kwanza.jeda.api.IEvent;
 
 /**
  * @author Guzanov Alexander

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.nio.client;
 
-import ru.kwanza.jeda.api.IEventProcessor;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
+import ru.kwanza.jeda.api.IEventProcessor;
 
 import java.util.Collection;
 
