@@ -24,6 +24,8 @@ public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilt
         pool.releaseConnection(ctx.getConnection());
     }
 
+    public abstract void handleConnectError(E event, Throwable e);
+
     private ConnectionPool getPool(FilterChainContext ctx) {
         return ConnectionPool.getPool(ctx.getConnection());
     }

@@ -2,6 +2,7 @@ package ru.kwanza.jeda.nio.client;
 
 import org.glassfish.grizzly.CompletionHandler;
 import org.glassfish.grizzly.Connection;
+import org.glassfish.grizzly.filterchain.Filter;
 import org.glassfish.grizzly.nio.NIOConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +34,10 @@ class ConnectCompletionHandler implements CompletionHandler<Connection> {
         logger.error("Error connect to " + event.getConnectionConfig().getEndpoint() +
                 " for event " + event + " canceled", throwable);
         connectionPool.returnConnection(null, event.getConnectionConfig());
-        IConnectErrorHandler connectErrorHandler = event.getConnectErrorHandler();
-        if (connectErrorHandler != null) {
-            connectErrorHandler.handleConnectError(event, throwable);
+        for (Filter f : event.getProcessingFilterChain()) {
+            if (f instanceof AbstractFilter) {
+                ((AbstractFilter) f).handleConnectError(event, throwable);
+            }
         }
     }
 

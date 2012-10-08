@@ -1,11 +1,5 @@
 package ru.kwanza.jeda.nio.client;
 
-import ru.kwanza.jeda.api.AbstractEvent;
-import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.Manager;
-import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
-import ru.kwanza.jeda.nio.utils.HttpUtil;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.filterchain.*;
 import org.glassfish.grizzly.http.*;
@@ -14,6 +8,12 @@ import org.glassfish.grizzly.memory.Buffers;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.ssl.SSLFilter;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.api.AbstractEvent;
+import ru.kwanza.jeda.api.IFlowBus;
+import ru.kwanza.jeda.api.Manager;
+import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
+import ru.kwanza.jeda.nio.utils.HttpUtil;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -30,7 +30,7 @@ public class Main {
 
     static AtomicLong counter = new AtomicLong(0);
     static volatile long ts;
-    public static final int BATCH_SIZE = 1000;
+    public static final int BATCH_SIZE = 1;
     public static final int ITER = 1;
     public static final long INT = BATCH_SIZE * ITER;
     public static long M = 1;
@@ -85,9 +85,20 @@ public class Main {
             }
         }
 
+        public void handleConnectError(ITransportEvent event, Throwable e) {
+            System.out.println("Connect Error for " + event);
+            e.printStackTrace();
+            long l = counter.incrementAndGet();
+            if (l == 1) {
+                ts = System.currentTimeMillis();
+            } else if (l == M * INT) {
+                ts = System.currentTimeMillis() - ts;
+                System.out.println(M * INT * 1000 / ts);
+            }
+        }
     }
 
-    public static class TestTransportEvent extends AbstractEvent implements ITransportEvent, IConnectErrorHandler {
+    public static class TestTransportEvent extends AbstractEvent implements ITransportEvent {
         private String uri;
         public static final String txt = "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"><soapenv:Body><ns1:CPAReq xmlns:ns1=\"http://twophaseinteraction.mts.ru/xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"ns1:CPAReqMessage\" ns1:messageId=\"0\" ns1:version=\"1.5\"><ns1:Client /><ns1:Provider><ns1:id>3868638A697715F0F186DA2C7CB1CDC3</ns1:id></ns1:Provider><ns1:Payment><ns1:date>2012-03-06T01:21:58.052+03:00</ns1:date><ns1:amount>1000</ns1:amount><ns1:currency>810</ns1:currency><ns1:exponent>2</ns1:exponent><ns1:Params><ns1:Param ns1:name=\"currency\">810</ns1:Param></ns1:Params></ns1:Payment><ns1:pcentreTrxId>E4131D2C074AEFB292DE87EE800E625A</ns1:pcentreTrxId></ns1:CPAReq></soapenv:Body></soapenv:Envelope>";
         private InetSocketAddress endpoint;
@@ -161,10 +172,6 @@ public class Main {
                     wrap).last(true).build();
         }
 
-        public IConnectErrorHandler getConnectErrorHandler() {
-            return this;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
         public String getContextId() {
             return null;
         }
@@ -175,16 +182,6 @@ public class Main {
                     "uri='" + uri + '\'' +
                     ", endpoint=" + endpoint +
                     '}';
-        }
-
-        public void handleConnectError(ITransportEvent event, Throwable e) {
-            long l = counter.incrementAndGet();
-            if (l == 1) {
-                ts = System.currentTimeMillis();
-            } else if (l == M * INT) {
-                ts = System.currentTimeMillis() - ts;
-                System.out.println(M * INT * 1000 / ts);
-            }
         }
 
     }

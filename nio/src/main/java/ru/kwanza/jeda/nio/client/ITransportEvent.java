@@ -14,7 +14,4 @@ public interface ITransportEvent extends IEvent {
     public FilterChain getProcessingFilterChain();
 
     public Object getContent();
-
-    //todo aguzanov очень неудобно делать отдельный обработчик событий. Нужно Засунуть это в FilterChain
-    public IConnectErrorHandler getConnectErrorHandler();
 }
