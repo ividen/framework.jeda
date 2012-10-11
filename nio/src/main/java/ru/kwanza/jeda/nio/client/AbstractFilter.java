@@ -21,7 +21,7 @@ public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilt
         ConnectionPool pool = getPool(ctx);
         Connection connection = ctx.getConnection();
         connection.closeSilently();
-        pool.releaseConnection(ctx.getConnection());
+        pool.releaseConnection(connection);
     }
 
     public abstract void handleConnectError(E event, Throwable e);

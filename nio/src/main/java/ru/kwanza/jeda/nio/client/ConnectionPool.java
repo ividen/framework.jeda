@@ -104,9 +104,10 @@ class ConnectionPool extends AbstractResourceController {
 
     void releaseConnection(Connection result) {
         ConnectionContext context = ConnectionContext.getContext(result);
-        if (context != null && context.getRequestEvent().getConnectionConfig().isKeepAlive()) {
+        ConnectionConfig connectionConfig = context.getRequestEvent().getConnectionConfig();
+        if (context != null && connectionConfig.isKeepAlive()) {
             context.clear();
-            returnConnection(result, context.getRequestEvent().getConnectionConfig());
+            returnConnection(result, connectionConfig);
         }
     }
 

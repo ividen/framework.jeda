@@ -13,7 +13,6 @@ import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
-import ru.kwanza.jeda.nio.utils.HttpUtil;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -30,8 +29,8 @@ public class Main {
 
     static AtomicLong counter = new AtomicLong(0);
     static volatile long ts;
-    public static final int BATCH_SIZE = 1;
-    public static final int ITER = 1;
+    public static final int BATCH_SIZE = 1000;
+    public static final int ITER = 1000;
     public static final long INT = BATCH_SIZE * ITER;
     public static long M = 1;
 
@@ -50,20 +49,19 @@ public class Main {
                         System.out.println(M * INT * 1000 / ts);
                     }
 
+//                    System.out.println(content.getContent().toStringContent());
                     // todo aguzanov Работа с client http обобшить код в части определения того, что делать с соединением: закрывать или возвращать  пул
-                    if (HttpUtil.isMarkForClose(content)) {
-                        closeConnection(ctx);
-                    } else {
-                        System.out.println(l);
-                        releaseConnection(ctx);
-                    }
-                    System.out.println(content.getContent().toStringContent());
+//                    if (HttpUtil.isMarkForClose(content)) {
+//                        closeConnection(ctx);
+//                    } else {
+//                    System.out.println(l);
+                    releaseConnection(ctx);
+//                    }
+
 
                 }
 
-            } else
-
-            {
+            } else {
                 System.out.println("not last");
             }
 
@@ -192,7 +190,7 @@ public class Main {
 
         IFlowBus flowBus = Manager.getFlowBus("client-transport-flow-bus");
 
-        URL url1 = new URL("http://localhost:9090/agregator-1.5/emulator/");
+        URL url1 = new URL("http://localhost:18080/emulator/aggregator/doWork.jsp");
 //        URL url1 = new URL("http://10.1.3.145:8080/agregator-1.5/emulator/");
 //        URL url2 = new URL("http://10.1.2.246:8080/agregator-1.5/emulator/");
         M = 1;
