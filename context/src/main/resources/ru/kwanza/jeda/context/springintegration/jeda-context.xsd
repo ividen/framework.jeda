@@ -31,7 +31,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.VersionGenerator"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
@@ -64,7 +64,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.VersionGenerator"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
@@ -109,7 +109,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.VersionGenerator"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
@@ -153,7 +153,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.VersionGenerator"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
@@ -184,7 +184,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.VersionGenerator"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.VersionGenerator"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
