@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.dbtool.DBTool;
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import org.springframework.beans.factory.BeanNameAware;

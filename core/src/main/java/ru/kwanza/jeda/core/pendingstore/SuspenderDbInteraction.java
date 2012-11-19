@@ -1,9 +1,9 @@
 package ru.kwanza.jeda.core.pendingstore;
 
-import ru.kwanza.dbtool.DBTool;
-import ru.kwanza.dbtool.FieldSetter;
-import ru.kwanza.dbtool.UpdateException;
-import ru.kwanza.dbtool.UpdateSetter;
+import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.FieldSetter;
+import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.txn.api.Transactional;
 import ru.kwanza.txn.api.TransactionalType;

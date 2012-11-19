@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context;
 
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.IContext;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 

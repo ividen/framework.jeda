@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.context.jdbc;
 
-import ru.kwanza.dbtool.DBTool;
-import ru.kwanza.dbtool.UpdateException;
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.ContextStoreException;
 import ru.kwanza.jeda.api.IContext;
 import ru.kwanza.jeda.api.IContextController;

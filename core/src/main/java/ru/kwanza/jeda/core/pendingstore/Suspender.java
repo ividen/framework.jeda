@@ -2,7 +2,7 @@ package ru.kwanza.jeda.core.pendingstore;
 
 import ru.kwanza.autokey.api.AutoKeyValueSequence;
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.UpdateException;
+import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.ISuspender;

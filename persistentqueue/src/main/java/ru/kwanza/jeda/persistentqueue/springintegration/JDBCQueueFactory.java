@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.DBTool;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;
 import ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController;

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.DBTool;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.berkeley;
 
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.ContextStoreException;
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.context.MapContextImpl;

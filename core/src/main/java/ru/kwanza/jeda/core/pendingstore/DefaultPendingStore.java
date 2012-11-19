@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.pendingstore;
 
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.*;
+import ru.kwanza.dbtool.core.*;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.helper.SinkResolver;
 import ru.kwanza.toolbox.SerializationHelper;

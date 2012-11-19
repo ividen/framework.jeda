@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;

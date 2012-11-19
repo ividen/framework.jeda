@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.manager;
 
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.DBTool;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ISystemManager;

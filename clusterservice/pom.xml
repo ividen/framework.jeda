@@ -61,7 +61,7 @@
 
         <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
-            <artifactId>dbtool</artifactId>
+            <artifactId>dbtool-core</artifactId>
             <scope>test</scope>
         </dependency>
 

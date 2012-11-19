@@ -2,10 +2,10 @@ package ru.kwanza.jeda.timer.jdbc;
 
 import ru.kwanza.autokey.api.AutoKeyValueSequence;
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.DBTool;
-import ru.kwanza.dbtool.UpdateException;
-import ru.kwanza.dbtool.UpdateSetter;
-import ru.kwanza.dbtool.lock.AppLock;
+import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.UpdateException;
+import ru.kwanza.dbtool.core.UpdateSetter;
+import ru.kwanza.dbtool.core.lock.AppLock;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.TimerItem;
 import ru.kwanza.jeda.clusterservice.ClusterService;
