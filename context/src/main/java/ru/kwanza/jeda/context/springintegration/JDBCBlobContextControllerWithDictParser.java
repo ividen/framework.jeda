@@ -50,8 +50,8 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
         addSimplePropertyValue(definitionBuilder, element, TERMINATOR_COLUMN_NAME);
         addSimplePropertyValue(definitionBuilder, element, CONTEXT_DATA_COLUMN_NAME);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                JDBCBlobContextControllerWithDictionary.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), JDBCBlobContextControllerWithDictionary.class, element,
+                parserContext);
     }
 
 

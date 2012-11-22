@@ -48,8 +48,7 @@ class HttpServerParser extends JedaBeanDefinitionParser {
 
         definitionBuilder.setInitMethodName("init");
         definitionBuilder.setDestroyMethodName("destroy");
-        JedaBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IHttpServer.class, element, parserContext);
+        JedaBeanDefinition result = createJedaDefinition(definitionBuilder.getBeanDefinition(), IHttpServer.class, element, parserContext);
 
         for (Element e : childElements) {
             String namespaceURI = e.getNamespaceURI();

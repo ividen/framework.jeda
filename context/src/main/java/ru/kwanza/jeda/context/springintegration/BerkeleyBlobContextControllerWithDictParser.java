@@ -39,8 +39,7 @@ public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobCon
 
         setSimplePropertyValue(definitionBuilder, element, TERMINATOR);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                BerkeleyBlobContextController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), BerkeleyBlobContextController.class, element, parserContext);
     }
 
 }

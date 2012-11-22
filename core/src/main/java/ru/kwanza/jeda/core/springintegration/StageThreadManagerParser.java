@@ -32,8 +32,7 @@ class StageThreadManagerParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("maxSingleEventAttempt", maxSingleEventAttempt);
         }
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IThreadManager.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IThreadManager.class, element, parserContext);
     }
 }
 

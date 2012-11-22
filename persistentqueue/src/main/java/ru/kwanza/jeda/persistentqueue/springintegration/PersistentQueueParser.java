@@ -56,8 +56,7 @@ class PersistentQueueParser extends JedaBeanDefinitionParser {
         }
 
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IQueue.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
 
     }
 }

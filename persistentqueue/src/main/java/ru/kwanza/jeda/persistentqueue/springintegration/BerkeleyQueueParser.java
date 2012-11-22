@@ -26,6 +26,6 @@ class BerkeleyQueueParser extends JedaBeanDefinitionParser {
         definitionBuilder.addPropertyReference("manager", ISystemManager.class.getName());
 
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
     }
 }

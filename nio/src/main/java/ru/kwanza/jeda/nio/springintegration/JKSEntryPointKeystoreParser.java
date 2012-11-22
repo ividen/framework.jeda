@@ -23,7 +23,6 @@ class JKSEntryPointKeystoreParser extends JedaBeanDefinitionParser {
         String keystorePassword = element.getAttribute("keystorePassword");
         definitionBuilder.addConstructorArgValue(keystorePassword);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IEntryPointKeystore.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IEntryPointKeystore.class, element, parserContext);
     }
 }

@@ -44,8 +44,7 @@ class JDBCObjectContextControllerParser extends AbstractJDBCContextControllerPar
         addSimplePropertyValue(definitionBuilder, element, TERMINATOR_COLUMN_NAME);
 
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                JDBCObjectContextController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), JDBCObjectContextController.class, element, parserContext);
     }
 
 }

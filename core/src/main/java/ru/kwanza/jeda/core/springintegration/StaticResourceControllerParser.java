@@ -35,7 +35,6 @@ class StaticResourceControllerParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("adjustmentInterval", adjustmentInterval);
         }
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IResourceController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IResourceController.class, element, parserContext);
     }
 }

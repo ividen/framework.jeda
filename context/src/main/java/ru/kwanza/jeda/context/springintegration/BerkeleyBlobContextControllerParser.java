@@ -38,8 +38,7 @@ class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
 
         setSimplePropertyValue(definitionBuilder, element, TERMINATOR);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                BerkeleyBlobContextController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), BerkeleyBlobContextController.class, element, parserContext);
     }
 
     protected void setSimplePropertyValue(BeanDefinitionBuilder definitionBuilder, Element element, String propName) {
