@@ -32,7 +32,7 @@ public class TestSpringIntegrationExplicitPropSet extends TestCase {
 
 //    <jeda-context:jdbc-blob-context-controller
 //            tableName="table_name" terminator="termName" idColumnName="id" versionColumnName="version"
-//    terminatorColumnName="terminator" dbTool="dbhelper.DBTool" versionGenerator="dbhelper.VersionGenerator"/>
+//    terminatorColumnName="terminator" dbTool="dbtool.DBTool" versionGenerator="dbtool.VersionGenerator"/>
 //    public void testJDBCBlobContextControllerSpringInt() throws Exception {
 //        JDBCBlobContextController ctxController = (JDBCBlobContextController)manager.getContextController(JDBC_BLOB_CONTEXT_CONTROLLER_BEAN);
 //        Assert.assertEquals("table_name", ctxController.getTableName());
@@ -40,7 +40,7 @@ public class TestSpringIntegrationExplicitPropSet extends TestCase {
 //        Assert.assertEquals("id", ctxController.getIdColumnName());
 //        Assert.assertEquals("version", ctxController.getVersionColumnName());
 //        Assert.assertEquals("terminator", ctxController.getTerminatorColumnName());
-//        Assert.assertNotNull(ctxController.getDbHelper());
+//        Assert.assertNotNull(ctxController.getDbTool());
 //        Assert.assertNotNull(ctxController.getVersionGenerator());
 //    }
 

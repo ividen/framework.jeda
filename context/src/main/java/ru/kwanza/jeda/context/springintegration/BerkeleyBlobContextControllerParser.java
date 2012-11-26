@@ -33,7 +33,7 @@ class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
         if (StringUtils.hasText(versionGenerator)) {
             definitionBuilder.addPropertyReference(VERSION_GENERATOR, versionGenerator);
         } else {
-            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbhelper.VersionGenerator");
+            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbtool.VersionGenerator");
         }
 
         setSimplePropertyValue(definitionBuilder, element, TERMINATOR);
