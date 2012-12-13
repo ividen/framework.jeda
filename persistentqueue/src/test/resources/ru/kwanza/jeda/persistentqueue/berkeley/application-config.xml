@@ -9,6 +9,7 @@
                http://www.intervale.ru/schema/jeda-persistentqueue http://www.intervale.ru/schema/jeda-persistentqueue.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:autokey-mock-config.xml"/>
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:jeda-clusterservice-mock-config.xml"/>

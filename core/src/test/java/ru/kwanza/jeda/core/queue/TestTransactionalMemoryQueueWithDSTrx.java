@@ -1,124 +1,30 @@
 package ru.kwanza.jeda.core.queue;
 
-import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.*;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.internal.*;
 
-import javax.transaction.*;
-import javax.transaction.xa.XAResource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
+public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
     protected ISystemManager manager;
+    private ClassPathXmlApplicationContext context;
 
-    public static class StubTransaction implements Transaction {
-        private ArrayList<Synchronization> sync = new ArrayList<Synchronization>();
-
-
-        public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException, SecurityException, IllegalStateException, SystemException {
-            for (Synchronization s : sync) {
-                s.beforeCompletion();
-                s.afterCompletion(Status.STATUS_COMMITTED);
-            }
-        }
-
-        public boolean delistResource(XAResource xaResource, int i) throws IllegalStateException, SystemException {
-            return false;
-        }
-
-        public boolean enlistResource(XAResource xaResource) throws RollbackException, IllegalStateException, SystemException {
-            return false;
-        }
-
-        public int getStatus() throws SystemException {
-            return 0;
-        }
-
-        public void registerSynchronization(Synchronization synchronization) throws RollbackException, IllegalStateException, SystemException {
-            sync.add(synchronization);
-        }
-
-        public void rollback() throws IllegalStateException, SystemException {
-            for (Synchronization s : sync) {
-                s.beforeCompletion();
-                s.afterCompletion(Status.STATUS_ROLLEDBACK);
-            }
-        }
-
-        public void setRollbackOnly() throws IllegalStateException, SystemException {
-        }
-    }
-
-    public static class StubTM implements ITransactionManagerInternal {
-        StubTransaction currentTx;
-        LinkedList<StubTransaction> txs = new LinkedList<StubTransaction>();
-
-
-        public boolean hasTransaction() {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void begin() {
-            synchronized (this) {
-                currentTx = new StubTransaction();
-                txs.add(currentTx);
-            }
-        }
-
-        public void commit() {
-            synchronized (this) {
-                try {
-                    currentTx.commit();
-                    iterateTx();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        public void rollback() {
-            synchronized (this) {
-                try {
-                    currentTx.rollback();
-                    iterateTx();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        public Transaction getTransaction() {
-            return currentTx;
-        }
-
-        public void suspend() {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void resume() {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void rollbackAllActive() {
-
-        }
-
-        private void iterateTx() {
-            txs.removeLast();
-            if (!txs.isEmpty()) {
-                currentTx = txs.getLast();
-            } else {
-                currentTx = null;
-            }
-        }
-    }
 
     public static class StubSystemManager implements ISystemManager {
-        StubTM tm = new StubTM();
+      private ITransactionManagerInternal tm;
+
+        public StubSystemManager(ITransactionManagerInternal tm) {
+            this.tm = tm;
+        }
 
         public ITransactionManagerInternal getTransactionManager() {
             return tm;
@@ -184,73 +90,40 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     }
 
     public static TestSuite suite() {
-        return new TestSuite(TestPriorityTransactionalMemoryQueueWithStubTrx.class);
+        return new TestSuite(TestTransactionalMemoryQueueWithDSTrx.class);
     }
 
     public void setUp() throws Exception {
-        manager = new StubSystemManager();
+        context = new ClassPathXmlApplicationContext(getContextPath(),TestTransactionalMemoryQueueWithDSTrx.class);
+        manager = new StubSystemManager((ITransactionManagerInternal) context.getBean("transactionManager"));
+    }
+
+    public String getContextPath() {
+        return "application-context-ds.xml";
     }
 
     public void tearDown() throws Exception {
+        context.close();
     }
-
-    public void testAllPriority() throws SinkException, SourceException {
-        IQueue queue = createQueue();
-        manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", IPriorityEvent.Priority.LOW)}));
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", IPriorityEvent.Priority.NORMAL)}));
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", IPriorityEvent.Priority.HIGH)}));
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", IPriorityEvent.Priority.HIGHEST)}));
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", IPriorityEvent.Priority.CRITICAL)}));
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        Collection<PriorityEvent> events = queue.take(10);
-        assertEquals("WrongSize", 5, events.size());
-        Iterator<PriorityEvent> iterator = events.iterator();
-        assertEquals("Wrong Priority", IPriorityEvent.Priority.CRITICAL, iterator.next().getPriority());
-        assertEquals("Wrong Priority", IPriorityEvent.Priority.HIGHEST, iterator.next().getPriority());
-        assertEquals("Wrong Priority", IPriorityEvent.Priority.HIGH, iterator.next().getPriority());
-        assertEquals("Wrong Priority", IPriorityEvent.Priority.NORMAL, iterator.next().getPriority());
-        assertEquals("Wrong Priority", IPriorityEvent.Priority.LOW, iterator.next().getPriority());
-        manager.getTransactionManager().commit();
-
-        manager.getTransactionManager().begin();
-        assertNull("Must be empty", queue.take(1));
-        manager.getTransactionManager().commit();
-    }
-
     public void testClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9")})));
 
 
         manager.getTransactionManager().begin();
 
-        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})).size());
+        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().commit();
@@ -263,21 +136,21 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9")})));
 
 
         manager.getTransactionManager().begin();
 
-        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})).size());
+        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().rollback();
@@ -290,21 +163,21 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9")})));
 
 
         manager.getTransactionManager().begin();
 
-        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})).size());
+        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().rollback();
@@ -317,19 +190,19 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9")})));
 
 
-        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})).size());
+        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().commit();
@@ -340,21 +213,21 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9")})));
 
         manager.getTransactionManager().commit();
         manager.getTransactionManager().begin();
 
-        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})).size());
+        assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})).size());
 
         assertEquals("Sink size", 9, queue.size());
         manager.getTransactionManager().commit();
@@ -364,23 +237,23 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
 
         manager.getTransactionManager().rollback();
         manager.getTransactionManager().begin();
 
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})));
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().commit();
@@ -390,23 +263,23 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
 
         manager.getTransactionManager().rollback();
         manager.getTransactionManager().begin();
 
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("11")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("11")})));
 
         assertEquals("Sink size", 0, queue.size());
         manager.getTransactionManager().rollback();
@@ -416,47 +289,57 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testEmptyPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{}));
+        queue.put(Arrays.asList(new IEvent[]{}));
         assertEquals("Wrong queue size", 0, queue.size());
-        assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testEmptyPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{}));
+        queue.put(Arrays.asList(new IEvent[]{}));
         assertEquals("Wrong queue size", 0, queue.size());
-        assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testEmptyTryPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{})));
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testEmptyTryPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{})));
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testMaxSize() {
-        PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(manager);
+        TransactionalMemoryQueue memoryQueue = new TransactionalMemoryQueue(manager);
         assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
@@ -474,21 +357,21 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertNotNull("Must be NOT null", queue.getObserver());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("7"),
-                    new PriorityEvent("7"),
-                    new PriorityEvent("9"),
-                    new PriorityEvent("10"),
-                    new PriorityEvent("11")
+            queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                    new Event("7"),
+                    new Event("9"),
+                    new Event("10"),
+                    new Event("11")
             }));
         } catch (SinkException.Clogged e) {
         }
@@ -496,11 +379,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
 
 
         manager.getTransactionManager().begin();
-        assertEquals("Wrong decline size", 1, queue.tryPut(Arrays.asList(new IEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("7"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10"),
-                new PriorityEvent("11")
+        assertEquals("Wrong decline size", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("7"),
+                new Event("9"),
+                new Event("10"),
+                new Event("11")
         })).size());
         manager.getTransactionManager().commit();
 
@@ -538,11 +421,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
 
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("7"),
-                    new PriorityEvent("7"),
-                    new PriorityEvent("9"),
-                    new PriorityEvent("10"),
-                    new PriorityEvent("11")
+            queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                    new Event("7"),
+                    new Event("9"),
+                    new Event("10"),
+                    new Event("11")
             }));
         } catch (SinkException.Clogged e) {
         }
@@ -557,388 +440,434 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     }
 
     public void testPutCommit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        IQueue<Event> queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new PriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new Event[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         int i = 0;
-        Collection<PriorityEvent> events = queue.take(1000);
+        Collection<Event> events = queue.take(1000);
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         assertEquals("Wrong events count", 6, events.size());
-        for (PriorityEvent e : events) {
+        for (Event e : events) {
             i++;
             assertEquals(String.valueOf(i), e.getContextId());
         }
     }
 
     public void testPutPutCommit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")
         }));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         int i = 0;
-        Collection<PriorityEvent> events = queue.take(1000);
+        Collection<Event> events = queue.take(1000);
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         assertEquals("Wrong events count", 10, events.size());
-        for (PriorityEvent e : events) {
+        for (Event e : events) {
             i++;
             assertEquals(String.valueOf(i), e.getContextId());
         }
     }
 
     public void testPutPutRollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testPutRollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 4, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 4, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
     }
 
     public void testPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testSinkExceptionClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                    new PriorityEvent("11")}));
+            queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                    new Event("11")}));
             fail("Must be SinkException.Clogged");
         } catch (SinkException.Clogged e) {
         }
         assertEquals("Sink size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Sink size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
         manager.getTransactionManager().commit();
         assertEquals("Sink size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testSinkExceptionClogged_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         try {
-            queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                    new PriorityEvent("11")}));
+            queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                    new Event("11")}));
             fail("Must be SinkException.Clogged");
         } catch (SinkException.Clogged e) {
         }
 
         assertEquals("Sink size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Sink size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testSinkExceptionClogged_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         manager.getTransactionManager().commit();
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                    new PriorityEvent("11")}));
+            queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                    new Event("11")}));
             fail("Must be SinkException.Clogged");
         } catch (SinkException.Clogged e) {
         }
 
         assertEquals("Sink size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Sink size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().rollback();
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                    new PriorityEvent("11")}));
+            queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                    new Event("11")}));
         } catch (SinkException.Clogged e) {
             fail("Must NOT  be SinkException.Clogged");
         }
         assertEquals("Sink size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 2, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Sink size", 2, queue.size());
+        assertEquals("WrongEstimateQueueSize", 2, queue.getEstimatedCount());
     }
 
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().rollback();
         manager.getTransactionManager().begin();
         try {
-            queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                    new PriorityEvent("11")}));
+            queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                    new Event("11")}));
         } catch (SinkException.Clogged e) {
             fail("Must NOT  be SinkException.Clogged");
         }
@@ -950,16 +879,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -981,16 +910,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Begin_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1012,16 +941,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1043,16 +972,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1073,16 +1002,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1103,16 +1032,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeBegin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1133,16 +1062,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1156,16 +1085,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1179,16 +1108,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1205,16 +1134,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void testTakeTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         manager.getTransactionManager().commit();
 
         manager.getTransactionManager().begin();
@@ -1228,269 +1157,364 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
-    public void testTryPutCommit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+    public void testTakeZero() throws SourceException, SinkException {
+        IQueue queue = createQueue();
+
+        assertEquals("WrongQueueSize", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")}));
+        assertEquals("WrongQueueSize", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
+        manager.getTransactionManager().commit();
+
+        manager.getTransactionManager().begin();
+        assertNull("Zero take ", queue.take(0));
+        assertEquals("WrongQueueSize", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
+        manager.getTransactionManager().commit();
+
+        assertEquals("WrongQueueSize", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
+    }
+
+    public void testTryPutCommit() throws SinkException, SourceException {
+        TransactionalMemoryQueue queue = createQueue();
+        manager.getTransactionManager().begin();
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         int i = 0;
-        Collection<PriorityEvent> events = queue.take(1000);
+        Collection<Event> events = queue.take(1000);
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         assertEquals("Wrong events count", 6, events.size());
-        for (PriorityEvent e : events) {
+        for (Event e : events) {
             i++;
             assertEquals(String.valueOf(i), e.getContextId());
         }
     }
 
-    public void testTryPutPutCommit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+    public void testTryPutInterrupt() throws SourceException, SinkException {
+        IQueue queue = createQueue();
+
+        assertEquals("WrongQueueSize", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        Thread.currentThread().interrupt();
+        try {
+            try {
+                queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                        new Event("2"),
+                        new Event("3"),
+                        new Event("4"),
+                        new Event("5"),
+                        new Event("6")}));
+                fail("MUstbe SinkClosed");
+                manager.getTransactionManager().commit();
+            } catch (SinkException.Closed e) {
+                assertEquals("WrongQueueSize", 0, queue.size());
+                assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
+                manager.getTransactionManager().rollback();
+            }
+        } catch (Throwable e) {
+            assertEquals("WrongQueueSize", 0, queue.size());
+            assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
+            manager.getTransactionManager().rollback();
+        }
+
+        assertEquals("WrongQueueSize", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
+    }
+
+    public void testTryPutPutCommit() throws SinkException, SourceException {
+        TransactionalMemoryQueue queue = createQueue();
+        manager.getTransactionManager().begin();
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")
         })));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         int i = 0;
-        Collection<PriorityEvent> events = queue.take(1000);
+        Collection<Event> events = queue.take(1000);
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
         assertEquals("Wrong events count", 10, events.size());
-        for (PriorityEvent e : events) {
+        for (Event e : events) {
             i++;
             assertEquals(String.valueOf(i), e.getContextId());
         }
     }
 
     public void testTryPutPutRollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testTryPutRollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 4, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 6, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 10, queue.size());
+        assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
         manager.getTransactionManager().commit();
         assertEquals("Wrong queue size", 4, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
     }
 
     public void testTryPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
-        PriorityTransactionalMemoryQueue queue = createQueue();
+        TransactionalMemoryQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
         manager.getTransactionManager().begin();
-        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")})));
+        assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")})));
 
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
         manager.getTransactionManager().rollback();
         assertEquals("Wrong queue size", 0, queue.size());
+        assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
     public void test_2_Queue_Put_Commit() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
         manager.getTransactionManager().begin();
-        queue1.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
-        queue2.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7")}));
+        queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
+        queue2.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
         manager.getTransactionManager().commit();
@@ -1502,13 +1526,13 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
         manager.getTransactionManager().begin();
-        queue1.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
-        queue2.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7")}));
+        queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
+        queue2.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
         manager.getTransactionManager().rollback();
@@ -1520,13 +1544,13 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
         manager.getTransactionManager().begin();
-        queue1.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
-        queue2.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7")}));
+        queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
+        queue2.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
         manager.getTransactionManager().commit();
@@ -1549,13 +1573,13 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
         manager.getTransactionManager().begin();
-        queue1.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
-        queue2.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7")}));
+        queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
+        queue2.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
         manager.getTransactionManager().commit();
@@ -1577,16 +1601,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Begin_Take_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         manager.getTransactionManager().begin();
         Collection c = queue.take(100);
@@ -1601,16 +1625,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Begin_Take_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         manager.getTransactionManager().begin();
         Collection c = queue.take(100);
@@ -1625,16 +1649,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Begin_Take_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         manager.getTransactionManager().begin();
         Collection c = queue.take(100);
@@ -1649,16 +1673,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Commit_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
         manager.getTransactionManager().commit();
@@ -1675,16 +1699,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Commit_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
         manager.getTransactionManager().commit();
@@ -1701,16 +1725,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Rollback_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
         manager.getTransactionManager().rollback();
@@ -1727,16 +1751,16 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Put_Rollback_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5"),
-                new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5"),
+                new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
         manager.getTransactionManager().rollback();
@@ -1753,11 +1777,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Begin_Put_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1767,11 +1791,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Queue size", 5, queue.size());
 
         manager.getTransactionManager().begin();
-        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10"), new PriorityEvent("11")})).size());
+        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
         manager.getTransactionManager().commit();
@@ -1783,11 +1807,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Begin_Put_Commit_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1797,11 +1821,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Queue size", 5, queue.size());
 
         manager.getTransactionManager().begin();
-        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10"), new PriorityEvent("11")})).size());
+        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
         manager.getTransactionManager().commit();
@@ -1813,11 +1837,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Begin_Put_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1827,11 +1851,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Queue size", 5, queue.size());
 
         manager.getTransactionManager().begin();
-        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10"), new PriorityEvent("11")})).size());
+        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
         manager.getTransactionManager().rollback();
@@ -1843,11 +1867,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Begin_Put_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1857,11 +1881,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Queue size", 5, queue.size());
 
         manager.getTransactionManager().begin();
-        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10"), new PriorityEvent("11")})).size());
+        assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
         manager.getTransactionManager().rollback();
@@ -1873,11 +1897,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Commit_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1889,11 +1913,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Qeuue size", 3, queue.size());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         assertEquals("Queue size", 3, queue.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 8, queue.size());
@@ -1902,11 +1926,11 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
     public void test_Begin_Take_Rollback_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("1"),
-                new PriorityEvent("2"),
-                new PriorityEvent("3"),
-                new PriorityEvent("4"),
-                new PriorityEvent("5")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("1"),
+                new Event("2"),
+                new Event("3"),
+                new Event("4"),
+                new Event("5")}));
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 5, queue.size());
 
@@ -1918,22 +1942,22 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         assertEquals("Qeuue size", 5, queue.size());
 
         manager.getTransactionManager().begin();
-        queue.put(Arrays.asList(new IPriorityEvent[]{new PriorityEvent("6"),
-                new PriorityEvent("7"),
-                new PriorityEvent("8"),
-                new PriorityEvent("9"),
-                new PriorityEvent("10")}));
+        queue.put(Arrays.asList(new IEvent[]{new Event("6"),
+                new Event("7"),
+                new Event("8"),
+                new Event("9"),
+                new Event("10")}));
         assertEquals("Queue size", 5, queue.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 10, queue.size());
     }
 
     public void test_Clone_Copy() throws SinkException, SourceException {
-        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
+        IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
 
         manager.getTransactionManager().begin();
-        PriorityEvent event = new PriorityEvent("1");
-        queue1.put(Arrays.asList(new IPriorityEvent[]{event}));
+        Event event = new Event("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 1, queue1.size());
@@ -1943,18 +1967,18 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
 
-        PriorityEvent event_copy = (PriorityEvent) take.iterator().next();
+        Event event_copy = (Event) take.iterator().next();
 
         assertEquals("Reference equal", event, event_copy);
         manager.getTransactionManager().commit();
     }
 
     public void test_Non_Clone_Copy() throws SinkException, SourceException {
-        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
+        IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
 
         manager.getTransactionManager().begin();
-        NonSerializablePriorityEvent event = new NonSerializablePriorityEvent("1");
-        queue1.put(Arrays.asList(new IPriorityEvent[]{event}));
+        NonSerializableEvent event = new NonSerializableEvent("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 1, queue1.size());
@@ -1964,7 +1988,7 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
 
-        NonSerializablePriorityEvent event_copy = (NonSerializablePriorityEvent) take.iterator().next();
+        NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
 
         assertTrue("Reference equal", (event == event_copy));
         manager.getTransactionManager().commit();
@@ -1974,8 +1998,8 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         IQueue queue1 = createQueue();
 
         manager.getTransactionManager().begin();
-        NonSerializablePriorityEvent event = new NonSerializablePriorityEvent("1");
-        queue1.put(Arrays.asList(new IPriorityEvent[]{event}));
+        NonSerializableEvent event = new NonSerializableEvent("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 1, queue1.size());
@@ -1990,21 +2014,35 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         manager.getTransactionManager().begin();
 
         take = queue1.take(1);
-        assertEquals("Event count", 1, take.size());
+        assertEquals("Evnt count", 1, take.size());
 
         manager.getTransactionManager().commit();
 
-        NonSerializablePriorityEvent event_copy = (NonSerializablePriorityEvent) take.iterator().next();
+        NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
 
         assertTrue("Reference equal", (event == event_copy));
+    }
+
+    public void test_Put_interrupt_Rollback() throws SinkException, SourceException {
+        IQueue queue = createQueue();
+
+        manager.getTransactionManager().begin();
+        Event event = new Event("1");
+        queue.put(Arrays.asList(new IEvent[]{event}));
+        assertEquals("Queue size", 0, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+        Thread.currentThread().interrupt();
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 0, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
     }
 
     public void test_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 
         manager.getTransactionManager().begin();
-        PriorityEvent event = new PriorityEvent("1");
-        queue1.put(Arrays.asList(new IPriorityEvent[]{event}));
+        Event event = new Event("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
         manager.getTransactionManager().commit();
         assertEquals("Queue size", 1, queue1.size());
@@ -2017,14 +2055,154 @@ public class TestPriorityTransactionalMemoryQueueWithStubTrx extends TestCase {
         manager.getTransactionManager().begin();
         take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
-        PriorityEvent event_copy = (PriorityEvent) take.iterator().next();
+        Event event_copy = (Event) take.iterator().next();
         manager.getTransactionManager().commit();
 
         assertNotSame("Reference must not be equal", event, event_copy);
         assertEquals("Objects equals", event, event_copy);
     }
 
-    protected PriorityTransactionalMemoryQueue createQueue() {
-        return new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.SERIALIZE, 10l);
+    public void test_TakeCLONE_Rollback() throws SinkException, SourceException {
+        IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
+
+        manager.getTransactionManager().begin();
+        Event event = new Event("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
+        assertEquals("Queue size", 0, queue1.size());
+        assertEquals("Queue size", 1, queue1.getEstimatedCount());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue1.size());
+        assertEquals("Queue size", 1, queue1.getEstimatedCount());
+
+        manager.getTransactionManager().begin();
+
+        Collection take = queue1.take(1);
+        assertEquals("Evnt count", 1, take.size());
+
+        Event event_copy = (Event) take.iterator().next();
+
+        assertEquals("Reference equal", event, event_copy);
+        manager.getTransactionManager().rollback();
+
+
+        manager.getTransactionManager().begin();
+
+        take = queue1.take(1);
+        assertEquals("Evnt count", 1, take.size());
+        event_copy = (Event) take.iterator().next();
+
+        assertNotSame("Reference NOT equal", event, event_copy);
+        manager.getTransactionManager().commit();
+    }
+
+    public void test_Take_interrupt_Rollback() throws SinkException, SourceException {
+        IQueue queue = createQueue();
+
+        manager.getTransactionManager().begin();
+        Event event = new Event("1");
+        queue.put(Arrays.asList(new IEvent[]{event}));
+        assertEquals("Queue size", 0, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+
+        manager.getTransactionManager().begin();
+
+        Collection take = queue.take(1);
+        assertEquals("Evnt count", 1, take.size());
+
+        Thread.currentThread().interrupt();
+        manager.getTransactionManager().rollback();
+    }
+
+
+    public void testTxCallback() throws SinkException, SourceException {
+        AbstractTransactionalMemoryQueue queue = createQueue();
+
+        manager.getTransactionManager().begin();
+        Event event = new Event("1");
+        queue.put(Arrays.asList(new IEvent[]{event}));
+        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+            public void beforeCompletion(boolean success) {
+                assertTrue(success);
+            }
+
+            public void afterCompletion(boolean success) {
+                assertTrue(success);
+            }
+        });
+        assertEquals("Queue size", 0, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+
+        manager.getTransactionManager().begin();
+
+        Collection take = queue.take(1);
+        assertEquals("Evnt count", 1, take.size());
+
+        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+            public void beforeCompletion(boolean success) {
+                assertFalse(success);
+            }
+
+            public void afterCompletion(boolean success) {
+                assertFalse(success);
+            }
+        });
+
+        manager.getTransactionManager().rollback();
+    }
+
+    public void testTxCallback_2() throws SinkException, SourceException {
+        AbstractTransactionalMemoryQueue queue = createQueue();
+
+        final AtomicLong beforeCounter = new AtomicLong(0l);
+        final AtomicLong afterCounter = new AtomicLong(0l);
+        manager.getTransactionManager().begin();
+        Event event = new Event("1");
+        queue.put(Arrays.asList(new IEvent[]{event}));
+
+        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+            public void beforeCompletion(boolean success) {
+                assertTrue(success);
+                beforeCounter.incrementAndGet();
+                throw new RuntimeException("Test with Exception");
+            }
+
+            public void afterCompletion(boolean success) {
+                assertTrue(success);
+                afterCounter.incrementAndGet();
+                throw new RuntimeException("Test with Exception");
+            }
+        });
+        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+            public void beforeCompletion(boolean success) {
+                assertTrue(success);
+                beforeCounter.incrementAndGet();
+                throw new RuntimeException("Test with Exception");
+            }
+
+            public void afterCompletion(boolean success) {
+                assertTrue(success);
+                afterCounter.incrementAndGet();
+                throw new RuntimeException("Test with Exception");
+            }
+        });
+        assertEquals("Queue size", 0, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue.size());
+        assertEquals("Queue size", 1, queue.getEstimatedCount());
+
+        assertEquals(beforeCounter.get(), 2l);
+        assertEquals(afterCounter.get(), 2l);
+
+    }
+
+    protected TransactionalMemoryQueue createQueue() {
+        return new TransactionalMemoryQueue(manager, ObjectCloneType.SERIALIZE, 10l);
     }
 }

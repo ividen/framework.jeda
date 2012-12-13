@@ -6,6 +6,7 @@
                http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
     <bean id="jtaTransactionManager"

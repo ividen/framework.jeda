@@ -5,13 +5,15 @@
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <import resource="classpath:txn-jta-config.xml"/>
-    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
-    <import resource="classpath:jeda-context-berkeley-config.xml"/>
-    <import resource="berkeley-blob-context-controller-test-config.xml"/>
+
 
     <bean id="jtaTransactionManager"
           class="com.arjuna.ats.internal.jta.transaction.arjunacore.JBossTransactionManager">
-        <constructor-arg index="0" value="true" type="boolean"/>
+        <constructor-arg index="0" type="boolean" value="true"/>
+    </bean>
+
+    <bean id="transactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager">
+        <constructor-arg ref="txn.ITransactionManager"/>
     </bean>
 
 </beans>

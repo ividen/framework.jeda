@@ -4,9 +4,10 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
+    <import resource="classpath:txn-jta-config.xml"/>
 
     <bean id="baseTransactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager">
-        <constructor-arg ref="jtaTransactionManager"/>
+        <constructor-arg ref="txn.ITransactionManager"/>
     </bean>
 
     <bean id="jtaTransactionManager"

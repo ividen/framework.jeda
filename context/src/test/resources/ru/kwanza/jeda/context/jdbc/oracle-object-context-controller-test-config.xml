@@ -6,7 +6,7 @@
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:autokey-mock-config.xml"/>
-    <import resource="classpath:txn-mock-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
 
     <bean id="versionGenerator" class="ru.kwanza.dbtool.core.VersionGenerator"/>
 

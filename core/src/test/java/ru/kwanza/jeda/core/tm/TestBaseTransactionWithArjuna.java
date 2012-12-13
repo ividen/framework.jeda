@@ -7,14 +7,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestBaseTransactionWithArjuna extends TestBaseTransactionManager {
 
-    public void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext("application-context-arjuna.xml", TestBaseTransactionManager.class);
-
-        tm = (BaseTransactionManager) ctx.getBean("baseTransactionManager");
-        jtaTM = (javax.transaction.TransactionManager) ctx.getBean("jtaTransactionManager");
-    }
-
-    public void tearDown() throws Exception {
-
+    @Override
+    protected String getContextPath() {
+        return "application-context-arjuna.xml";  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

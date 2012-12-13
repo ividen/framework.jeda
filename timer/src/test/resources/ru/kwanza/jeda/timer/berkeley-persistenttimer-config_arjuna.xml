@@ -7,6 +7,7 @@
 
     <import resource="berkeley-persistenttimer-config.xml"/>
 
+
     <bean id="jtaTransactionManager"
           class="com.arjuna.ats.internal.jta.transaction.arjunacore.JBossTransactionManager">
         <constructor-arg index="0" type="boolean" value="true"/>

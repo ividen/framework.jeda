@@ -7,6 +7,7 @@
 
 
     <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
     <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
 

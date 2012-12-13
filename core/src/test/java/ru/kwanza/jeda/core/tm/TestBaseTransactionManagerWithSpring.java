@@ -6,12 +6,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import javax.transaction.TransactionManager;
 
 /**
- * @author Guzanov Alexander
+ * @author Alexander Guzanov
  */
-public class TestBaseTransactionManagerWithAtomikos extends TestBaseTransactionManager {
+public class TestBaseTransactionManagerWithSpring extends TestBaseTransactionManager {
 
-    public String getContextPath() {
-        return "application-context-atomikos.xml";
+    @Override
+    protected String getContextPath() {
+        return "application-context-ds.xml";
     }
 
 }

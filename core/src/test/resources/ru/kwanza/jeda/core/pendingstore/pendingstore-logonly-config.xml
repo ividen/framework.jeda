@@ -6,16 +6,12 @@
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
         http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
+    <import resource="classpath:txn-ds-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
     <jeda-core:flow-bus name="TestFlowBus1" class="ru.kwanza.jeda.core.pendingstore.env.TestFlowBus1"/>
 
-    <bean id="jtaTransactionManager"
-          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
-          init-method="init" destroy-method="close">
-        <property name="forceShutdown" value="true"/>
-    </bean>
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${dbunit.driverClass}"/>

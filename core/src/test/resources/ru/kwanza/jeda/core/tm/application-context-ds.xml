@@ -5,12 +5,10 @@
         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <import resource="classpath:txn-ds-config.xml"/>
-    <import resource="classpath:jeda-core-config.xml"/>
-    <import resource="classpath:pendingstore-logonly-config.xml"/>
-    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
-    <import resource="classpath:jeda-context-jdbc-config.xml"/>
-    <import resource="classpath:dbtool-config.xml"/>
-    <import resource="classpath:autokey-mock-config.xml"/>
+
+    <bean id="baseTransactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager">
+        <constructor-arg ref="txn.ITransactionManager"/>
+    </bean>
 
 
     <bean id="propertyPlaceholderConfigurer1"
@@ -22,11 +20,17 @@
         </property>
     </bean>
 
+
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${dbunit.driverClass}"/>
         <property name="url" value="${dbunit.connectionUrl}"/>
         <property name="username" value="${dbunit.username}"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive"  value="50"/>
+        <property name="maxIdle" value="50"/>
         <property name="password" value="${dbunit.password}"/>
     </bean>
+
+    <bean id="testTxnBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>
 
 </beans>

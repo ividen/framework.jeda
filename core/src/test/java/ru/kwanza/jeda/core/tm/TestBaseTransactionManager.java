@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.core.tm;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ISystemManager;
@@ -8,7 +9,7 @@ import ru.kwanza.jeda.core.queue.Event;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import junit.framework.TestCase;
-import org.springframework.context.ApplicationContext;
+import ru.kwanza.txn.impl.TransactionException;
 
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
@@ -20,8 +21,20 @@ import java.util.Collections;
 public abstract class TestBaseTransactionManager extends TestCase {
     protected TransactionManager jtaTM;
     protected BaseTransactionManager tm;
-    protected ApplicationContext ctx;
+    protected ClassPathXmlApplicationContext ctx;
 
+    public void setUp() throws Exception {
+        ctx = new ClassPathXmlApplicationContext(getContextPath(), TestBaseTransactionManager.class);
+        tm = (BaseTransactionManager) ctx.getBean("baseTransactionManager");
+        jtaTM = (TransactionManager) ctx.getBean("jtaTransactionManager");
+    }
+
+    protected abstract String getContextPath();
+
+    @Override
+    public void tearDown() throws Exception {
+        ctx.close();
+    }
 
     public void testBeginBeginCommitCommit() throws SystemException {
         tm.begin();

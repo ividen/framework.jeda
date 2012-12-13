@@ -8,15 +8,10 @@
 
     <import resource="classpath:autokey-mock-config.xml"/>
     <import resource="classpath:dbtool-config.xml"/>
-    <import resource="classpath:txn-mock-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-jdbc-config.xml"/>
 
-    <bean id="jtaTransactionManager"
-          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
-          init-method="init" destroy-method="close">
-        <property name="forceShutdown" value="true"/>
-    </bean>
 
     <jeda-core:flow-bus name="TestFlowBus1" class="ru.kwanza.jeda.core.pendingstore.env.TestFlowBus1"/>
     <jeda-core:flow-bus name="TestFlowBus2" class="ru.kwanza.jeda.core.pendingstore.env.TestFlowBus2"/>

@@ -8,6 +8,7 @@
                http://www.kwanza-systems.ru/schema/jeda-jeconnection http://www.kwanza-systems.ru/schema/jeda-jeconnection.xsd">
 
     <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
 
