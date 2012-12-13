@@ -35,13 +35,11 @@ public class MockSystemManager implements ISystemManager {
         buses.clear();
         stages.clear();
         timers.clear();
-        MockTransactionManagerInternal.getInstance().rollbackAllActive();
-        MockTransactionManagerInternal.getInstance().clear();
     }
 
 
     public ITransactionManagerInternal getTransactionManager() {
-        return MockTransactionManagerInternal.getInstance();
+        return null;
     }
 
     public MockStage getStage(String name) {

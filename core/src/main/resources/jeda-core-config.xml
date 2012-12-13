@@ -18,8 +18,8 @@
         <property name="pendingStore" ref="pendingStore"/>
     </bean>
 
-    <bean id="transactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager" scope="singleton">
-        <property name="jtaTransactionManager" ref="jtaTransactionManager"/>
+    <bean id="jeda.ITransactionManagerInternal" class="ru.kwanza.jeda.core.tm.BaseTransactionManager" scope="singleton">
+        <constructor-arg ref="txn.ITransactionManager"/>
     </bean>
 
     <bean class="ru.kwanza.jeda.api.Manager" scope="singleton"

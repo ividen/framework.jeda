@@ -47,13 +47,9 @@ public class MockFlowBus implements IFlowBus<IEvent> {
             throw new SinkException("Max size=" + maxSize + "!");
         }
 
-        MockTransactionManagerInternal.MockTx currentTx = MockTransactionManagerInternal.getInstance().getCurrentTx();
-        if (currentTx == null) {
+
             this.events.addAll(events);
             size += events.size();
-        } else {
-            currentTx.getSyncs().add(new MockFlowBusSync(events));
-        }
     }
 
     public Collection<IEvent> tryPut(Collection<IEvent> events) throws SinkException {

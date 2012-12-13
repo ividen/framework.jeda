@@ -40,15 +40,10 @@ public class MockSink implements ISink<IEvent> {
             throw new SinkException.Clogged("Max size=" + maxSize + "!");
         }
 
-        MockTransactionManagerInternal.MockTx currentTx = MockTransactionManagerInternal.getInstance().getCurrentTx();
-        if (currentTx == null) {
             for (IEvent e : events) {
                 add(e);
             }
             size += events.size();
-        } else {
-            currentTx.getSyncs().add(new MockSinkSync(events));
-        }
     }
 
     private void add(IEvent e) {

@@ -202,10 +202,8 @@ public abstract class TestBaseTransactionManager extends TestCase {
         }
 
 
-        assertEquals("Tx count", 50, tm.getTxCount());
         tm.rollbackAllActive();
         assertEquals("QueueSize ", 0, queue.size());
-        assertEquals("Tx count", 0, tm.getTxCount());
     }
 
     public void testSetJtaTransactionManager() throws SystemException {
