@@ -24,7 +24,7 @@
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.DBTool"/>
+                                    <tool:expected-type type="ru.kwanza.dbtool.core.DBTool"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>

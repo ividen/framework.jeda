@@ -11,7 +11,7 @@
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
 
-    <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
+    <bean id="versionGenerator" class="ru.kwanza.dbtool.core.VersionGenerator"/>
 
     <bean id="berkeleyBlobContextController"
           class="ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController">

@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.context.dictionary.dbinteractor;
 
 import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.DBTool;
-import ru.kwanza.dbtool.KeyValue;
+import ru.kwanza.dbtool.core.DBTool;
+import ru.kwanza.dbtool.core.KeyValue;
 import ru.kwanza.jeda.context.MapContextImpl;
 import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import ru.kwanza.txn.api.Transactional;

@@ -40,7 +40,6 @@ class StageParser extends JedaBeanDefinitionParser {
             }
         }
         beanBuilder.build(definitionBuilder);
-        return createFlexFlowDefinition(name, definitionBuilder.getBeanDefinition(), IStage.class,
-                element, parserContext);
+        return createJedaDefinition(name, definitionBuilder.getBeanDefinition(), IStage.class, element, parserContext);
     }
 }

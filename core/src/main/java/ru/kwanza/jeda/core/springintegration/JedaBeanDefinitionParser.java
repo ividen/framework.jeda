@@ -10,22 +10,15 @@ import org.w3c.dom.Element;
  * @author Guzanov Alexander
  */
 public abstract class JedaBeanDefinitionParser extends AbstractBeanDefinitionParser {
-    protected JedaBeanDefinition createFlexFlowDefinition(AbstractBeanDefinition originalDefinition,
-                                                              Class type,
-                                                              Element e,
-                                                              ParserContext parserContext) {
-        String id = generateId(e, parserContext, originalDefinition);
 
-        return createFlexFlowDefinition(id, originalDefinition, type, e, parserContext);
+    protected JedaBeanDefinition createJedaDefinition(AbstractBeanDefinition originalDefinition, Class type, Element e,
+                                                      ParserContext parserContext) {
+        String id = generateId(e, parserContext, originalDefinition);
+        return createJedaDefinition(id, originalDefinition, type, e, parserContext);
     }
 
-
-    protected JedaBeanDefinition createFlexFlowDefinition(String name,
-                                                              AbstractBeanDefinition originalDefinition,
-                                                              Class type,
-                                                              Element e,
-                                                              ParserContext parserContext) {
-
+    protected JedaBeanDefinition createJedaDefinition(String name, AbstractBeanDefinition originalDefinition, Class type, Element e,
+                                                      ParserContext parserContext) {
         return new JedaBeanDefinition(name, type, originalDefinition);
     }
 
@@ -34,11 +27,11 @@ public abstract class JedaBeanDefinitionParser extends AbstractBeanDefinitionPar
     }
 
     @Override
-    protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext) throws BeanDefinitionStoreException {
+    protected String resolveId(Element element, AbstractBeanDefinition definition, ParserContext parserContext)
+            throws BeanDefinitionStoreException {
         if (definition instanceof JedaBeanDefinition) {
             return ((JedaBeanDefinition) definition).getId();
         }
-
         return generateId(element, parserContext, definition);
     }
 

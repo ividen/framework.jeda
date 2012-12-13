@@ -37,7 +37,6 @@ class JEConnectionFactoryParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("lockingTimeout", lockingTimeout);
         }
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), JEConnectionFactory.class, element,
-                parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), JEConnectionFactory.class, element, parserContext);
     }
 }

@@ -352,7 +352,7 @@
 
             <dependency>
                 <groupId>ru.kwanza.dbtool</groupId>
-                <artifactId>dbtool</artifactId>
+                <artifactId>dbtool-core</artifactId>
                 <version>${dbtool.version}</version>
             </dependency>
 

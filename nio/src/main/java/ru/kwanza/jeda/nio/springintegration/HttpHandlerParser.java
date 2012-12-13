@@ -47,8 +47,7 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
             definitionBuilder.addConstructorArgValue(timeout);
         }
 
-        JedaBeanDefinition result = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class,
-                element, parserContext);
+        JedaBeanDefinition result = createJedaDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class, element, parserContext);
 
         String server = element.getAttribute("server");
         String uri = DomUtils.getChildElementValueByTagName(element, "uri");

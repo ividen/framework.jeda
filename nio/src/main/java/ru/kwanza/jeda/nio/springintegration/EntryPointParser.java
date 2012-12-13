@@ -86,7 +86,6 @@ class EntryPointParser extends JedaBeanDefinitionParser {
         }
 
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IEntryPoint.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IEntryPoint.class, element, parserContext);
     }
 }

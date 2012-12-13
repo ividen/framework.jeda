@@ -8,7 +8,7 @@
     <import resource="classpath:autokey-mock-config.xml"/>
     <import resource="classpath:txn-mock-config.xml"/>
 
-    <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
+    <bean id="versionGenerator" class="ru.kwanza.dbtool.core.VersionGenerator"/>
 
     <bean id="jdbcObjectContextController" class="ru.kwanza.jeda.context.jdbc.JDBCObjectContextController">
         <constructor-arg index="0" value="ru.kwanza.jeda.context.TestObject"/>

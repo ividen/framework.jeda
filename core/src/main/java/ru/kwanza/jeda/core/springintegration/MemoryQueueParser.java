@@ -18,6 +18,6 @@ class MemoryQueueParser extends JedaBeanDefinitionParser {
         if (StringUtils.hasText(maxSize)) {
             definitionBuilder.addConstructorArgValue(maxSize);
         }
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
     }
 }

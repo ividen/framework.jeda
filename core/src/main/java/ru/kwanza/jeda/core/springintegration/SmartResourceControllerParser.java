@@ -56,7 +56,6 @@ class SmartResourceControllerParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("maxBatchSize", maxBatchSize);
         }
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IResourceController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IResourceController.class, element, parserContext);
     }
 }

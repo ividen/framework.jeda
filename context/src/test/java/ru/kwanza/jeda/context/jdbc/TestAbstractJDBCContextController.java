@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.jdbc;
 
-import ru.kwanza.dbtool.UpdateException;
+import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.api.ContextStoreException;
 import ru.kwanza.jeda.context.MapContextImpl;
 import junit.framework.Assert;

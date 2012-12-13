@@ -25,8 +25,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(InputRateComparator.class);
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -36,8 +35,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(ThreadCountComparator.class);
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -46,8 +44,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(WaitingTimeComparator.class);
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -62,8 +59,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
                 definitionBuilder.addPropertyValue("maxWaitingTime", maxWaitingTime);
             }
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -77,8 +73,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
                 definitionBuilder.addPropertyValue("maxWaitingTime", maxWaitingTime);
             }
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -87,8 +82,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(QueueSizeComparator.class);
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -97,8 +91,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
             BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                     .genericBeanDefinition(RoundRobinComparator.class);
 
-            return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                    Comparator.class, element, parserContext);
+            return createJedaDefinition(definitionBuilder.getBeanDefinition(), Comparator.class, element, parserContext);
         }
     }
 
@@ -152,7 +145,6 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
         }
 
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IThreadManager.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IThreadManager.class, element, parserContext);
     }
 }

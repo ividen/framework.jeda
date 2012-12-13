@@ -33,14 +33,14 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
         if (StringUtils.hasText(dbTool)) {
             definitionBuilder.addPropertyReference(DBTOOL, dbTool);
         } else {
-            definitionBuilder.addPropertyReference(DBTOOL, "dbhelper.DBTool");
+            definitionBuilder.addPropertyReference(DBTOOL, "dbtool.DBTool");
         }
 
         String versionGenerator = element.getAttribute(VERSION_GENERATOR);
         if (StringUtils.hasText(versionGenerator)) {
             definitionBuilder.addPropertyReference(VERSION_GENERATOR, versionGenerator);
         } else {
-            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbhelper.VersionGenerator");
+            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbtool.VersionGenerator");
         }
 
         addSimplePropertyValue(definitionBuilder, element, TERMINATOR);
@@ -50,8 +50,8 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
         addSimplePropertyValue(definitionBuilder, element, TERMINATOR_COLUMN_NAME);
         addSimplePropertyValue(definitionBuilder, element, CONTEXT_DATA_COLUMN_NAME);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                JDBCBlobContextControllerWithDictionary.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), JDBCBlobContextControllerWithDictionary.class, element,
+                parserContext);
     }
 
 

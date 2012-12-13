@@ -4,7 +4,7 @@ import org.dbunit.database.QueryDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.autokey.mock.MockAutoKeyImpl;
-import ru.kwanza.dbtool.DBTool;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.context.DBUnitUtil;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.DictionaryDbInteractor;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;

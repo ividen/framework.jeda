@@ -34,13 +34,12 @@ public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobCon
         if (StringUtils.hasText(versionGenerator)) {
             definitionBuilder.addPropertyReference(VERSION_GENERATOR, versionGenerator);
         } else {
-            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbhelper.VersionGenerator");
+            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbtool.VersionGenerator");
         }
 
         setSimplePropertyValue(definitionBuilder, element, TERMINATOR);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                BerkeleyBlobContextController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), BerkeleyBlobContextController.class, element, parserContext);
     }
 
 }

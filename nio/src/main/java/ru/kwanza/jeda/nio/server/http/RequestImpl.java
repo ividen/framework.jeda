@@ -40,16 +40,29 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
     private String uri;
     private long timestamp;
 
-    boolean requestParametersParsed = false;
-    boolean cookiesParsed = false;
+    private String remoteAddress;
 
-    final Parameters parameters = new Parameters();
+    private Map<String, String> requestHeaders;
+    private Map<String, String> requestAttributes;
+    private Map<String, String> requestParameters;
+
+    private Parameters internalParameters = new Parameters();
 
     private Collection<Cookie> cookies;
     private Cookies rawCookies;
 
-    RequestImpl(String uri, FilterChainContext context, HttpServer httpServer, EntryPoint entryPoint,
-                HttpContent content, ITimedOutHandler timedOutHandler, long timeout) {
+    private byte[] body;
+
+    private boolean remoteAddressParsed;
+    private boolean internalParametersParsed;
+    private boolean requestParametersParsed;
+    private boolean requestHeadersParsed;
+    private boolean requestAttributesParsed;
+    private boolean cookiesParsed;
+    private boolean bodyParsed;
+
+    RequestImpl(String uri, FilterChainContext context, HttpServer httpServer, EntryPoint entryPoint, HttpContent content,
+                ITimedOutHandler timedOutHandler, long timeout) {
         this.id = new RequestID(httpServer.nextUID(), httpServer.getName());
         this.context = context;
         this.content = content;
@@ -88,15 +101,11 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return timestamp;
     }
 
-    //todo aguzanov кэшировать
     public String getRemoteAddress() {
-        final Connection connection = context != null ? context.getConnection() : null;
-        final Object peerAddress = connection != null ? connection.getPeerAddress() : null;
-        InetSocketAddress inetSocketAddress = null;
-        if (peerAddress instanceof InetSocketAddress) {
-            inetSocketAddress = (InetSocketAddress) peerAddress;
+        if (!remoteAddressParsed) {
+            parseRemoteAddress();
         }
-        return inetSocketAddress != null ? inetSocketAddress.getHostName() : null;
+        return remoteAddress;
     }
 
     public HttpContent getContent() {
@@ -106,22 +115,20 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
     public final boolean finish(HttpPacket result) {
         if (finished) {
             if (HttpServer.logger.isDebugEnabled()) {
-                HttpServer.logger.trace("HttpServer({},{}) : Can't send Response."
-                        + " Asynchronous request(id={},uri={}) is finished already!",
-                        new Object[]{httpServer.getName(), entryPoint.getName(), id, uri});
+                HttpServer.logger
+                        .trace("HttpServer({},{}) : Can't send Response." + " Asynchronous request(id={},uri={}) is finished already!",
+                                new Object[]{httpServer.getName(), entryPoint.getName(), id, uri});
             }
             return false;
         }
         if (HttpServer.logger.isDebugEnabled()) {
             if (HttpServer.logger.isTraceEnabled()) {
-                HttpServer.logger
-                        .trace("HttpServer({},{}) : Response to  Asynchronous request(id={},uri={}) in {}, result: {}",
-                                new Object[]{httpServer.getName(), entryPoint.getName(), id, uri,
-                                        System.currentTimeMillis() - timestamp, TraceUtil.getDescription(result)});
+                HttpServer.logger.trace("HttpServer({},{}) : Response to  Asynchronous request(id={},uri={}) in {}, result: {}",
+                        new Object[]{httpServer.getName(), entryPoint.getName(), id, uri, System.currentTimeMillis() - timestamp,
+                                TraceUtil.getDescription(result)});
             } else {
                 HttpServer.logger.debug("HttpServer({},{}) : Response to  Asynchronous request(id={},uri={}) in {}",
-                        new Object[]{httpServer.getName(), entryPoint.getName(), id, uri,
-                                System.currentTimeMillis() - timestamp});
+                        new Object[]{httpServer.getName(), entryPoint.getName(), id, uri, System.currentTimeMillis() - timestamp});
             }
         }
 
@@ -129,71 +136,60 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return true;
     }
 
-    //todo aguzanov кэшировать
     public Map<String, String> getHeaderMap() {
-        final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
-        final MimeHeaders mimeHeaders = httpHeader != null ? httpHeader.getHeaders() : null;
-        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        if (mimeHeaders != null) {
-            for (String headerName : mimeHeaders.names()) {
-                resultMap.put(headerName, httpHeader.getHeader(headerName));
-            }
+        if (!requestHeadersParsed) {
+            parseRequestHeaders();
         }
-        return Collections.unmodifiableMap(resultMap);
+        return requestHeaders;
     }
 
     public String getHeader(String name) {
-        return getHeaderMap().get(name);
+        if (!requestHeadersParsed) {
+            parseRequestHeaders();
+        }
+        return requestHeaders.get(name);
     }
 
-    // todo aguzanov кэшировать
     public Map<String, String> getAttributeMap() {
-        final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
-        final AttributeHolder attributes = httpHeader != null ? httpHeader.getAttributes() : null;
-        final Set<String> attributeSet = attributes != null ? attributes.getAttributeNames() : null;
-        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        if (attributeSet != null) {
-            for (String attributeName : attributeSet) {
-                resultMap.put(attributeName, attributes.getAttribute(attributeName).toString());
-            }
+        if (!requestAttributesParsed) {
+            parseRequestAttributes();
         }
-        return Collections.unmodifiableMap(resultMap);
+        return requestAttributes;
     }
 
     public String getAttribute(String name) {
-        return getAttributeMap().get(name);
+        if (!requestAttributesParsed) {
+            parseRequestAttributes();
+        }
+        return requestAttributes.get(name);
     }
 
-    //todo aguzanov кэшировать
     public Map<String, String> getParameterMap() {
-        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
-        for (final String name : getParameterNames()) {
-            final String[] values = getParameterValues(name);
-            final String value = values != null ? (values.length == 0 ? "" : values[0]) : null;
-            resultMap.put(name, value);
+        if (!requestParametersParsed) {
+            parseRequestParameters();
         }
-        return Collections.unmodifiableMap(resultMap);
+        return requestParameters;
     }
 
     public String getParameter(String name) {
-        if (!requestParametersParsed) {
-            parseRequestParameters();
+        if (!internalParametersParsed) {
+            parseInternalParameters();
         }
-        return parameters.getParameter(name);
+        return internalParameters.getParameter(name);
     }
 
     private Set<String> getParameterNames() {
-        if (!requestParametersParsed) {
-            parseRequestParameters();
+        if (!internalParametersParsed) {
+            parseInternalParameters();
         }
-        return parameters.getParameterNames();
+        return internalParameters.getParameterNames();
     }
 
     private String[] getParameterValues(String name) {
-        if (!requestParametersParsed) {
-            parseRequestParameters();
+        if (!internalParametersParsed) {
+            parseInternalParameters();
         }
-        return parameters.getParameterValues(name);
+        return internalParameters.getParameterValues(name);
     }
 
     public Collection<Cookie> getCookies() {
@@ -203,17 +199,63 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         return Collections.unmodifiableCollection(cookies);
     }
 
-    //todo aguzanov кэшировать
     public byte[] getBody() {
-        final Buffer contentBuffer = content != null ? content.getContent() : null;
-        final byte[] body = contentBuffer != null ? new byte[contentBuffer.capacity()] : null;
-        if (body != null) {
-            contentBuffer.get(body);
+        if (!bodyParsed) {
+            parseBody();
         }
         return body;
     }
 
+    private void parseRemoteAddress() {
+        final Connection connection = context != null ? context.getConnection() : null;
+        final Object peerAddress = connection != null ? connection.getPeerAddress() : null;
+        InetSocketAddress inetSocketAddress = null;
+        if (peerAddress instanceof InetSocketAddress) {
+            inetSocketAddress = (InetSocketAddress) peerAddress;
+        }
+        remoteAddress = inetSocketAddress != null ? inetSocketAddress.getHostName() : null;
+        remoteAddressParsed = true;
+    }
+
+    private void parseRequestHeaders() {
+        final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
+        final MimeHeaders mimeHeaders = httpHeader != null ? httpHeader.getHeaders() : null;
+        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
+        if (mimeHeaders != null) {
+            for (String headerName : mimeHeaders.names()) {
+                resultMap.put(headerName, httpHeader.getHeader(headerName));
+            }
+        }
+        requestHeaders = Collections.unmodifiableMap(resultMap);
+        requestHeadersParsed = true;
+    }
+
+    private void parseRequestAttributes() {
+        final HttpHeader httpHeader = content != null ? content.getHttpHeader() : null;
+        final AttributeHolder attributes = httpHeader != null ? httpHeader.getAttributes() : null;
+        final Set<String> attributeSet = attributes != null ? attributes.getAttributeNames() : null;
+        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
+        if (attributeSet != null) {
+            for (String attributeName : attributeSet) {
+                resultMap.put(attributeName, attributes.getAttribute(attributeName).toString());
+            }
+        }
+        requestAttributes = Collections.unmodifiableMap(resultMap);
+        requestAttributesParsed = true;
+    }
+
     private void parseRequestParameters() {
+        final Map<String, String> resultMap = new LinkedHashMap<String, String>();
+        for (final String name : getParameterNames()) {
+            final String[] values = getParameterValues(name);
+            final String value = values != null ? (values.length == 0 ? "" : values[0]) : null;
+            resultMap.put(name, value);
+        }
+        requestParameters = Collections.unmodifiableMap(resultMap);
+        requestParametersParsed = true;
+    }
+
+    private void parseInternalParameters() {
         final HttpHeader httpHeader = content.getHttpHeader();
         HttpRequestPacket httpRequestPacket = null;
         if (httpHeader instanceof HttpRequestPacket) {
@@ -221,7 +263,7 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
         }
 
         if (httpRequestPacket != null) {
-            parameters.setQuery(httpRequestPacket.getQueryStringDC());
+            internalParameters.setQuery(httpRequestPacket.getQueryStringDC());
         }
 
         final String encoding = content.getHttpHeader().getCharacterEncoding();
@@ -237,11 +279,11 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
             charset = DEFAULT_HTTP_CHARSET;
         }
 
-        parameters.setHeaders(content.getHttpHeader().getHeaders());
-        parameters.setEncoding(charset);
-        parameters.setQueryStringEncoding(charset);
+        internalParameters.setHeaders(content.getHttpHeader().getHeaders());
+        internalParameters.setEncoding(charset);
+        internalParameters.setQueryStringEncoding(charset);
 
-        parameters.handleQueryParameters();
+        internalParameters.handleQueryParameters();
 
         if (httpRequestPacket != null && !Method.POST.equals(httpRequestPacket.getMethod())) {
             return;
@@ -256,12 +298,12 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
 
             try {
                 final Buffer formData = content.getContent();
-                parameters.processParameters(formData, formData.position(), length);
+                internalParameters.processParameters(formData, formData.position(), length);
             } catch (Exception e) {
                 log.error("Error while processing parameters", e);
             }
         }
-        requestParametersParsed = true;
+        internalParametersParsed = true;
     }
 
     private void parseCookies() {
@@ -277,6 +319,16 @@ final class RequestImpl extends EmptyCompletionHandler<WriteResult> implements I
             rawCookies.setHeaders(content.getHttpHeader().getHeaders());
         }
         return rawCookies;
+    }
+
+    private void parseBody() {
+        final Buffer contentBuffer = content != null ? content.getContent() : null;
+        final byte[] buffer = contentBuffer != null ? new byte[contentBuffer.capacity()] : null;
+        if (buffer != null) {
+            contentBuffer.get(buffer);
+        }
+        body = buffer;
+        bodyParsed = true;
     }
 
     private boolean checkPostContentType(String contentType) {

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.timer;
 
-import ru.kwanza.dbtool.DBTool;
+import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.api.TimerItem;
 import org.springframework.context.ApplicationContext;
 

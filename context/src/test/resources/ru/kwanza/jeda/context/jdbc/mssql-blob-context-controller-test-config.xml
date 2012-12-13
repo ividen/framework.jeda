@@ -9,7 +9,7 @@
     <import resource="classpath:txn-mock-config.xml"/>
     <import resource="classpath:jeda-context-jdbc-config.xml"/>
 
-    <bean id="versionGenerator" class="ru.kwanza.dbtool.VersionGenerator"/>
+    <bean id="versionGenerator" class="ru.kwanza.dbtool.core.VersionGenerator"/>
 
     <bean id="jdbcBlobContextController" class="ru.kwanza.jeda.context.jdbc.JDBCBlobContextController">
         <property name="dbTool" ref="dbtool.DBTool"/>

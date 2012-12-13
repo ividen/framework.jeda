@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.jdbc;
 
-import ru.kwanza.dbtool.*;
+import ru.kwanza.dbtool.core.*;
 import ru.kwanza.jeda.api.ContextStoreException;
 import ru.kwanza.jeda.context.ObjectContext;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;

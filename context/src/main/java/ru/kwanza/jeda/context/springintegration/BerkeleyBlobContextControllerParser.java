@@ -33,13 +33,12 @@ class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
         if (StringUtils.hasText(versionGenerator)) {
             definitionBuilder.addPropertyReference(VERSION_GENERATOR, versionGenerator);
         } else {
-            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbhelper.VersionGenerator");
+            definitionBuilder.addPropertyReference(VERSION_GENERATOR, "dbtool.VersionGenerator");
         }
 
         setSimplePropertyValue(definitionBuilder, element, TERMINATOR);
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                BerkeleyBlobContextController.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), BerkeleyBlobContextController.class, element, parserContext);
     }
 
     protected void setSimplePropertyValue(BeanDefinitionBuilder definitionBuilder, Element element, String propName) {

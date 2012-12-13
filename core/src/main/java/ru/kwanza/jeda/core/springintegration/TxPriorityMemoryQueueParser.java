@@ -38,6 +38,6 @@ class TxPriorityMemoryQueueParser extends JedaBeanDefinitionParser {
             definitionBuilder.addConstructorArgValue(Long.MAX_VALUE);
         }
 
-        return createFlexFlowDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
     }
 }

@@ -48,8 +48,8 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
 
 
         definitionBuilder.setInitMethodName("init");
-        final JedaBeanDefinition originalBean = createFlexFlowDefinition(definitionBuilder.getBeanDefinition(),
-                IFlowBus.class, element, parserContext);
+        final JedaBeanDefinition originalBean = createJedaDefinition(definitionBuilder.getBeanDefinition(), IFlowBus.class, element,
+                parserContext);
 
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(originalBean.getId(), originalBean);
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);

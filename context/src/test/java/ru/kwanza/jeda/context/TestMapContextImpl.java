@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context;
 
-import ru.kwanza.dbtool.VersionGenerator;
+import ru.kwanza.dbtool.core.VersionGenerator;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
