@@ -71,7 +71,7 @@
     </jeda-core:stage>
 
     <jeda-core:stage name="TestStage8" transaction="true">
-        <jeda-core:tx-memory-queue maxSize="1000"/>
+        <jeda-core:tx-memory-queue maxSize="1000" cloneType="NONE"/>
         <jeda-core:smart-resource-controller startBatchSize="1"/>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage8"/>
@@ -87,7 +87,7 @@
     </jeda-core:stage>
 
     <jeda-core:stage name="TestStage10" transaction="true">
-        <jeda-core:tx-priority-memory-queue/>
+        <jeda-core:tx-priority-memory-queue cloneType="NONE"/>
         <jeda-core:static-resource-controller/>
         <jeda-core:event-processor class="ru.kwanza.jeda.core.springintegration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="TestStage10"/>

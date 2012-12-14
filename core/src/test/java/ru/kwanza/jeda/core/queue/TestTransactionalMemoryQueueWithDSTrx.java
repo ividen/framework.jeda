@@ -1994,6 +1994,27 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().commit();
     }
 
+    public void test_Non_Copy() throws SinkException, SourceException {
+        IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10l);
+
+        manager.getTransactionManager().begin();
+        NonSerializableEvent event = new NonSerializableEvent("1");
+        queue1.put(Arrays.asList(new IEvent[]{event}));
+        assertEquals("Queue size", 0, queue1.size());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue1.size());
+
+        manager.getTransactionManager().begin();
+
+        Collection take = queue1.take(1);
+        assertEquals("Evnt count", 1, take.size());
+
+        NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
+
+        assertTrue("Reference equal", (event == event_copy));
+        manager.getTransactionManager().commit();
+    }
+
     public void test_Non_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 

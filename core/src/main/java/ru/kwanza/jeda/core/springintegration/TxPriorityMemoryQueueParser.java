@@ -26,6 +26,8 @@ class TxPriorityMemoryQueueParser extends JedaBeanDefinitionParser {
                 type = ObjectCloneType.SERIALIZE;
             } else if ("CLONE".equals(sType)) {
                 type = ObjectCloneType.CLONE;
+            }else if("NONE".equals(sType)){
+                type = ObjectCloneType.NONE;
             }
         }
 

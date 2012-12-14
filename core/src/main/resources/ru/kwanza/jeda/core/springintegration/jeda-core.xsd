@@ -46,6 +46,7 @@
         <xsd:restriction base="xsd:string">
             <xsd:enumeration value="SERIALIZE"/>
             <xsd:enumeration value="CLONE"/>
+            <xsd:enumeration value="NONE"/>
         </xsd:restriction>
     </xsd:simpleType>
 

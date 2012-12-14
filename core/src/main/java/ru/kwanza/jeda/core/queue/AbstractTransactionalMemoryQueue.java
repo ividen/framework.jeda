@@ -1,12 +1,12 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.transaction.Transaction;
 import java.io.*;
@@ -241,8 +241,10 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
                 try {
                     if (objectCloneType == ObjectCloneType.SERIALIZE) {
                         oos.writeObjectAndCount(event);
-                    } else {
+                    } else if (objectCloneType == ObjectCloneType.CLONE) {
                         tx.logUndoTake((E) event.getClass().getMethod("clone").invoke(event));
+                    } else {
+                        tx.logUndoTake(event);
                     }
                 } catch (Exception e) {
                     if (logger.isWarnEnabled()) {

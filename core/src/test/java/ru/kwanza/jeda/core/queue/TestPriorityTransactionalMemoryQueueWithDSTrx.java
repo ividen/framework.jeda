@@ -1,12 +1,15 @@
 package ru.kwanza.jeda.core.queue;
 
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.*;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * @author Guzanov Alexander
@@ -16,7 +19,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
     private ClassPathXmlApplicationContext context;
 
     public static class StubSystemManager implements ISystemManager {
-               private ITransactionManagerInternal tm;
+        private ITransactionManagerInternal tm;
 
         public StubSystemManager(ITransactionManagerInternal tm) {
             this.tm = tm;
@@ -91,7 +94,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
 
 
     public void setUp() throws Exception {
-        context = new ClassPathXmlApplicationContext(getContextPath(),TestPriorityTransactionalMemoryQueueWithDSTrx.class);
+        context = new ClassPathXmlApplicationContext(getContextPath(), TestPriorityTransactionalMemoryQueueWithDSTrx.class);
         manager = new StubSystemManager((ITransactionManagerInternal) context.getBean("transactionManager"));
     }
 
@@ -1856,6 +1859,28 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         PriorityEvent event_copy = (PriorityEvent) take.iterator().next();
 
         assertEquals("Reference equal", event, event_copy);
+        manager.getTransactionManager().commit();
+    }
+
+
+    public void test_None_Copy() throws SinkException, SourceException {
+        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10l);
+
+        manager.getTransactionManager().begin();
+        PriorityEvent event = new PriorityEvent("1");
+        queue1.put(Arrays.asList(new IPriorityEvent[]{event}));
+        assertEquals("Queue size", 0, queue1.size());
+        manager.getTransactionManager().commit();
+        assertEquals("Queue size", 1, queue1.size());
+
+        manager.getTransactionManager().begin();
+
+        Collection take = queue1.take(1);
+        assertEquals("Evnt count", 1, take.size());
+
+        PriorityEvent event_copy = (PriorityEvent) take.iterator().next();
+
+        assertTrue("Reference equal", event == event_copy);
         manager.getTransactionManager().commit();
     }
 
