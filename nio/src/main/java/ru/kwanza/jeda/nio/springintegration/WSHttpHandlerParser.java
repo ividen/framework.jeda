@@ -1,30 +1,32 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
-import ru.kwanza.jeda.nio.server.http.JedaHttpHandler;
-import ru.kwanza.jeda.nio.server.http.IHttpHandler;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
+import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
+import ru.kwanza.jeda.nio.server.http.IHttpHandler;
+import ru.kwanza.jeda.nio.server.http.JedaHttpHandler;
+import ru.kwanza.jeda.nio.server.http.JedaWSHttpHandler;
 
 /**
- * @author Guzanov Alexander
+ * @author Alexander Guzanov
  */
-class HttpHandlerParser extends JedaBeanDefinitionParser {
+class WSHttpHandlerParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
-                BeanDefinitionBuilder.genericBeanDefinition(JedaHttpHandler.class);
+                BeanDefinitionBuilder.genericBeanDefinition(JedaWSHttpHandler.class);
 
         String stage = DomUtils.getChildElementValueByTagName(element, "stage");
         String flowBus = DomUtils.getChildElementValueByTagName(element, "flowBus");
         String timeout = element.getAttribute("timeout");
         String timedOutHandler = element.getAttribute("timedOutHandler");
+        String wsdl = element.getAttribute("wsdl");
 
         String constructorName = null;
         String paramReference = null;
@@ -45,6 +47,10 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
 
         if (StringUtils.hasText(timeout)) {
             definitionBuilder.addConstructorArgValue(timeout);
+        }
+
+        if(StringUtils.hasText(wsdl)){
+            definitionBuilder.addConstructorArgValue(wsdl);
         }
 
         JedaBeanDefinition result = createJedaDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class, element, parserContext);

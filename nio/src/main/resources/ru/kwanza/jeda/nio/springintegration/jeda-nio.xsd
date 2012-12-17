@@ -54,6 +54,54 @@
         </xsd:complexContent>
     </xsd:complexType>
 
+    <xsd:complexType name="base-http-handler">
+        <xsd:sequence>
+            <xsd:choice minOccurs="1" maxOccurs="1">
+                <xsd:element name="uri" type="xsd:string"/>
+                <xsd:element name="pattern" type="xsd:string"/>
+            </xsd:choice>
+            <xsd:choice minOccurs="1" maxOccurs="1">
+                <xsd:element name="stage" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type type="ru.kwanza.jeda.api.IStage"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+                <xsd:element name="flowBus" type="xsd:string">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <tool:annotation kind="ref">
+                                <tool:expected-type type="ru.kwanza.jeda.api.IFlowBus"/>
+                            </tool:annotation>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:sequence>
+        <xsd:attribute name="server" type="xsd:string">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type type="ru.kwanza.jeda.nio.server.http.IHttpServer"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="timeout" type="xsd:long" use="optional"/>
+        <xsd:attribute name="timedOutHandler" use="optional">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type type="ru.kwanza.jeda.nio.server.http.ITimedOutHandler"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
 
     <xsd:element name="client-transport-flow-bus" substitutionGroup="jeda-core:jeda-flow-bus"
                  type="client-transport-flow-bus-type">
@@ -140,53 +188,17 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="http-handler">
+    <xsd:element name="http-handler" type="base-http-handler">
+    </xsd:element>
+
+    <xsd:element name="ws-http-handler">
         <xsd:complexType>
-            <xsd:sequence>
-                <xsd:choice minOccurs="1" maxOccurs="1">
-                    <xsd:element name="uri" type="xsd:string"/>
-                    <xsd:element name="pattern" type="xsd:string"/>
-                </xsd:choice>
-                <xsd:choice minOccurs="1" maxOccurs="1">
-                    <xsd:element name="stage" type="xsd:string">
-                        <xsd:annotation>
-                            <xsd:appinfo>
-                                <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.jeda.api.IStage"/>
-                                </tool:annotation>
-                            </xsd:appinfo>
-                        </xsd:annotation>
-                    </xsd:element>
-                    <xsd:element name="flowBus" type="xsd:string">
-                        <xsd:annotation>
-                            <xsd:appinfo>
-                                <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.jeda.api.IFlowBus"/>
-                                </tool:annotation>
-                            </xsd:appinfo>
-                        </xsd:annotation>
-                    </xsd:element>
-                </xsd:choice>
-            </xsd:sequence>
-            <xsd:attribute name="server" type="xsd:string">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:expected-type type="ru.kwanza.jeda.nio.server.http.IHttpServer"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="timeout" type="xsd:long" use="optional"/>
-            <xsd:attribute name="timedOutHandler" use="optional">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:expected-type type="ru.kwanza.jeda.nio.server.http.ITimedOutHandler"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
+            <xsd:complexContent>
+                <xsd:extension base="base-http-handler">
+                    <xsd:attribute name="wsdl" type="xsd:string" use="required">
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
 

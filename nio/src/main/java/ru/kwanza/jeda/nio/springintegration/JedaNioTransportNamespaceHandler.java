@@ -13,5 +13,6 @@ public class JedaNioTransportNamespaceHandler extends NamespaceHandlerSupport {
         registerBeanDefinitionParser("jks-keystore", new JKSEntryPointKeystoreParser());
         registerBeanDefinitionParser("keystore", new CustomKeystoreParser());
         registerBeanDefinitionParser("http-handler", new HttpHandlerParser());
+        registerBeanDefinitionParser("ws-http-handler", new WSHttpHandlerParser());
     }
 }
