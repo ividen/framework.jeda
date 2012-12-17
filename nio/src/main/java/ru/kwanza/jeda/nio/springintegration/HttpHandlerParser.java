@@ -19,23 +19,20 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
 
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
-                BeanDefinitionBuilder.genericBeanDefinition(JedaHttpHandler.class);
+                BeanDefinitionBuilder.genericBeanDefinition(getHandlerClass());
 
         String stage = DomUtils.getChildElementValueByTagName(element, "stage");
         String flowBus = DomUtils.getChildElementValueByTagName(element, "flowBus");
         String timeout = element.getAttribute("timeout");
         String timedOutHandler = element.getAttribute("timedOutHandler");
 
-        String constructorName = null;
         String paramReference = null;
         if (StringUtils.hasText(stage)) {
             paramReference = stage;
-            constructorName = "createForStage";
         } else if (StringUtils.hasText(flowBus)) {
             paramReference = flowBus;
-            constructorName = "createForFlowBus";
         }
-        definitionBuilder.setFactoryMethod(constructorName);
+        definitionBuilder.setFactoryMethod("createForObjectRef");
         definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
         definitionBuilder.addConstructorArgReference(paramReference);
 
@@ -74,5 +71,9 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
 
 
         return result;
+    }
+
+    protected Class<JedaHttpHandler> getHandlerClass() {
+        return JedaHttpHandler.class;
     }
 }

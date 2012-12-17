@@ -28,16 +28,13 @@ class WSHttpHandlerParser extends JedaBeanDefinitionParser {
         String timedOutHandler = element.getAttribute("timedOutHandler");
         String wsdl = element.getAttribute("wsdl");
 
-        String constructorName = null;
         String paramReference = null;
         if (StringUtils.hasText(stage)) {
             paramReference = stage;
-            constructorName = "createForStage";
         } else if (StringUtils.hasText(flowBus)) {
             paramReference = flowBus;
-            constructorName = "createForFlowBus";
         }
-        definitionBuilder.setFactoryMethod(constructorName);
+        definitionBuilder.setFactoryMethod("createForObjectRef");
         definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
         definitionBuilder.addConstructorArgReference(paramReference);
 

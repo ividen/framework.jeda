@@ -19,35 +19,16 @@ public class JedaWSHttpHandler extends JedaHttpHandler {
     private String wsdl;
     private AtomicReference<byte[]> wsdlContent = new AtomicReference<byte[]>();
 
-    public static JedaWSHttpHandler createForFlowBus(ISystemManager manager, IFlowBus flowBus, String wsdlUrl) {
-        return createForFlowBus(manager, flowBus, Const.DEFAULT_FLEX_FLOW_RESPONSE_TIMEOUT, wsdlUrl);
-    }
 
-    public static JedaWSHttpHandler createForFlowBus(ISystemManager manager, IFlowBus flowBus,
-                                                     long timeout, String wsdlUrl) {
-        return new JedaWSHttpHandler(manager, flowBus, timeout, wsdlUrl);
-    }
-
-    public static JedaWSHttpHandler createForStage(ISystemManager manager, IStage stage,
-                                                   String wsdlUrl) {
-        return createForStage(manager, stage, Const.DEFAULT_FLEX_FLOW_RESPONSE_TIMEOUT, wsdlUrl);
-    }
-
-    public static JedaWSHttpHandler createForStage(ISystemManager manager, IStage stage,
-                                                   long timeout, String wsdlUrl) {
-        return new JedaWSHttpHandler(manager, stage.<IHttpEvent>getSink(), timeout, wsdlUrl);
+    public static JedaWSHttpHandler createForObjectRef(ISystemManager manager, ISink object, long timeout,String wsdl) {
+        return new JedaWSHttpHandler(manager, object, timeout,wsdl);
     }
 
     public static JedaWSHttpHandler createForObject(ISystemManager manager, String objectName,
-                                                    String wsdlUrl) {
-        return createForObject(manager, objectName, Const.DEFAULT_FLEX_FLOW_RESPONSE_TIMEOUT, wsdlUrl);
-    }
-
-    public static JedaWSHttpHandler createForObject(ISystemManager manager, String objectName,
-                                                    long timeout, String wsdlUrl) {
+                                                    long timeout, String wsdl) {
         Object obj = manager.resolveObject(objectName);
         ISink sink = obj instanceof IStage ? ((IStage) obj).getSink() : (ISink) obj;
-        return new JedaWSHttpHandler(manager, sink, timeout, wsdlUrl);
+        return createForObjectRef(manager, sink,timeout,wsdl);
     }
 
     public JedaWSHttpHandler(ISystemManager manager, ISink<IHttpEvent> sink, long timeout, String wsdl) {
