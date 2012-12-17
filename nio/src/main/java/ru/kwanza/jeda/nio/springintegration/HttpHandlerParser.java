@@ -21,28 +21,7 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder =
                 BeanDefinitionBuilder.genericBeanDefinition(getHandlerClass());
 
-        String stage = DomUtils.getChildElementValueByTagName(element, "stage");
-        String flowBus = DomUtils.getChildElementValueByTagName(element, "flowBus");
-        String timeout = element.getAttribute("timeout");
-        String timedOutHandler = element.getAttribute("timedOutHandler");
-
-        String paramReference = null;
-        if (StringUtils.hasText(stage)) {
-            paramReference = stage;
-        } else if (StringUtils.hasText(flowBus)) {
-            paramReference = flowBus;
-        }
-        definitionBuilder.setFactoryMethod("createForObjectRef");
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
-        definitionBuilder.addConstructorArgReference(paramReference);
-
-        if (StringUtils.hasText(timedOutHandler)) {
-            definitionBuilder.addPropertyReference("timedOutHandler", timedOutHandler);
-        }
-
-        if (StringUtils.hasText(timeout)) {
-            definitionBuilder.addConstructorArgValue(timeout);
-        }
+        parseParameters(element, definitionBuilder);
 
         JedaBeanDefinition result = createJedaDefinition(definitionBuilder.getBeanDefinition(), IHttpHandler.class, element, parserContext);
 
@@ -73,7 +52,32 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
         return result;
     }
 
-    protected Class<JedaHttpHandler> getHandlerClass() {
+   protected void parseParameters(Element element, BeanDefinitionBuilder definitionBuilder) {
+        String stage = DomUtils.getChildElementValueByTagName(element, "stage");
+        String flowBus = DomUtils.getChildElementValueByTagName(element, "flowBus");
+        String timeout = element.getAttribute("timeout");
+        String timedOutHandler = element.getAttribute("timedOutHandler");
+
+        String paramReference = null;
+        if (StringUtils.hasText(stage)) {
+            paramReference = stage;
+        } else if (StringUtils.hasText(flowBus)) {
+            paramReference = flowBus;
+        }
+        definitionBuilder.setFactoryMethod("createForObjectRef");
+        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference(paramReference);
+
+        if (StringUtils.hasText(timedOutHandler)) {
+            definitionBuilder.addPropertyReference("timedOutHandler", timedOutHandler);
+        }
+
+        if (StringUtils.hasText(timeout)) {
+            definitionBuilder.addConstructorArgValue(timeout);
+        }
+    }
+
+    protected Class<? extends JedaHttpHandler> getHandlerClass() {
         return JedaHttpHandler.class;
     }
 }
