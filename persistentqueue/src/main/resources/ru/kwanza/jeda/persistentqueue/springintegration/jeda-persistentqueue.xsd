@@ -8,11 +8,11 @@
             elementFormDefault="qualified"
             attributeFormDefault="unqualified">
     <xsd:import namespace="http://www.springframework.org/schema/beans"
-                schemaLocation="http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"/>
+                schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
     <xsd:import namespace="http://www.kwanza-systems.ru/schema/jeda-core"
                 schemaLocation="http://www.kwanza-systems.ru/schema/jeda-core.xsd"/>
     <xsd:import namespace="http://www.springframework.org/schema/tool"
-                schemaLocation="http://www.springframework.org/schema/tool/spring-tool-3.0.xsd"/>
+                schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 
     <xsd:element name="jdbc-queue"

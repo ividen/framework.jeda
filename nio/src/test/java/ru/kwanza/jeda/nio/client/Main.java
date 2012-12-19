@@ -190,7 +190,7 @@ public class Main {
 
         IFlowBus flowBus = Manager.getFlowBus("client-transport-flow-bus");
 
-        URL url1 = new URL("http://localhost:18080/emulator/aggregator/doWork.jsp");
+        URL url1 = new URL("http://192.168.1.2:88/agentapi/");
 //        URL url1 = new URL("http://10.1.3.145:8080/agregator-1.5/emulator/");
 //        URL url2 = new URL("http://10.1.2.246:8080/agregator-1.5/emulator/");
         M = 1;

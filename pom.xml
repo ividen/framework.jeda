@@ -6,7 +6,7 @@
     <properties>
         <jeda.version>1.0-SNAPSHOT</jeda.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <org.springframework.version>3.0.5.RELEASE</org.springframework.version>
+        <org.springframework.version>3.2.0.RELEASE</org.springframework.version>
         <aspectj.version>1.5.4</aspectj.version>
         <slf4j.version>1.6.3</slf4j.version>
         <log4j.version>1.2.16</log4j.version>

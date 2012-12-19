@@ -5,7 +5,7 @@
        xmlns:jeda-core="http://www.springframework.org/schema/jeda-core"
        xmlns:flexlow-core="http://java.sun.com/xml/ns/javaee"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/beans/spring-beans.xsd
 
         http://www.springframework.org/schema/jeda-core http://www.springframework.org/schema/jeda-core.xsd">
 
