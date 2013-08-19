@@ -179,6 +179,8 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                                 stage.getName(),
                                 events.size(), this.getName()),e);
 
+                        logger.error("Error occured!",e);
+
                         resourceController.throughput(events.size(), batchSize, System.currentTimeMillis() - ts, false);
                         rollbackAll(stage, e);
                         if (!stage.hasTransaction()) {
