@@ -36,10 +36,12 @@ public class Main {
 
 
     public static class ResponseHandle extends AbstractFilter {
+
         public NextAction handleRead(FilterChainContext ctx) throws IOException {
             Object message = ctx.getMessage();
             if (message instanceof HttpContent) {
                 HttpContent content = (HttpContent) message;
+
                 if (content.isLast() == true) {
                     long l = counter.incrementAndGet();
                     if (l == 1) {

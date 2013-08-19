@@ -175,9 +175,9 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                     try {
                         stage.getProcessor().process(events);
                     } catch (Throwable e) {
-                        logger.error(MessageFormat.format("Error events(count={1}) for Stage({2}), thread({3})",
+                        logger.error(MessageFormat.format("Error events(count={0}) for Stage({1}), thread({2})",
                                 stage.getName(),
-                                events.size(), this.getName()), e);
+                                events.size(), this.getName()),e);
 
                         resourceController.throughput(events.size(), batchSize, System.currentTimeMillis() - ts, false);
                         rollbackAll(stage, e);
