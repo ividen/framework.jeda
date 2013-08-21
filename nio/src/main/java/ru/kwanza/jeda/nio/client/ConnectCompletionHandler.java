@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.Socket;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Guzanov Alexander
@@ -94,5 +95,6 @@ class ConnectCompletionHandler implements CompletionHandler<Connection> {
     }
 
     public void updated(Connection result) {
+        System.out.println("Updated");
     }
 }

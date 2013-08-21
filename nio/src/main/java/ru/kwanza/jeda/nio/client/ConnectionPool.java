@@ -60,7 +60,6 @@ class ConnectionPool extends AbstractResourceController {
         return 1;
     }
 
-
     public void write(TCPNIOTransport transport, ITransportEvent event) {
         ConnectionConfig connectionConfig = event.getConnectionConfig();
         if (connectionConfig.isKeepAlive()) {
@@ -80,16 +79,12 @@ class ConnectionPool extends AbstractResourceController {
         transport.connect(connectionConfig.getEndpoint(), new ConnectCompletionHandler(this, event));
     }
 
-
     void registerConnection(Connection connection, ITransportEvent event) {
-        registerConnectionHolder(
-                new ConnectionHolder(connection, event.getConnectionConfig(),
-                        configurator.getMaxRequestCount(address)),
+        registerConnectionHolder(new ConnectionHolder(connection, event.getConnectionConfig(), configurator.getMaxRequestCount(address)),
                 event, configurator.getKeepAliveTimeout(address));
     }
 
-    void registerConnectionHolder(ConnectionHolder holder, ITransportEvent event,
-                                  long keepAliveTimeout) {
+    void registerConnectionHolder(ConnectionHolder holder, ITransportEvent event, long keepAliveTimeout) {
         holder.update(keepAliveTimeout);
         Connection connection = holder.getConnection();
         ConnectionContext context = ConnectionContext.getContext(connection);
@@ -104,13 +99,12 @@ class ConnectionPool extends AbstractResourceController {
 
     void releaseConnection(Connection result) {
         ConnectionContext context = ConnectionContext.getContext(result);
-        ConnectionConfig connectionConfig = context.getRequestEvent().getConnectionConfig();
-        if (context != null && connectionConfig.isKeepAlive()) {
+
+        if (context != null && context.getRequestEvent().getConnectionConfig().isKeepAlive()) {
+            returnConnection(result, context.getRequestEvent().getConnectionConfig());
             context.clear();
-            returnConnection(result, connectionConfig);
         }
     }
-
 
     void returnConnection(Connection result, ConnectionConfig config) {
         returnConnection(result, config, false);
@@ -122,11 +116,10 @@ class ConnectionPool extends AbstractResourceController {
                 ConnectionHolder holder = leasedConnections.remove(result);
                 if (holder != null && result.isOpen() && !close) {
                     availableConnections.offer(holder);
+                    getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
                 }
             }
         }
-        int i = batchSize.incrementAndGet();
-        getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
     }
 
     public static ConnectionPool getPool(Connection connection) {

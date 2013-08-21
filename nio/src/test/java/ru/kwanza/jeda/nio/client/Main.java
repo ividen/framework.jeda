@@ -29,11 +29,10 @@ public class Main {
 
     static AtomicLong counter = new AtomicLong(0);
     static volatile long ts;
-    public static final int BATCH_SIZE = 1000;
-    public static final int ITER = 1000;
+    public static final int BATCH_SIZE = 100;
+    public static final int ITER = 2;
     public static final long INT = BATCH_SIZE * ITER;
     public static long M = 1;
-
 
     public static class ResponseHandle extends AbstractFilter {
 
@@ -51,7 +50,7 @@ public class Main {
                         System.out.println(M * INT * 1000 / ts);
                     }
 
-//                    System.out.println(content.getContent().toStringContent());
+                    System.out.println(content.getContent().toStringContent());
                     // todo aguzanov Работа с client http обобшить код в части определения того, что делать с соединением: закрывать или возвращать  пул
 //                    if (HttpUtil.isMarkForClose(content)) {
 //                        closeConnection(ctx);
@@ -60,22 +59,19 @@ public class Main {
                     releaseConnection(ctx);
 //                    }
 
-
                 }
 
             } else {
                 System.out.println("not last");
             }
 
-            return super.
-
-                    handleRead(ctx);
+            return super.handleRead(ctx);
         }
-
 
         @Override
         public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
             super.exceptionOccurred(ctx, error);
+            error.printStackTrace();
             long l = counter.incrementAndGet();
             if (l == 1) {
                 ts = System.currentTimeMillis();
@@ -100,21 +96,20 @@ public class Main {
 
     public static class TestTransportEvent extends AbstractEvent implements ITransportEvent {
         private String uri;
-        public static final String txt = "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"><soapenv:Body><ns1:CPAReq xmlns:ns1=\"http://twophaseinteraction.mts.ru/xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"ns1:CPAReqMessage\" ns1:messageId=\"0\" ns1:version=\"1.5\"><ns1:Client /><ns1:Provider><ns1:id>3868638A697715F0F186DA2C7CB1CDC3</ns1:id></ns1:Provider><ns1:Payment><ns1:date>2012-03-06T01:21:58.052+03:00</ns1:date><ns1:amount>1000</ns1:amount><ns1:currency>810</ns1:currency><ns1:exponent>2</ns1:exponent><ns1:Params><ns1:Param ns1:name=\"currency\">810</ns1:Param></ns1:Params></ns1:Payment><ns1:pcentreTrxId>E4131D2C074AEFB292DE87EE800E625A</ns1:pcentreTrxId></ns1:CPAReq></soapenv:Body></soapenv:Envelope>";
+        public static final String txt =
+                "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"><soapenv:Body><ns1:CPAReq xmlns:ns1=\"http://twophaseinteraction.mts.ru/xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"ns1:CPAReqMessage\" ns1:messageId=\"0\" ns1:version=\"1.5\"><ns1:Client /><ns1:Provider><ns1:id>3868638A697715F0F186DA2C7CB1CDC3</ns1:id></ns1:Provider><ns1:Payment><ns1:date>2012-03-06T01:21:58.052+03:00</ns1:date><ns1:amount>1000</ns1:amount><ns1:currency>810</ns1:currency><ns1:exponent>2</ns1:exponent><ns1:Params><ns1:Param ns1:name=\"currency\">810</ns1:Param></ns1:Params></ns1:Payment><ns1:pcentreTrxId>E4131D2C074AEFB292DE87EE800E625A</ns1:pcentreTrxId></ns1:CPAReq></soapenv:Body></soapenv:Envelope>";
         private InetSocketAddress endpoint;
 
         public static FilterChain chain;
         private ConnectionConfig config;
         private boolean isSSL;
 
-
         public TestTransportEvent(URL url, boolean iskeepAlive) {
-            this.endpoint = new InetSocketAddress(url.getHost(), url.getPort());
+            this.endpoint = new InetSocketAddress(url.getHost(), url.getPort() == -1 ? 80 : url.getPort());
             this.uri = url.getPath();
             this.isSSL = url.getProtocol().equals("https");
-            this.config = new ConnectionConfig(endpoint,/*iskeepAlive*/true, true, 10000);
+            this.config = new ConnectionConfig(endpoint,/*iskeepAlive*/true, true, 1000);
         }
-
 
         public ConnectionConfig getConnectionConfig() {
             return config;
@@ -134,7 +129,6 @@ public class Main {
                     keystore.init(null, null);
                     sslContext.init(keystore.getKeyManager(), keystore.getTrustManagers(), null);
 
-
                     SSLEngineConfigurator engineConfigurator = new SSLEngineConfigurator(sslContext, true, true, true);
                     SSLFilter filter = new SSLFilter(null, engineConfigurator);
                     builder.add(filter);
@@ -142,25 +136,22 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             }
-            HttpClientFilter httpClientFilter = new HttpClientFilter();
-            httpClientFilter
-                    .addTransferEncoding(new FixedLengthTransferEncoding());
+
+            HttpClientFilter httpClientFilter = new HttpClientFilter() {
+
+            };
+            httpClientFilter.addTransferEncoding(new FixedLengthTransferEncoding());
             builder.add(httpClientFilter);
             builder.add(new ResponseHandle());
 
             return builder.build();
         }
 
-
         public Object getContent() {
             Buffer wrap = Buffers.wrap(null, txt);
             HttpRequestPacket.Builder requestBuilder = HttpRequestPacket.builder();
 
-            requestBuilder.method("POST")
-                    .uri(uri)
-                    .protocol(Protocol.HTTP_1_1)
-                    .chunked(false)
-                    .contentLength(wrap.capacity())
+            requestBuilder.method("POST").uri(uri).protocol(Protocol.HTTP_1_1).chunked(false).contentLength(wrap.capacity())
                     .header(Header.Host, config.getEndpoint().getHostName() + ":" + config.getEndpoint().getPort())
                     .contentType("application/soap+xml");
             if (config.isKeepAlive()) {
@@ -168,8 +159,7 @@ public class Main {
             } else {
                 requestBuilder.header(Header.Connection, "close");
             }
-            return HttpContent.builder(requestBuilder.build()).content(
-                    wrap).last(true).build();
+            return HttpContent.builder(requestBuilder.build()).content(wrap).last(true).build();
         }
 
         public String getContextId() {
@@ -186,13 +176,13 @@ public class Main {
 
     }
 
-
     public static void main(String[] args) throws InterruptedException, IOException, SinkException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml", Main.class);
 
         IFlowBus flowBus = Manager.getFlowBus("client-transport-flow-bus");
 
-        URL url1 = new URL("http://192.168.1.2:88/agentapi/");
+        URL url1 = new URL("http://localhost:88/console/ttp-ticketservice-controller/security/config");
+//        URL url1 = new URL("http://wwww.lenta.ru/");
 //        URL url1 = new URL("http://10.1.3.145:8080/agregator-1.5/emulator/");
 //        URL url2 = new URL("http://10.1.2.246:8080/agregator-1.5/emulator/");
         M = 1;
