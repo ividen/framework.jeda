@@ -181,7 +181,7 @@ public class Main {
 
         IFlowBus flowBus = Manager.getFlowBus("client-transport-flow-bus");
 
-        URL url1 = new URL("http://localhost:88/console/ttp-ticketservice-controller/security/config");
+        URL url1 = new URL("http://localhost:88/console/ttp-ticketservice-controller/security/config1");
 //        URL url1 = new URL("http://wwww.lenta.ru/");
 //        URL url1 = new URL("http://10.1.3.145:8080/agregator-1.5/emulator/");
 //        URL url2 = new URL("http://10.1.2.246:8080/agregator-1.5/emulator/");

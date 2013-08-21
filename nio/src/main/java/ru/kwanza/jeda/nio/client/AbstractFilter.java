@@ -24,7 +24,6 @@ public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilt
     }
 
     public final void closeConnection(FilterChainContext ctx) {
-        ConnectionPool pool = getPool(ctx);
         Connection connection = ctx.getConnection();
         connection.closeSilently();
     }

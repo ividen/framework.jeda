@@ -6,8 +6,7 @@ import org.glassfish.grizzly.attributes.Attribute;
 import ru.kwanza.jeda.nio.client.AbstractFilter;
 
 import java.net.SocketTimeoutException;
-import java.util.Iterator;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TimeoutHandler extends Thread {
     private static volatile TimeoutHandler instance;
     private static ReentrantLock lock = new ReentrantLock();
-    private ConcurrentSkipListSet<Connection> connetions = new ConcurrentSkipListSet<Connection>(new ConnectionComparator());
+    private PriorityBlockingQueue<Connection> connetions = new PriorityBlockingQueue<Connection>(100, new ConnectionComparator());
     private AtomicLong w = new AtomicLong();
     static Attribute<Record> TIMEOUT = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute(AbstractFilter.class.getSimpleName() + ".TIMEOUT");
 
@@ -51,7 +50,7 @@ public class TimeoutHandler extends Thread {
             connetions.add(connection);
         } else {
             TIMEOUT.get(connection).timestamp.set(System.currentTimeMillis() + ts);
-            if(connetions.remove(connection)){
+            if (connetions.remove(connection)) {
                 connetions.add(connection);
             }
 
@@ -77,21 +76,20 @@ public class TimeoutHandler extends Thread {
     public final void run() {
         while (isAlive() && !isInterrupted()) {
             try {
-                final Iterator<Connection> i = connetions.iterator();
-
-                while (i.hasNext()) {
-                    final Connection connection = i.next();
-                    final Record record = TIMEOUT.get(connection);
-//                    if (record != null && record.timestamp.get() < System.currentTimeMillis()) {
-//                        if (connetions.remove(connection)) {
-//                            record.throwReadError.set(true);
-//                            connection.closeSilently();
-//                        }
-//                    } else {
-//                        break;
-//                    }
+                Connection connection;
+                while ((connection = connetions.peek()) != null) {
+                    if (connection != null) {
+                        final Record record = TIMEOUT.get(connection);
+                        if (record != null && record.timestamp.get() < System.currentTimeMillis()) {
+                            if (connetions.remove(connection)) {
+                                record.throwReadError.set(true);
+                                connection.closeSilently();
+                            }
+                        } else {
+                            break;
+                        }
+                    }
                 }
-
                 synchronized (this) {
                     try {
                         wait(1000L);
@@ -103,18 +101,19 @@ public class TimeoutHandler extends Thread {
 
             }
         }
+
     }
 
     private static final TimeoutHandler getInstance() {
         if (instance == null) {
             lock.lock();
-            if (instance == null) {
-                try {
+            try {
+                if (instance == null) {
                     instance = new TimeoutHandler();
                     instance.start();
-                } finally {
-                    lock.unlock();
                 }
+            } finally {
+                lock.unlock();
             }
         }
 
