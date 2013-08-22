@@ -3,6 +3,8 @@ package ru.kwanza.jeda.nio.client.timeouthandler;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.attributes.Attribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.nio.client.AbstractFilter;
 
 import java.net.SocketTimeoutException;
@@ -14,6 +16,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 public class TimeoutHandler extends Thread {
+    private static final Logger logger = LoggerFactory.getLogger(TimeoutHandler.class)
+
     private static volatile TimeoutHandler instance;
     private static ReentrantLock lock = new ReentrantLock();
     private PriorityBlockingQueue<Connection> connetions = new PriorityBlockingQueue<Connection>(100, new ConnectionComparator());
@@ -38,9 +42,12 @@ public class TimeoutHandler extends Thread {
     }
 
     private void registerRead0(Connection connection) throws SocketTimeoutException {
-        if (connetions.remove(connection)) {
-//            checkTimedOut(connection);
-        }
+        connetions.remove(connection);
+        TIMEOUT.remove(connection);
+    }
+
+    private void forget0(Connection connection) throws SocketTimeoutException {
+        connetions.remove(connection);
         TIMEOUT.remove(connection);
     }
 
@@ -98,7 +105,7 @@ public class TimeoutHandler extends Thread {
                     }
                 }
             } catch (Exception e) {
-
+                logger.error("Unexpected exception occured!", e);
             }
         }
 
@@ -120,4 +127,7 @@ public class TimeoutHandler extends Thread {
         return instance;
     }
 
+    public static void forget(Connection connection) {
+        getInstance().forget0(connection);
+    }
 }

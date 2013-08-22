@@ -20,6 +20,8 @@ public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilt
 
     public final void releaseConnection(FilterChainContext ctx) {
         ConnectionPool pool = getPool(ctx);
+        final Connection connection = ctx.getConnection();
+        TimeoutHandler.forget(connection);
         pool.releaseConnection(ctx.getConnection());
     }
 
