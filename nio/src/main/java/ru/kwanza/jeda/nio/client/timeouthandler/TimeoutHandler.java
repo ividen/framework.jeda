@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 public class TimeoutHandler extends Thread {
-    private static final Logger logger = LoggerFactory.getLogger(TimeoutHandler.class)
+    private static final Logger logger = LoggerFactory.getLogger(TimeoutHandler.class);
 
     private static volatile TimeoutHandler instance;
     private static ReentrantLock lock = new ReentrantLock();
@@ -46,7 +46,7 @@ public class TimeoutHandler extends Thread {
         TIMEOUT.remove(connection);
     }
 
-    private void forget0(Connection connection) throws SocketTimeoutException {
+    private void forget0(Connection connection) {
         connetions.remove(connection);
         TIMEOUT.remove(connection);
     }
