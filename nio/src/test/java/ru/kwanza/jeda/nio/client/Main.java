@@ -36,7 +36,7 @@ public class Main {
 
     public static class ResponseHandle extends AbstractFilter {
 
-        public NextAction handleRead(FilterChainContext ctx) throws IOException {
+        public NextAction read(FilterChainContext ctx) throws IOException {
             Object message = ctx.getMessage();
             if (message instanceof HttpContent) {
                 HttpContent content = (HttpContent) message;
@@ -65,7 +65,7 @@ public class Main {
                 System.out.println("not last");
             }
 
-            return super.handleRead(ctx);
+            return ctx.getInvokeAction();
         }
 
         @Override

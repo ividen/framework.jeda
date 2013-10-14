@@ -13,7 +13,6 @@ import java.io.IOException;
  */
 public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilter {
 
-
     public final ConnectionContext getConnectionContext(FilterChainContext ctx) {
         return ConnectionContext.getContext(ctx.getConnection());
     }
@@ -37,21 +36,29 @@ public abstract class AbstractFilter<E extends ITransportEvent> extends BaseFilt
     }
 
     @Override
-    public NextAction handleRead(final FilterChainContext ctx) throws IOException {
+    public final NextAction handleRead(final FilterChainContext ctx) throws IOException {
         final Connection connection = ctx.getConnection();
 
         TimeoutHandler.registerRead(connection);
 
+        return read(ctx);
+    }
+
+    public NextAction read(FilterChainContext ctx) throws IOException {
         return ctx.getInvokeAction();
     }
 
     @Override
-    public NextAction handleWrite(final FilterChainContext ctx) throws IOException {
+    public final NextAction handleWrite(final FilterChainContext ctx) throws IOException {
         final long ts = getConnectionContext(ctx).getRequestEvent().getConnectionConfig().getSoTimeout();
         final Connection connection = ctx.getConnection();
 
         TimeoutHandler.registerWrite(ts, connection);
 
+        return write(ctx);
+    }
+
+    public NextAction write(FilterChainContext ctx) throws IOException {
         return ctx.getInvokeAction();
     }
 
