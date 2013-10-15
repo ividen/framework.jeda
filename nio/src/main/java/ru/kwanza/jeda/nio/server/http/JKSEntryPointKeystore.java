@@ -33,7 +33,6 @@ public class JKSEntryPointKeystore implements IEntryPointKeystore {
     private TrustManager[] trustManagers;
     private X509Certificate[] serverCertificateChain;
 
-
     private class X509TrustManagerImpl implements X509TrustManager {
         public X509TrustManagerImpl() {
         }
@@ -190,20 +189,25 @@ public class JKSEntryPointKeystore implements IEntryPointKeystore {
             Enumeration<String> aliases = ks.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = aliases.nextElement();
-                Certificate[] chain = ks.getCertificateChain(alias);
-                X509Certificate[] certificateChain = new X509Certificate[chain.length];
-                System.arraycopy(chain, 0, certificateChain, 0, chain.length);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("HttpServer({}:{}) Load alias '{}' from file {}, certificate chain: {}",
-                            new Object[]{server.getName(), entryPoint.getName(), alias,
-                                    keystoreFile.getAbsolutePath(), certificateChain});
-                }
-                if (Const.SERVER_SLOT_ALIAS.equals(alias)) {
-                    serverPrivateKey = (PrivateKey) ks.getKey(alias, keyStorePassword.toCharArray());
-                    serverCertificateChain = certificateChain;
+                if (ks.isCertificateEntry(alias)) {
+                    Certificate[] chain = ks.getCertificateChain(alias);
+                    X509Certificate[] certificateChain = new X509Certificate[chain.length];
+                    System.arraycopy(chain, 0, certificateChain, 0, chain.length);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("HttpServer({}:{}) Load alias '{}' from file {}, certificate chain: {}",
+                                new Object[]{server.getName(), entryPoint.getName(), alias,
+                                        keystoreFile.getAbsolutePath(), certificateChain});
+                    }
+                    if (Const.SERVER_SLOT_ALIAS.equals(alias)) {
+                        serverPrivateKey = (PrivateKey) ks.getKey(alias, keyStorePassword.toCharArray());
+                        serverCertificateChain = certificateChain;
+                    } else {
+                        for (X509Certificate c : certificateChain) {
+                            trustedAnchors.add(new TrustAnchor(c, null));
+                        }
+                    }
                 } else {
-                    for (X509Certificate c : certificateChain)
-                        trustedAnchors.add(new TrustAnchor(c, null));
+                    logger.warn("Not found a certificate with alias = " + alias);
                 }
             }
         } catch (Exception e) {
