@@ -12,7 +12,7 @@ import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
+import ru.kwanza.jeda.nio.utils.JCEKSKeystore;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -125,8 +125,8 @@ public class Main {
                 try {
                     SSLContext sslContext = SSLContext.getInstance("TLS");
 
-                    JKSEntryPointKeystore keystore = new JKSEntryPointKeystore("J:/mykeystore.jks", "a12345678");
-                    keystore.init(null, null);
+                    JCEKSKeystore keystore = new ru.kwanza.jeda.nio.utils.JCEKSKeystore("J:/mykeystore.jks", "a12345678", true);
+                    keystore.initServer(null, null);
                     sslContext.init(keystore.getKeyManager(), keystore.getTrustManagers(), null);
 
                     SSLEngineConfigurator engineConfigurator = new SSLEngineConfigurator(sslContext, true, true, true);

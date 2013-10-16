@@ -12,6 +12,7 @@ import org.glassfish.grizzly.ssl.SSLFilter;
 import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.utils.DelayedExecutor;
+import ru.kwanza.jeda.nio.utils.IEntryPointKeystore;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
@@ -160,7 +161,7 @@ public class EntryPoint implements IEntryPoint {
         }
 
         if (keystore != null) {
-            keystore.init(server, this);
+            keystore.initServer(server, this);
             try {
                 serverFilterChainBuilder.add(createSSLFilter());
             } catch (Exception e) {
