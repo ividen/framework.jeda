@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
-import ru.kwanza.jeda.nio.utils.IEntryPointKeystore;
-import ru.kwanza.jeda.nio.utils.JCEKSKeystore;
+import ru.kwanza.jeda.nio.server.http.IEntryPointKeystore;
+import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -15,7 +15,7 @@ class JKSEntryPointKeystoreParser extends JedaBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
-                BeanDefinitionBuilder.genericBeanDefinition(JCEKSKeystore.class);
+                BeanDefinitionBuilder.genericBeanDefinition(JKSEntryPointKeystore.class);
 
         String keystoreFile = element.getAttribute("keystoreFile");
         definitionBuilder.addConstructorArgValue(keystoreFile);

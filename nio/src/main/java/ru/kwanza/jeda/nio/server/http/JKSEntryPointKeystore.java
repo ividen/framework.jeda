@@ -1,8 +1,4 @@
-package ru.kwanza.jeda.nio.utils;
-
-import ru.kwanza.jeda.nio.server.http.Const;
-import ru.kwanza.jeda.nio.server.http.IEntryPoint;
-import ru.kwanza.jeda.nio.server.http.IHttpServer;
+package ru.kwanza.jeda.nio.server.http;
 
 import javax.net.ssl.*;
 import java.io.*;
@@ -23,22 +19,19 @@ import static ru.kwanza.jeda.nio.server.http.HttpServer.logger;
 /**
  * @author Guzanov Alexander
  */
-public class JCEKSKeystore implements IEntryPointKeystore {
+public class JKSEntryPointKeystore implements IEntryPointKeystore {
     public static final X509Certificate[] ACCEPTED_ISSUERS = new X509Certificate[]{};
 
     private FileLock keystoreFileLock;
     private File keystoreFile;
+    private IEntryPoint entryPoint;
+    private IHttpServer server;
     private KeyManager[] keyManagers;
     private PrivateKey serverPrivateKey;
     private final Set<TrustAnchor> trustedAnchors = new HashSet<TrustAnchor>();
     private String keyStorePassword;
     private TrustManager[] trustManagers;
     private X509Certificate[] serverCertificateChain;
-
-    private Boolean isServer;
-    private String url;
-    private IEntryPoint entryPoint;
-    private IHttpServer server;
 
     private class X509TrustManagerImpl implements X509TrustManager {
         public X509TrustManagerImpl() {
@@ -96,31 +89,18 @@ public class JCEKSKeystore implements IEntryPointKeystore {
         }
     }
 
-    public JCEKSKeystore(String keystoreFile, String keyStorePassword, Boolean server) {
-        this.isServer = server;
+    public JKSEntryPointKeystore(String keystoreFile, String keyStorePassword) {
         setKeystoreFile(keystoreFile);
         setKeyStorePassword(keyStorePassword);
     }
 
-    public void initServer(IHttpServer server, IEntryPoint entryPoint) {
+    public void init(IHttpServer server, IEntryPoint entryPoint) {
         this.server = server;
         this.entryPoint = entryPoint;
 
         if (!keystoreFile.exists()) {
             logger.error("HttpServer({}:{}) Keystore file {} doesn't exitst!",
                     new Object[]{server.getName(), entryPoint.getName(), keystoreFile.getAbsolutePath()});
-            throw new RuntimeException("File " + keystoreFile.getAbsolutePath() + " doesn't exists!");
-        }
-        loadKeystore();
-        this.trustManagers = trustedAnchors.isEmpty() ? null : new TrustManager[]{new X509TrustManagerImpl()};
-        this.keyManagers = serverPrivateKey == null ? null : new KeyManager[]{new X509KeyManagerImpl()};
-    }
-
-    public void initClient(String url) {
-        this.url = url;
-
-        if (!keystoreFile.exists()) {
-            logger.error("HttpClient({}) Keystore file {} doesn't exitst!", url);
             throw new RuntimeException("File " + keystoreFile.getAbsolutePath() + " doesn't exists!");
         }
         loadKeystore();
@@ -209,29 +189,25 @@ public class JCEKSKeystore implements IEntryPointKeystore {
             Enumeration<String> aliases = ks.aliases();
             while (aliases.hasMoreElements()) {
                 String alias = aliases.nextElement();
-                Certificate[] chain = ks.getCertificateChain(alias);
-                if (chain == null) {
-                    chain = new Certificate[]{ks.getCertificate(alias)};
-                }
-                X509Certificate[] certificateChain = new X509Certificate[chain.length];
-                System.arraycopy(chain, 0, certificateChain, 0, chain.length);
-                if (logger.isDebugEnabled()) {
-                    if (isServer) {
+                if (ks.isCertificateEntry(alias)) {
+                    Certificate[] chain = ks.getCertificateChain(alias);
+                    X509Certificate[] certificateChain = new X509Certificate[chain.length];
+                    System.arraycopy(chain, 0, certificateChain, 0, chain.length);
+                    if (logger.isDebugEnabled()) {
                         logger.debug("HttpServer({}:{}) Load alias '{}' from file {}, certificate chain: {}",
-                                new Object[]{server.getName(), entryPoint.getName(), alias, keystoreFile.getAbsolutePath(),
-                                        certificateChain});
+                                new Object[]{server.getName(), entryPoint.getName(), alias,
+                                        keystoreFile.getAbsolutePath(), certificateChain});
+                    }
+                    if (Const.SERVER_SLOT_ALIAS.equals(alias)) {
+                        serverPrivateKey = (PrivateKey) ks.getKey(alias, keyStorePassword.toCharArray());
+                        serverCertificateChain = certificateChain;
                     } else {
-                        logger.debug("HttpClient({}) Load alias '{}' from file {}, certificate chain: {}",
-                                new Object[]{url, alias, keystoreFile.getAbsolutePath(), certificateChain});
+                        for (X509Certificate c : certificateChain) {
+                            trustedAnchors.add(new TrustAnchor(c, null));
+                        }
                     }
-                }
-                if (Const.SERVER_SLOT_ALIAS.equals(alias)) {
-                    serverPrivateKey = (PrivateKey) ks.getKey(alias, keyStorePassword.toCharArray());
-                    serverCertificateChain = certificateChain;
                 } else {
-                    for (X509Certificate c : certificateChain) {
-                        trustedAnchors.add(new TrustAnchor(c, null));
-                    }
+                    logger.warn("Not found a certificate with alias = " + alias);
                 }
             }
         } catch (Exception e) {

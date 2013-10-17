@@ -4,7 +4,7 @@ import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.EntryPoint;
 import ru.kwanza.jeda.nio.server.http.IEntryPoint;
-import ru.kwanza.jeda.nio.utils.IEntryPointKeystore;
+import ru.kwanza.jeda.nio.server.http.IEntryPointKeystore;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;

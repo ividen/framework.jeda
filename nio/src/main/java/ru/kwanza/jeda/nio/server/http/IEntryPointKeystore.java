@@ -1,7 +1,4 @@
-package ru.kwanza.jeda.nio.utils;
-
-import ru.kwanza.jeda.nio.server.http.IEntryPoint;
-import ru.kwanza.jeda.nio.server.http.IHttpServer;
+package ru.kwanza.jeda.nio.server.http;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
@@ -10,9 +7,7 @@ import javax.net.ssl.TrustManager;
  * @author Guzanov Alexander
  */
 public interface IEntryPointKeystore {
-    public void initServer(IHttpServer server, IEntryPoint entryPoint);
-
-    public void initClient(String url);
+    public void init(IHttpServer server, IEntryPoint entryPoint);
 
     public void destroy();
 

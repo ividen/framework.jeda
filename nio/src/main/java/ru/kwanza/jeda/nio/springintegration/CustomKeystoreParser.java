@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.core.springintegration.CustomBeanDefinitionParserDelegate;
-import ru.kwanza.jeda.nio.utils.IEntryPointKeystore;
+import ru.kwanza.jeda.nio.server.http.IEntryPointKeystore;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
