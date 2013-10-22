@@ -428,7 +428,7 @@
         <snapshotRepository>
             <id>snapshots</id>
             <name>snapshots</name>
-            <url>http://artifactory.kwanza-systems.ru/libs-snapshot-local</url>
+            <url>https://artifactory.tprs.ru/artifactory/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
 
