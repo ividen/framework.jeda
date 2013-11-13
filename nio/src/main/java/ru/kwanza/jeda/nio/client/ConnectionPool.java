@@ -119,13 +119,14 @@ class ConnectionPool extends AbstractResourceController {
 
     void returnConnection(Connection result, ConnectionConfig config, boolean close) {
         if (result != null) {
+            ConnectionHolder holder = leasedConnections.remove(result);
             if (config.isKeepAlive()) {
-                ConnectionHolder holder = leasedConnections.remove(result);
                 if (holder != null && result.isOpen() && !close) {
                     availableConnections.offer(holder);
                     getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
                 }
             }
+            batchSize.incrementAndGet();
         }
     }
 
