@@ -90,6 +90,13 @@
             <artifactId>spring-context</artifactId>
             <scope>compile</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>atomikos-extention</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

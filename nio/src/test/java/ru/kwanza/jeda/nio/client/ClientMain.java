@@ -25,12 +25,12 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Guzanov Alexander
  */
-public class Main {
+public class ClientMain {
 
     static AtomicLong counter = new AtomicLong(0);
     static volatile long ts;
-    public static final int BATCH_SIZE = 100;
-    public static final int ITER = 2;
+    public static final int BATCH_SIZE = 10;
+    public static final int ITER = 1000;
     public static final long INT = BATCH_SIZE * ITER;
     public static long M = 1;
 
@@ -40,8 +40,7 @@ public class Main {
             Object message = ctx.getMessage();
             if (message instanceof HttpContent) {
                 HttpContent content = (HttpContent) message;
-
-                if (content.isLast() == true) {
+                if (content.isLast()) {
                     long l = counter.incrementAndGet();
                     if (l == 1) {
                         ts = System.currentTimeMillis();
@@ -50,7 +49,7 @@ public class Main {
                         System.out.println(M * INT * 1000 / ts);
                     }
 
-                    System.out.println(content.getContent().toStringContent());
+                    System.out.println(content.getContent().toStringContent().length());
                     // todo aguzanov Работа с client http обобшить код в части определения того, что делать с соединением: закрывать или возвращать  пул
 //                    if (HttpUtil.isMarkForClose(content)) {
 //                        closeConnection(ctx);
@@ -96,8 +95,8 @@ public class Main {
 
     public static class TestTransportEvent extends AbstractEvent implements ITransportEvent {
         private String uri;
-        public static final String txt =
-                "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"><soapenv:Body><ns1:CPAReq xmlns:ns1=\"http://twophaseinteraction.mts.ru/xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"ns1:CPAReqMessage\" ns1:messageId=\"0\" ns1:version=\"1.5\"><ns1:Client /><ns1:Provider><ns1:id>3868638A697715F0F186DA2C7CB1CDC3</ns1:id></ns1:Provider><ns1:Payment><ns1:date>2012-03-06T01:21:58.052+03:00</ns1:date><ns1:amount>1000</ns1:amount><ns1:currency>810</ns1:currency><ns1:exponent>2</ns1:exponent><ns1:Params><ns1:Param ns1:name=\"currency\">810</ns1:Param></ns1:Params></ns1:Payment><ns1:pcentreTrxId>E4131D2C074AEFB292DE87EE800E625A</ns1:pcentreTrxId></ns1:CPAReq></soapenv:Body></soapenv:Envelope>";
+        public static final String txt = new String(new byte[1000000]);
+//                "<?xml version='1.0' encoding='utf-8'?><soapenv:Envelope xmlns:soapenv=\"http://www.w3.org/2003/05/soap-envelope\"><soapenv:Body><ns1:CPAReq xmlns:ns1=\"http://twophaseinteraction.mts.ru/xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"ns1:CPAReqMessage\" ns1:messageId=\"0\" ns1:version=\"1.5\"><ns1:Client /><ns1:Provider><ns1:id>3868638A697715F0F186DA2C7CB1CDC3</ns1:id></ns1:Provider><ns1:Payment><ns1:date>2012-03-06T01:21:58.052+03:00</ns1:date><ns1:amount>1000</ns1:amount><ns1:currency>810</ns1:currency><ns1:exponent>2</ns1:exponent><ns1:Params><ns1:Param ns1:name=\"currency\">810</ns1:Param></ns1:Params></ns1:Payment><ns1:pcentreTrxId>E4131D2C074AEFB292DE87EE800E625A</ns1:pcentreTrxId></ns1:CPAReq></soapenv:Body></soapenv:Envelope>";
         private InetSocketAddress endpoint;
 
         public static FilterChain chain;
@@ -141,6 +140,7 @@ public class Main {
 
             };
             httpClientFilter.addTransferEncoding(new FixedLengthTransferEncoding());
+//            httpClientFilter.addTransferEncoding(new ChunkedTransferEncoding(HttpServerFilter.DEFAULT_MAX_HTTP_PACKET_HEADER_SIZE));
             builder.add(httpClientFilter);
             builder.add(new ResponseHandle());
 
@@ -177,11 +177,11 @@ public class Main {
     }
 
     public static void main(String[] args) throws InterruptedException, IOException, SinkException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml", Main.class);
+        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml", ClientMain.class);
 
         IFlowBus flowBus = Manager.getFlowBus("client-transport-flow-bus");
 
-        URL url1 = new URL("http://localhost:88/console/ttp-ticketservice-controller/security/config1");
+        URL url1 = new URL("http://localhost:18081/admin/start.wsm");
 //        URL url1 = new URL("http://wwww.lenta.ru/");
 //        URL url1 = new URL("http://10.1.3.145:8080/agregator-1.5/emulator/");
 //        URL url2 = new URL("http://10.1.2.246:8080/agregator-1.5/emulator/");

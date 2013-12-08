@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:nio="http://www.kwanza-systems.ru/schema/jeda-nio"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans.xsd
+               http://www.kwanza-systems.ru/schema/jeda-nio http://www.kwanza-systems.ru/schema/jeda-nio.xsd
+               http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+    <nio:http-server name="HttpServer" keepAliveIdleTimeout="60" keepAliveMaxRequestsCount="-1">
+        <nio:entry-point host="localhost" port="18081"/>
+        <nio:entry-point host="localhost" port="28081" useAJP="true"/>
+        <!--<nio:entry-point host="localhost" port="22443">-->
+            <!--<nio:jks-keystore keystoreFile="J:/mykeystore.jks" keystorePassword="a12345678"/>-->
+        <!--</nio:entry-point>-->
+    </nio:http-server>
+
+    <core:stage name="TestHttpEventStage">
+        <core:tx-memory-queue cloneType="SERIALIZE" maxSize="1000"/>
+
+        <core:fixed-batch-size-resource-controller batchSize="100" adjustmentCount="100"
+                                                   waitForFillingTimeout="1000"/>
+        <core:event-processor class="ru.kwanza.jeda.nio.server.TestEventProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="TestHttpEventStage" idleTimeout="50000"/>
+    </core:stage>
+
+    <core:flow-bus name="TestFlowBus" class="ru.kwanza.jeda.nio.server.TestFlowBus">
+        <property name="next" ref="TestHttpEventStage"/>
+    </core:flow-bus>
+
+    <nio:http-handler server="HttpServer" timeout="1000" timedOutHandler="timedOut">
+        <nio:uri>/admin/start.wsm</nio:uri>
+        <nio:stage>TestHttpEventStage</nio:stage>
+    </nio:http-handler>
+
+    <nio:http-handler server="HttpServer" timeout="1000" timedOutHandler="timedOut">
+        <nio:pattern>/admin/*.wsm</nio:pattern>
+        <nio:flowBus>TestFlowBus</nio:flowBus>
+    </nio:http-handler>
+
+    <bean id="timedOut" class="ru.kwanza.jeda.nio.server.TestTimedOutHandler"/>
+
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+</beans>
