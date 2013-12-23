@@ -1,11 +1,12 @@
 package ru.kwanza.jeda.nio.client;
 
+import java.io.Serializable;
 import java.net.InetSocketAddress;
 
 /**
  * @author Guzanov Alexander
  */
-public class ConnectionConfig {
+public class ConnectionConfig implements Serializable {
     private boolean keepAlive;
     private Boolean tcpNoDelay;
     //todo aguzanov Возможность работы клиентских соединений через proxy

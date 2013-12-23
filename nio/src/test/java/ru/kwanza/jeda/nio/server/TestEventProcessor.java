@@ -17,12 +17,6 @@ import java.util.Collection;
  */
 public class TestEventProcessor implements IEventProcessor<IHttpEvent> {
     public void process(Collection<IHttpEvent> events) {
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
-
 
         for (IHttpEvent e : events) {
             IHttpRequest httpRequest = e.getHttpRequest();
@@ -208,7 +202,7 @@ public class TestEventProcessor implements IEventProcessor<IHttpEvent> {
             responseHeader.setContentLength(build.getContent().capacity());
             try {
                 String requestString = httpRequest.getID().asString();
-                System.out.println(requestString);
+//                System.out.println(requestString);
                 RequestID.findRequest(requestString).finish(build);
             } catch (RequestIDException e1) {
                 e1.printStackTrace();
