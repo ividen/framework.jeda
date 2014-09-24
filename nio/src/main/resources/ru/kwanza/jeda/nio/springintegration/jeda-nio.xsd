@@ -157,7 +157,7 @@
             </xsd:sequence>
 
             <xsd:attribute name="host" type="xsd:string" use="optional"/>
-            <xsd:attribute name="port" type="xsd:int" use="optional"/>
+            <xsd:attribute name="port" type="xsd:string" use="optional"/>
             <xsd:attribute name="useAJP" type="xsd:boolean" use="optional" default="false"/>
             <xsd:attribute name="keepAliveIdleTimeout" type="xsd:int" use="optional"/>
             <xsd:attribute name="keepAliveMaxRequestsCount" type="xsd:int" use="optional"/>
