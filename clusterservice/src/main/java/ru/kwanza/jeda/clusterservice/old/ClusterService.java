@@ -1,6 +1,6 @@
-package ru.kwanza.jeda.clusterservice;
+package ru.kwanza.jeda.clusterservice.old;
 
-import ru.kwanza.jeda.clusterservice.impl.IClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.impl.IClusterServiceImpl;
 
 import javax.annotation.Resource;
 

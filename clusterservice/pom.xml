@@ -62,7 +62,13 @@
         <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
             <artifactId>dbtool-core</artifactId>
-            <scope>test</scope>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.dbtool</groupId>
+            <artifactId>dbtool-orm</artifactId>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

@@ -8,7 +8,7 @@ import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.lock.AppLock;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.TimerItem;
-import ru.kwanza.jeda.clusterservice.ClusterService;
+import ru.kwanza.jeda.clusterservice.old.ClusterService;
 import ru.kwanza.jeda.timer.ITimerPersistentController;
 import ru.kwanza.jeda.timer.TimerException;
 import org.springframework.jdbc.core.RowMapper;

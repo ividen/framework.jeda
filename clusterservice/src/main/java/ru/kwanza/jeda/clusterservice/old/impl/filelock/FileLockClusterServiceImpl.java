@@ -1,7 +1,7 @@
-package ru.kwanza.jeda.clusterservice.impl.filelock;
+package ru.kwanza.jeda.clusterservice.old.impl.filelock;
 
-import ru.kwanza.jeda.clusterservice.INodeListener;
-import ru.kwanza.jeda.clusterservice.impl.IClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.impl.IClusterServiceImpl;
 
 /**
  * @author Guzanov Alexander

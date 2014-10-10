@@ -3,7 +3,7 @@ package ru.kwanza.jeda.persistentqueue.berkeley;
 import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;

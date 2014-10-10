@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.clusterservice.mock;
 
-import ru.kwanza.jeda.clusterservice.INodeListener;
-import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import junit.framework.TestCase;
 
 import java.util.concurrent.atomic.AtomicLong;

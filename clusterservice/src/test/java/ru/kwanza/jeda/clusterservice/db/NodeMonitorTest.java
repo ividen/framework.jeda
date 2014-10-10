@@ -1,12 +1,7 @@
 package ru.kwanza.jeda.clusterservice.db;
 
-import ru.kwanza.jeda.clusterservice.ClusterService;
-import ru.kwanza.jeda.clusterservice.INodeListener;
-import junit.framework.TestCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class NodeMonitorTest /* extends TestCase*/ {
     private static final Logger logger = LoggerFactory.getLogger(NodeMonitorTest.class);

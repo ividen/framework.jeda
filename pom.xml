@@ -18,7 +18,7 @@
         <junit.version>3.8.1</junit.version>
         <dbunit.version>2.4.8</dbunit.version>
         <txn.version>1.0</txn.version>
-        <dbtool.version>1.0</dbtool.version>
+        <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <autokey.version>1.0</autokey.version>
         <filelock.version>1.0</filelock.version>
         <toolbox.version>1.0</toolbox.version>
@@ -386,6 +386,12 @@
             <dependency>
                 <groupId>ru.kwanza.dbtool</groupId>
                 <artifactId>dbtool-core</artifactId>
+                <version>${dbtool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.dbtool</groupId>
+                <artifactId>dbtool-orm</artifactId>
                 <version>${dbtool.version}</version>
             </dependency>
 

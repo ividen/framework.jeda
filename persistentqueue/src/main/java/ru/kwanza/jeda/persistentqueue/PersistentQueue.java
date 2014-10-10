@@ -3,8 +3,8 @@ package ru.kwanza.jeda.persistentqueue;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.*;
-import ru.kwanza.jeda.clusterservice.ClusterService;
-import ru.kwanza.jeda.clusterservice.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.ClusterService;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
 import ru.kwanza.jeda.core.queue.*;
 
 import java.util.ArrayList;

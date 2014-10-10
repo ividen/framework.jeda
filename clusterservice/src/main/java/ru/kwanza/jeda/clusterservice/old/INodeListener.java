@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.clusterservice;
+package ru.kwanza.jeda.clusterservice.old;
 
 /**
  * @author Guzanov Alexander

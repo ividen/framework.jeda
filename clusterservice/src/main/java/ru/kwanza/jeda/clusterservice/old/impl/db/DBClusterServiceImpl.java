@@ -1,7 +1,7 @@
-package ru.kwanza.jeda.clusterservice.impl.db;
+package ru.kwanza.jeda.clusterservice.old.impl.db;
 
-import ru.kwanza.jeda.clusterservice.INodeListener;
-import ru.kwanza.jeda.clusterservice.impl.IClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.impl.IClusterServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
@@ -40,7 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * </p>
  *
  * @author Guzanov Alexander
- * @see ru.kwanza.jeda.clusterservice.ClusterService
+ * @see ru.kwanza.jeda.clusterservice.old.ClusterService
  * @see IClusterServiceImpl
  */
 public class DBClusterServiceImpl implements IClusterServiceImpl, ApplicationListener<ContextRefreshedEvent> {

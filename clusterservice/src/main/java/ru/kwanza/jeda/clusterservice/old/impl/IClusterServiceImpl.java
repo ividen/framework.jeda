@@ -1,6 +1,6 @@
-package ru.kwanza.jeda.clusterservice.impl;
+package ru.kwanza.jeda.clusterservice.old.impl;
 
-import ru.kwanza.jeda.clusterservice.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
 
 /**
  * @author Guzanov Alexander

@@ -2,7 +2,7 @@ package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.clusterservice.ClusterService;
+import ru.kwanza.jeda.clusterservice.old.ClusterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

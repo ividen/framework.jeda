@@ -8,11 +8,11 @@
 
     <context:annotation-config/>
 
-    <bean id="clusterServiceImpl" class="ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl"
+    <bean id="clusterServiceImpl" class="ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl"
           scope="singleton" factory-method="getInstance">
     </bean>
 
-    <bean id="clusterService" class="ru.kwanza.jeda.clusterservice.ClusterService" scope="singleton"
+    <bean id="clusterService" class="ru.kwanza.jeda.clusterservice.old.ClusterService" scope="singleton"
           factory-method="getInstance">
     </bean>
 

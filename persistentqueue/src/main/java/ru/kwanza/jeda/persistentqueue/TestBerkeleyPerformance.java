@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.Manager;
-import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
