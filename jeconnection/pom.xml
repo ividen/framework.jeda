@@ -33,14 +33,12 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-core</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -54,12 +52,6 @@
             <groupId>jboss.jbossts</groupId>
             <artifactId>jbossts-extention</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.sleepycat</groupId>
-            <artifactId>je</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>

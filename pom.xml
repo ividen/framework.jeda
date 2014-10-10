@@ -13,15 +13,15 @@
         <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
         <jtds.version>1.2.1</jtds.version>
         <cglib.version>2.2.2</cglib.version>
-        <atamicos.version>3.7.0-SNAPSHOT</atamicos.version>
-        <jbossts.version>4.9.0-SNAPSHOT</jbossts.version>
+        <atamicos.version>3.7.0</atamicos.version>
+        <jbossts.version>4.9.0</jbossts.version>
         <junit.version>3.8.1</junit.version>
         <dbunit.version>2.4.8</dbunit.version>
-        <txn.version>1.0-SNAPSHOT</txn.version>
-        <dbtool.version>1.0-SNAPSHOT</dbtool.version>
-        <autokey.version>1.0-SNAPSHOT</autokey.version>
-        <filelock.version>1.0-SNAPSHOT</filelock.version>
-        <toolbox.version>1.0-SNAPSHOT</toolbox.version>
+        <txn.version>1.0</txn.version>
+        <dbtool.version>1.0</dbtool.version>
+        <autokey.version>1.0</autokey.version>
+        <filelock.version>1.0</filelock.version>
+        <toolbox.version>1.0</toolbox.version>
         <mockito.version>1.9.0</mockito.version>
         <commons-dbcp.version>1.4</commons-dbcp.version>
         <beanutils.version>1.8.3</beanutils.version>
@@ -223,6 +223,38 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>ru.kwanza.jeda</groupId>
+                <artifactId>jeda-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.jeda</groupId>
+                <artifactId>jeda-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.jeda</groupId>
+                <artifactId>jeda-jeconnection</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.jeda</groupId>
+                <artifactId>jeda-clusterservice</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.jeda</groupId>
+                <artifactId>jeda-persistentqueue</artifactId>
+                <version>${project.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -259,7 +291,7 @@
                 <version>${slf4j.version}</version>
                 <scope>test</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-core</artifactId>
@@ -318,6 +350,7 @@
                 <groupId>com.atomikos</groupId>
                 <artifactId>atomikos-extention</artifactId>
                 <version>${atamicos.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -401,6 +434,7 @@
                 <groupId>jboss.jbossts</groupId>
                 <artifactId>jbossts-extention</artifactId>
                 <version>${jbossts.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -424,12 +458,24 @@
         </dependencies>
     </dependencyManagement>
 
+    <scm>
+        <connection>scm:git:https://fisheye.kwanza-systems.ru/git/framework.jeda.git</connection>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
+        <repository>
+            <id>kwanza-releases</id>
+            <name>libs-release</name>
+            <url>http://artifactory.kwanza-systems.ru/libs-release-local</url>
+        </repository>
+
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>kwanza-snapshots</id>
             <name>snapshots</name>
-	    <url>http://artifactory.kwanza-systems.ru/libs-snapshot-local</url>
+            <url>http://artifactory.kwanza-systems.ru/libs-snapshot-local</url>
         </snapshotRepository>
     </distributionManagement>
+
 
 </project>

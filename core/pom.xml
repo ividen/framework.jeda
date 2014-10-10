@@ -26,7 +26,6 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 

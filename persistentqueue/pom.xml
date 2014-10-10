@@ -38,7 +38,6 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -99,21 +98,18 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-core</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-clusterservice</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-jeconnection</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 

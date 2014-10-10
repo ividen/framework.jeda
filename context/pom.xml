@@ -20,7 +20,6 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -55,8 +54,6 @@
             <scope>compile</scope>
         </dependency>
 
-
-
         <dependency>
             <groupId>ru.kwanza.txn</groupId>
             <artifactId>txn</artifactId>
@@ -66,7 +63,6 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-core</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -91,14 +87,12 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-jeconnection</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-clusterservice</artifactId>
-            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -153,13 +147,11 @@
         <dependency>
             <groupId>jboss.jbossts</groupId>
             <artifactId>jbossts-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>atomikos-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
