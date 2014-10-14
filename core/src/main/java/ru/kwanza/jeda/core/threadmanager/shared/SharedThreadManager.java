@@ -1,7 +1,8 @@
 package ru.kwanza.jeda.core.threadmanager.shared;
 
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.core.threadmanager.AbstractProcessingThread;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;
 import ru.kwanza.jeda.core.threadmanager.shared.comparator.RoundRobinComparator;
@@ -25,7 +26,7 @@ public class SharedThreadManager extends AbstractThreadManager {
     private List<StageEntry> orderedStage = new ArrayList<StageEntry>();
     private Comparator<StageEntry> stageComparator = new RoundRobinComparator();
 
-    public SharedThreadManager(String threadNamePrefix, ISystemManager manager) {
+    public SharedThreadManager(String threadNamePrefix, ISystemManagerInternal manager) {
         super(threadNamePrefix, manager);
         setMaxThreadCount(DEFAULT_MAX_THREAD_COUNT);
     }

@@ -1,9 +1,9 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
 import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
 import junit.framework.TestCase;
@@ -36,7 +36,7 @@ public abstract class TestPersistentQueue extends TestCase {
     protected abstract String getContextName();
 
     protected PersistentQueue createQeueue() {
-        return new PersistentQueue((ISystemManager) ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager"),
+        return new PersistentQueue((ISystemManagerInternal) ctx.getBean("ru.kwanza.jeda.api.ISystemManager"),
                 1000, controller);
     }
 
@@ -107,16 +107,16 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(queue.isActive());
 
         Thread.currentThread().interrupt();
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         try {
             try {
                 queue.put(Collections.singleton(createEvent("Test1")));
                 fail("Expected " + SinkException.Closed.class);
             } catch (SinkException.Closed e) {
             }
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         } catch (Throwable e) {
-            Manager.getTM().rollback();
+            queue.getManager().getTransactionManager().rollback();
             throw e;
         }
         assertEquals("Wrong size", 0, queue.size());
@@ -130,16 +130,16 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(queue.isActive());
 
         Thread.currentThread().interrupt();
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         try {
             try {
                 queue.tryPut(Collections.singleton(createEvent("Test1")));
                 fail("Expected " + SinkException.Closed.class);
             } catch (SinkException.Closed e) {
             }
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         } catch (Throwable e) {
-            Manager.getTM().rollback();
+            queue.getManager().getTransactionManager().rollback();
             throw e;
         }
         assertEquals("Wrong size", 0, queue.size());
@@ -152,12 +152,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
@@ -178,12 +178,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().rollback();
+        queue.getManager().getTransactionManager().rollback();
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
@@ -202,11 +202,11 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(queue.isActive());
 
         controller.setErrorOnPersist(true);
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         try {
             queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         } catch (Throwable e) {
-            Manager.getTM().rollback();
+            queue.getManager().getTransactionManager().rollback();
         }
 
         assertEquals("Wrong size", 0, queue.size());
@@ -225,7 +225,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         ArrayList<Event> events = new ArrayList<Event>();
         for (int i = 0; i < 1001; i++) {
             events.add(createEvent("Test" + i));
@@ -238,7 +238,7 @@ public abstract class TestPersistentQueue extends TestCase {
 
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
@@ -252,12 +252,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         assertNull(queue.tryPut(Collections.singleton(createEvent("Test1"))));
         assertNull(queue.tryPut(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4"))));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
@@ -278,12 +278,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         assertNull(queue.tryPut(Collections.singleton(createEvent("Test1"))));
         assertNull(queue.tryPut(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4"))));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().rollback();
+        queue.getManager().getTransactionManager().rollback();
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
@@ -301,7 +301,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         ArrayList<Event> events = new ArrayList<Event>();
         for (int i = 0; i < 1001; i++) {
             events.add(createEvent("Test" + i));
@@ -314,7 +314,7 @@ public abstract class TestPersistentQueue extends TestCase {
 
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 1000, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 1000, queue.size());
         assertEquals("Wrong estimate size", 1000, queue.getEstimatedCount());
 
@@ -330,12 +330,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
@@ -376,12 +376,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
@@ -412,28 +412,28 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
         assertTrue(exists(events, "Test4"));
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         assertEquals("Wrong Size", 4, take.size());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         take = queue.take(1000);
         assertNull(take);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
@@ -448,22 +448,22 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
         assertTrue(exists(events, "Test4"));
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         assertEquals("Wrong Size", 4, take.size());
-        Manager.getTM().rollback();
+        queue.getManager().getTransactionManager().rollback();
 
         Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
         assertEquals("Must be empty", 4, storedevents.size());
@@ -473,10 +473,10 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(events, "Test4"));
 
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         take = queue.take(1000);
         assertEquals("Wrong Size", 4, take.size());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         storedevents = TestDataStore.getInstance().getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
@@ -491,12 +491,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
@@ -505,16 +505,16 @@ public abstract class TestPersistentQueue extends TestCase {
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeLost();
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         assertNull(queue.take(1000));
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         assertEquals("Wrong Size", 4, take.size());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
@@ -529,12 +529,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
@@ -547,10 +547,10 @@ public abstract class TestPersistentQueue extends TestCase {
         } catch (SourceException e) {
         }
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         assertEquals("Wrong Size", 4, take.size());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
@@ -565,12 +565,12 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
@@ -578,13 +578,13 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(events, "Test4"));
 
         Thread.currentThread().interrupt();
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         try {
             queue.take(1000);
             fail("Expected " + SourceException.class);
         } catch (SourceException e) {
         }
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -614,12 +614,12 @@ public abstract class TestPersistentQueue extends TestCase {
 
         assertEquals(observer, queue.getObserver());
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Collections.singleton(createEvent("Test1")));
         queue.put(Arrays.asList(createEvent("Test2"), createEvent("Test3"), createEvent("Test4")));
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
         Collection<Event> events = TestDataStore.getInstance().getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
@@ -665,9 +665,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(2);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         events = TestDataStore.getInstance().getEvents(1);
         assertTrue(!exists(events, "1"));
@@ -716,7 +716,7 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(2);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         assertTrue(exists(take, "1"));
         assertTrue(exists(take, "2"));
@@ -724,7 +724,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(take, "4"));
         assertTrue(exists(take, "5"));
         assertTrue(exists(take, "6"));
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         events = TestDataStore.getInstance().getEvents(1);
         assertTrue(!exists(events, "1"));
@@ -765,9 +765,9 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 1000; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         Thread.sleep(1000);
@@ -779,9 +779,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(2);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -822,9 +822,9 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 1000; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         Thread.sleep(1000);
@@ -839,9 +839,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(3);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -882,28 +882,28 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 1000; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
 
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             try {
                 try {
                     queue.put(Arrays.asList(createEvent("Test_Event" + i)));
                     fail("Expected " + SinkException.Clogged.class);
                 } catch (SinkException.Clogged e) {
                 }
-                Manager.getTM().commit();
+                queue.getManager().getTransactionManager().commit();
             } catch (Throwable e) {
-                Manager.getTM().rollback();
+                queue.getManager().getTransactionManager().rollback();
             }
 
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             try {
                 assertEquals("WrongSize", 1, queue.tryPut(Arrays.asList(createEvent("Test_try_Event" + i))).size());
-                Manager.getTM().commit();
+                queue.getManager().getTransactionManager().commit();
             } catch (Throwable e) {
-                Manager.getTM().rollback();
+                queue.getManager().getTransactionManager().rollback();
             }
         }
 
@@ -919,18 +919,18 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(3);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         Thread.sleep(1000);
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         queue.put(Arrays.asList(createEvent("Test_Event")));
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         assertNull(queue.tryPut(Arrays.asList(createEvent("Test_try_Event"))));
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -971,24 +971,24 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1);
         MockClusterServiceImpl.getInstance().generateCurrentNodeLost();
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
         MockClusterServiceImpl.getInstance().generateNodeLost(3, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
         for (int i = 0; i < 499; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
 
@@ -1006,9 +1006,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(3);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -1042,18 +1042,18 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
             MockClusterServiceImpl.getInstance().setLastNodeActivity(2, System.currentTimeMillis());
         }
 
         Thread.sleep(1000);
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         Thread.sleep(1000);
@@ -1065,9 +1065,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(2);
         assertEquals(events.size(), 0);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -1095,9 +1095,9 @@ public abstract class TestPersistentQueue extends TestCase {
         events = TestDataStore.getInstance().getEvents(2);
         assertNull(events);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         events = TestDataStore.getInstance().getEvents(1);
         assertTrue(!exists(events, "1"));
@@ -1176,18 +1176,18 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         QueueEventsTransfer.getInstance().shutdown();
 
         Thread.sleep(1000);
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
         QueueEventsTransfer.getInstance().start();
     }
@@ -1220,9 +1220,9 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         Thread.currentThread().interrupt();
@@ -1233,9 +1233,9 @@ public abstract class TestPersistentQueue extends TestCase {
         } catch (SinkException.Closed e) {
         }
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -1267,9 +1267,9 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
-            Manager.getTM().begin();
+            queue.getManager().getTransactionManager().begin();
             Collection<Event> take = queue.take(1);
-            Manager.getTM().commit();
+            queue.getManager().getTransactionManager().commit();
         }
 
         Thread.currentThread().interrupt();
@@ -1280,9 +1280,9 @@ public abstract class TestPersistentQueue extends TestCase {
         } catch (SinkException.Closed e) {
         }
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 
@@ -1314,9 +1314,9 @@ public abstract class TestPersistentQueue extends TestCase {
         } catch (SinkException.Closed e) {
         }
 
-        Manager.getTM().begin();
+        queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(10000);
-        Manager.getTM().commit();
+        queue.getManager().getTransactionManager().commit();
 
     }
 

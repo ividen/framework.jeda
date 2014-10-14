@@ -1,7 +1,8 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.Manager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
 import javax.transaction.Status;
@@ -14,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Guzanov Alexander
  */
 public class TestDataStore {
+    private ISystemManagerInternal manager;
     private static final TestDataStore instance = new TestDataStore();
 
     private AtomicLong idCounter = new AtomicLong(0l);
@@ -122,7 +124,7 @@ public class TestDataStore {
     }
 
     public void delete(long nodeId, Collection<EventWithKey> events) {
-        ITransactionManagerInternal tm = (ITransactionManagerInternal) Manager.getTM();
+        ITransactionManagerInternal tm = (ITransactionManagerInternal) manager.getTransactionManager();
         try {
             tm.getTransaction().registerSynchronization(new DeleteSync(nodeId, events));
         } catch (Exception e) {
@@ -143,7 +145,7 @@ public class TestDataStore {
     }
 
     public void persist(long nodeId, Collection<EventWithKey> events) {
-        ITransactionManagerInternal tm = (ITransactionManagerInternal) Manager.getTM();
+        ITransactionManagerInternal tm = (ITransactionManagerInternal) manager.getTransactionManager();
         try {
             tm.getTransaction().registerSynchronization(new AddSync(nodeId, events));
         } catch (Exception e) {
@@ -153,7 +155,7 @@ public class TestDataStore {
 
     public Collection<EventWithKey> transfer(long count, long currentNodeId, long newNodeId) {
         lock();
-        ITransactionManagerInternal tm = (ITransactionManagerInternal) Manager.getTM();
+        ITransactionManagerInternal tm = (ITransactionManagerInternal) manager.getTransactionManager();
         try {
             ArrayList<EventWithKey> currentEvents = store.get(currentNodeId);
             if (currentEvents == null) {

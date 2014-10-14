@@ -1,9 +1,9 @@
 package ru.kwanza.jeda.core.manager;
 
-import ru.kwanza.jeda.api.Manager;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 
 /**
  * @author Guzanov Alexander
@@ -11,10 +11,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class TestManagerInjection extends TestCase {
     public void testManagerInjection() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", TestManagerInjection.class);
-        Manager manager = ctx.getBean(Manager.class);
+        ISystemManagerInternal manager = ctx.getBean(ISystemManagerInternal.class);
 
-        Manager.getTM().begin();
+        manager.getTransactionManager().begin();
 
-        Manager.getTM().commit();
+        manager.getTransactionManager().commit();
     }
 }

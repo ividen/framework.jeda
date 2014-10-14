@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;

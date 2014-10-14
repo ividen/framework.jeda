@@ -9,11 +9,13 @@ import java.util.Collection;
  */
 public class SinkResolver<E extends IEvent> implements ISink<E> {
 
+    private final ISystemManager manager;
     private ISink<E> original;
     private String name;
 
-    public SinkResolver(String name) {
+    public SinkResolver(ISystemManager manager,String name) {
         this.name = name;
+        this.manager = manager;
     }
 
     public void put(Collection<E> events) throws SinkException {
@@ -35,7 +37,7 @@ public class SinkResolver<E extends IEvent> implements ISink<E> {
             return;
         }
 
-        Object obj = Manager.resolveObject(name);
+        Object obj = manager.resolveObject(name);
         if (obj instanceof ISink) {
             original = (ISink) obj;
         } else if (obj instanceof IStage) {

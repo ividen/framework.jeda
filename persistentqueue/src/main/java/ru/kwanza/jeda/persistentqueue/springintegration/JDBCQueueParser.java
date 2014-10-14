@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;

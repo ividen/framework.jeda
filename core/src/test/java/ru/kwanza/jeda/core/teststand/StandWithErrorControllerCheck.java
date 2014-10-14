@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.teststand;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.manager.DefaultSystemManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
@@ -84,11 +84,13 @@ public class StandWithErrorControllerCheck {
     }
 
     public static class InputThread extends Thread {
+        private final ISystemManager manager;
         long counter = 0;
         long FREQ = 50000;
 
-        public InputThread() {
+        public InputThread(ISystemManager manager) {
             super("InputThread");
+            this.manager = manager;
         }
 
         public void run() {
@@ -107,7 +109,7 @@ public class StandWithErrorControllerCheck {
                 }
 
                 try {
-                    Manager.getStage("TestStage").<Event>getSink().put(events);
+                    manager.getStage("TestStage").<Event>getSink().put(events);
                 } catch (SinkException e) {
                     e.printStackTrace();
                 }
@@ -117,7 +119,7 @@ public class StandWithErrorControllerCheck {
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", Main.class);
-        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
                 DefaultSystemManager.class);
         StageThreadManager stageThreadManager = new StageThreadManager("testThreads", systemManager);
         stageThreadManager.setMaxThreadCount(10);
@@ -125,7 +127,7 @@ public class StandWithErrorControllerCheck {
         SmartResourceController resourceController = new SmartResourceController();
         resourceController.setMaxBatchSize(50000);
         TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
-                ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", ISystemManager.class),
+                systemManager,
                 ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
         Stage testStage = new Stage(systemManager, "TestStage", new EventProcessor("TestStage"), queue,
                 stageThreadManager, null, resourceController, true);
@@ -133,7 +135,7 @@ public class StandWithErrorControllerCheck {
 
         systemManager.registerStage(testStage);
 
-        new InputThread().start();
+        new InputThread(systemManager).start();
         Thread.currentThread().join();
     }
 }

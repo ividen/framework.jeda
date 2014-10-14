@@ -2,7 +2,7 @@ package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.internal.IResourceController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.core.springintegration.SystemFlowBusFactory;

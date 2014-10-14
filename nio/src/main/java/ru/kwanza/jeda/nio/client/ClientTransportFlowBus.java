@@ -6,7 +6,8 @@ import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.core.manager.ObjectNotFoundException;
 import ru.kwanza.jeda.core.stage.Stage;
 import ru.kwanza.jeda.core.threadmanager.shared.SharedThreadManager;
@@ -19,7 +20,7 @@ import java.util.*;
  * @author Guzanov Alexander
  */
 public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
-    private ISystemManager manager;
+    private ISystemManagerInternal manager;
     private IDirectionQueueFactory directionQueueFactory;
     private TCPNIOTransport transport;
     private String name;
@@ -54,7 +55,7 @@ public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
         this.name = name;
     }
 
-    public void setManager(ISystemManager manager) {
+    public void setManager(ISystemManagerInternal manager) {
         this.manager = manager;
     }
 
@@ -91,7 +92,7 @@ public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
         }
     }
 
-    private IStageInternal createDirectionStage(String stageName, InetSocketAddress endpoint, ISystemManager manager) {
+    private IStageInternal createDirectionStage(String stageName, InetSocketAddress endpoint, ISystemManagerInternal manager) {
         ConnectionPool connectionPool = registry.getConnectionPool(endpoint);
         return new Stage(manager, stageName,
                 new EventProcessor(transport, connectionPool),

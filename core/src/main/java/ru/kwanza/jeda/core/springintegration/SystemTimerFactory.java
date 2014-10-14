@@ -2,16 +2,17 @@ package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.ITimer;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 
 /**
  * @author Guzanov Alexander
  */
 class SystemTimerFactory implements SmartFactoryBean<ITimer>, BeanNameAware {
     private ITimer original;
-    private ISystemManager manager;
+    private ISystemManagerInternal manager;
     private String name;
 
     public boolean isPrototype() {
@@ -42,7 +43,7 @@ class SystemTimerFactory implements SmartFactoryBean<ITimer>, BeanNameAware {
         this.original = original;
     }
 
-    public void setManager(ISystemManager manager) {
+    public void setManager(ISystemManagerInternal manager) {
         this.manager = manager;
     }
 }

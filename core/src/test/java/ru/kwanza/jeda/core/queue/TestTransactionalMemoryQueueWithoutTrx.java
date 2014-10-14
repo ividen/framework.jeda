@@ -3,7 +3,8 @@ package ru.kwanza.jeda.core.queue;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import junit.framework.TestSuite;
 
@@ -11,7 +12,7 @@ import junit.framework.TestSuite;
  * @author Guzanov Alexander
  */
 public class TestTransactionalMemoryQueueWithoutTrx extends TestEventQueue {
-    public static class NonTransactionalSystemManager implements ISystemManager {
+    public static class NonTransactionalSystemManager implements ISystemManagerInternal {
         public ITransactionManagerInternal getTransactionManager() {
             return null;
         }

@@ -32,10 +32,10 @@ public class TestMocks extends TestCase {
 
     public void testMockFlowBus() throws SinkException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", TestMocks.class);
-        Manager manager = ctx.getBean(Manager.class);
+        ISystemManager manager = ctx.getBean(ISystemManager.class);
 
-        Manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
-        Manager.getFlowBus("TestFlowBus_2").put(Arrays.asList(new IEvent[]{new TestEvent("3"), new TestEvent("4")}));
+        manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
+        manager.getFlowBus("TestFlowBus_2").put(Arrays.asList(new IEvent[]{new TestEvent("3"), new TestEvent("4")}));
 
         ArrayList<IEvent> events = MockFlowBus.getEvents("TestFlowBus_1");
         assertEquals("Wrong event", "1", ((TestEvent) events.get(0)).getContextId());
@@ -63,9 +63,9 @@ public class TestMocks extends TestCase {
 
     public void testCurrentStage() throws BusException, SinkException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", TestMocks.class);
-        Manager manager = ctx.getBean(Manager.class);
+        ISystemManager manager = ctx.getBean(ISystemManager.class);
 
-        Manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
+        manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
 
         ArrayList<IEvent> events = MockFlowBus.getEvents("TestFlowBus_1");
         assertEquals("Wrong event", "1", ((TestEvent) events.get(0)).getContextId());
@@ -83,12 +83,12 @@ public class TestMocks extends TestCase {
 
     public void testBusException() throws BusException, SinkException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", TestMocks.class);
-        Manager manager = ctx.getBean(Manager.class);
+        ISystemManager manager = ctx.getBean(ISystemManager.class);
 
-        Manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
+        manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
         MockSystemManager.getInstance().getFlowBus("TestFlowBus_1").setMaxSize(3);
         try {
-            Manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
+            manager.getFlowBus("TestFlowBus_1").put(Arrays.asList(new IEvent[]{new TestEvent("1"), new TestEvent("2")}));
             fail("Mus be bus exception!");
         } catch (SinkException e) {
         }

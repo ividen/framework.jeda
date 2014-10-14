@@ -15,10 +15,10 @@ import java.util.Iterator;
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
-    protected ISystemManager manager;
+    protected ISystemManagerInternal manager;
     private ClassPathXmlApplicationContext context;
 
-    public static class StubSystemManager implements ISystemManager {
+    public static class StubSystemManager implements ISystemManagerInternal {
         private ITransactionManagerInternal tm;
 
         public StubSystemManager(ITransactionManagerInternal tm) {

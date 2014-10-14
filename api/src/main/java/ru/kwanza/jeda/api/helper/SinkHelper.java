@@ -11,9 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static ru.kwanza.jeda.api.Manager.resolveObject;
-import static ru.kwanza.jeda.api.Manager.resolveObjectName;
-
 /**
  * @author Guzanov Alexander
  */
@@ -23,13 +20,16 @@ public class SinkHelper {
 
     public static final IAttribute<Object> SH_EVENT_KEY_ATTR = AttributeFactory.create();
     public static final IAttribute<String> SH_SINK_NAME_ATTR = AttributeFactory.create();
-    public static final FieldHelper.Field<IEvent, Object> SH_EVENT_KEY_FIELD = new AttributeField<IEvent, Object>(SH_EVENT_KEY_ATTR);
     public static final FieldHelper.Field<IEvent, String> SH_SINK_NAME_FIELD = new AttributeField<IEvent, String>(SH_SINK_NAME_ATTR);
-    public static final FieldHelper.Field<IEvent, ISink<IEvent>> SH_SINK_FIELD = new SinkField();
 
+    private final ISystemManager manager;
     private Map<ISink, Map<Object, IEvent>> puts = new HashMap<ISink, Map<Object, IEvent>>();
     private Map<ISink, Map<Object, IEvent>> tryPuts = new HashMap<ISink, Map<Object, IEvent>>();
     private Map<String, ISink> sinks = new HashMap<String, ISink>();
+
+    public SinkHelper(ISystemManager manager){
+        this.manager = manager;
+    }
 
     public void clear() {
         puts.clear();
@@ -40,7 +40,7 @@ public class SinkHelper {
     ISink getSink(String name) {
         ISink result = sinks.get(name);
         if (result == null) {
-            result = new SinkResolver(name);
+            result = new SinkResolver(manager,name);
             sinks.put(name, result);
         }
         return result;
@@ -62,13 +62,13 @@ public class SinkHelper {
         put(sink, event, puts, event);
     }
 
-    public static Map<ISink, Map<Object, IEvent>> splitByKeyBySink(Collection<IEvent> events) {
-        return new Splitter<IEvent>(SH_SINK_FIELD, SH_EVENT_KEY_FIELD).oneToOne(events);
-    }
-
-    public static Map<String, Map<Object, IEvent>> splitByKeyBySinkName(Collection<IEvent> events) {
-        return new Splitter<IEvent>(SH_SINK_NAME_FIELD, SH_EVENT_KEY_FIELD).oneToOne(events);
-    }
+//    public static Map<ISink, Map<Object, IEvent>> splitByKeyBySink(Collection<IEvent> events) {
+//        return new Splitter<IEvent>(SH_SINK_FIELD, SH_EVENT_KEY_FIELD).oneToOne(events);
+//    }
+//
+//    public static Map<String, Map<Object, IEvent>> splitByKeyBySinkName(Collection<IEvent> events) {
+//        return new Splitter<IEvent>(SH_SINK_NAME_FIELD, SH_EVENT_KEY_FIELD).oneToOne(events);
+//    }
 
     /**
      * @param sinkName синки
@@ -91,7 +91,7 @@ public class SinkHelper {
     public Collection<IEvent> refuse(ISink... sinks) {
         List<IEvent> eventList = new LinkedList<IEvent>();
         for (ISink s : sinks) {
-            String sinkName = resolveObjectName(s);
+            String sinkName = manager.resolveObjectName(s);
             setEventsAttributes(sinkName, puts.remove(s), eventList);
             setEventsAttributes(sinkName, tryPuts.remove(s), eventList);
         }
@@ -329,7 +329,7 @@ public class SinkHelper {
     }
 
     protected ISuspender<IEvent> getSuspender() {
-        return Manager.getPendingStore().getSuspender();
+        return manager.getPendingStore().getSuspender();
     }
 
     private void setEventsAttributes(String sinkName, Map<Object, IEvent> eventByKey, Collection<IEvent> outputEvents) {
@@ -392,7 +392,7 @@ public class SinkHelper {
         if (sink instanceof SinkResolver) {
             return ((SinkResolver) sink).getName();
         }
-        return resolveObjectName(sink);
+        return manager.resolveObjectName(sink);
     }
 
     private void flushTryPutsToSink(ISink sink, FlushResult result) {
@@ -475,7 +475,7 @@ public class SinkHelper {
         Map<Object, IEvent> puts = this.puts.get(sink);
         Map<Object, IEvent> tryPuts = this.tryPuts.get(sink);
 
-        String sinkName = resolveObjectName(sink);
+        String sinkName = manager.resolveObjectName(sink);
         refuseKeys(keys, puts, tryPuts, sinkName, outputEvents);
 
         if (puts != null && puts.isEmpty()) {
@@ -486,11 +486,4 @@ public class SinkHelper {
             this.tryPuts.remove(sink);
         }
     }
-
-    private static class SinkField implements FieldHelper.Field<IEvent, ISink<IEvent>> {
-        public ISink<IEvent> value(IEvent object) {
-            return resolveObject(SH_SINK_NAME_ATTR.get(object));
-        }
-    }
-
 }

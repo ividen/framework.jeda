@@ -2,7 +2,7 @@ package ru.kwanza.jeda.mock;
 
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
 import java.util.concurrent.ConcurrentHashMap;

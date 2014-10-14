@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.persistentqueue.berkeley;
 
-import ru.kwanza.jeda.api.Manager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.jeconnection.JEConnectionException;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.toolbox.SerializationHelper;
@@ -46,78 +46,78 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
 
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
             list0.add(new EventWithKey(new TestEvent(String.valueOf(i))));
         }
         controller.persist(list0, 0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list1 = new ArrayList<EventWithKey>();
         for (int i = 1000; i < 2000; i++) {
             list1.add(new EventWithKey(new TestEvent(String.valueOf(i))));
         }
         controller.persist(list1, 1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load0 = controller.load(0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(1000, load0.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load1 = controller.load(1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(1000, load1.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load2 = controller.transfer(500, 0, 1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(500, load2.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load3 = controller.load(0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(500, load3.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load4 = controller.transfer(300, 0, 1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(300, load4.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load5 = controller.load(0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(200, load5.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load6 = controller.transfer(500, 0, 1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(200, load6.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load7 = controller.load(0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(0, load7.size());
 
         factoryJE.closeConnection(0l);
         factoryJE.closeConnection(1l);
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load8 = controller.load(1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(2000, load8.size());
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         controller.delete(load8, 1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load9 = controller.load(1);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
         assertEquals(0, load7.size());
 
         factoryJE.closeConnection(0l);
@@ -129,8 +129,8 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testFailPersist() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
             list0.add(new EventWithKey(new TestNonSerializableEvent()));
@@ -140,7 +140,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
 
         factoryJE.closeConnection(0l);
@@ -151,9 +151,9 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
         factoryJE2.getConnection(0l);
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
             list0.add(new EventWithKey(new TestNonSerializableEvent()));
@@ -163,7 +163,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
 
         factoryJE.closeConnection(0l);
@@ -175,21 +175,21 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testFailLoad() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
         Database database = factoryJE.getConnection(0l)
                 .openDatabase("test_db", new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         database.put(null, new DatabaseEntry(SerializationHelper.longToBytes(11111)),
                 new DatabaseEntry(SerializationHelper.longToBytes(11111)));
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         try {
             controller.load(0);
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
 
         factoryJE.closeConnection(0l);
@@ -201,15 +201,15 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
 
         try {
             controller.load(0);
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
         factoryJE.closeConnection(0l);
         factoryJE2.closeConnection(0l);
@@ -222,15 +222,15 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
 
         try {
             controller.delete(Arrays.asList(new EventWithKey(new TestEvent("Test"))), 0);
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
         factoryJE.closeConnection(0l);
         factoryJE2.closeConnection(0l);
@@ -243,15 +243,15 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
 
         try {
             controller.transfer(1000, 0, 1);
             fail("Expected " + PersistenceQueueException.class);
         } catch (PersistenceQueueException e) {
         } finally {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
         factoryJE.closeConnection(0l);
         factoryJE2.closeConnection(0l);
@@ -262,6 +262,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testJEConnectionFail() {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
         try {
             factoryJE.getTxConnection(0l);
             fail("Expected " + JEConnectionException.class);
@@ -275,22 +276,22 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testPersists_Rollback() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-
-        Manager.getTM().begin();
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManagerInternal.class);
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
             list0.add(new EventWithKey(new TestEvent(String.valueOf(i))));
         }
         controller.persist(list0, 0);
-        Manager.getTM().rollback();
+        systemManager.getTransactionManager().rollback();
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list1 = new ArrayList<EventWithKey>();
         for (int i = 1000; i < 2000; i++) {
             list1.add(new EventWithKey(new TestEvent(String.valueOf(i))));
         }
         controller.persist(list1, 0);
-        Manager.getTM().commit();
+        systemManager.getTransactionManager().commit();
 
         factoryJE.destroy();
     }

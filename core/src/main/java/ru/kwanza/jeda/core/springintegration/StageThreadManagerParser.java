@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.core.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.api.internal.IThreadManager;
 import ru.kwanza.jeda.core.threadmanager.stage.StageThreadManager;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

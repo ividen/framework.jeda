@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.core.pendingstore;
 
+import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.dbtool.core.*;
 import ru.kwanza.jeda.api.*;
@@ -7,7 +8,6 @@ import ru.kwanza.jeda.api.helper.SinkResolver;
 import ru.kwanza.toolbox.SerializationHelper;
 import ru.kwanza.txn.api.Transactional;
 import ru.kwanza.txn.api.TransactionalType;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,6 +21,7 @@ public class DefaultPendingStore implements IPendingStore {
 
     private static final SuspendedEventRemoveSetter SUSPENDED_EVENT_REMOVE_SETTER = new SuspendedEventRemoveSetter();
 
+    private ISystemManager manager;
     private DBTool dbTool;
     private IAutoKey autoKey;
     private SuspendInfoRowMapper suspendInfoRowMapper;
@@ -32,10 +33,12 @@ public class DefaultPendingStore implements IPendingStore {
     private String eventDescriptionColumnName = "event_description";
     private String eventDataColumnName = "event_binary";
 
+
     public DefaultPendingStore() {
     }
 
-    public DefaultPendingStore(DBTool dbTool, IAutoKey autoKey, SuspenderDbInteraction suspenderDbInteraction) {
+    public DefaultPendingStore(ISystemManager manager, DBTool dbTool, IAutoKey autoKey, SuspenderDbInteraction suspenderDbInteraction) {
+        this.manager = manager;
         this.dbTool = dbTool;
         this.autoKey = autoKey;
         this.suspenderDbInteraction = suspenderDbInteraction;
@@ -44,7 +47,7 @@ public class DefaultPendingStore implements IPendingStore {
     }
 
     public <E extends IEvent> ISuspender<E> getSuspender() {
-        return new Suspender<E>(autoKey, suspenderDbInteraction, sqlBuilder.getInsertSql());
+        return new Suspender<E>(manager, autoKey, suspenderDbInteraction, sqlBuilder.getInsertSql());
     }
 
     @Transactional(value = TransactionalType.REQUIRED, applicationExceptions = ResumeException.class)
@@ -56,7 +59,7 @@ public class DefaultPendingStore implements IPendingStore {
             String sinkName = entry.getKey();
             Map<Long, IEvent> eventById = entry.getValue();
 
-            SinkResolver<IEvent> resolver = new SinkResolver<IEvent>(sinkName);
+            SinkResolver<IEvent> resolver = new SinkResolver<IEvent>(manager, sinkName);
             try {
                 resolver.put(eventById.values());
             } catch (SinkException e) {
@@ -77,7 +80,7 @@ public class DefaultPendingStore implements IPendingStore {
             String sinkName = entry.getKey();
             Map<Long, IEvent> eventById = entry.getValue();
 
-            SinkResolver<IEvent> resolver = new SinkResolver<IEvent>(sinkName);
+            SinkResolver<IEvent> resolver = new SinkResolver<IEvent>(manager, sinkName);
             try {
                 Collection<IEvent> remainingEvents = resolver.tryPut(eventById.values());
                 if (!remainingEvents.isEmpty()) {

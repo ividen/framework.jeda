@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.api.helper;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -34,10 +34,10 @@ public class TestSinkHelper extends TestCase {
     private TestSink sink2;
 
     private ISuspender<IEvent> suspenderMock;
+    private ISystemManager systemManager;
 
     @Override
     public void setUp() throws Exception {
-        sinkHelperSpy = spy(new SinkHelper());
         sinkResolverMock1 = mock(SinkResolver.class);
         sinkResolverMock2 = mock(SinkResolver.class);
 
@@ -59,17 +59,18 @@ public class TestSinkHelper extends TestCase {
         when(sinkHelperSpy.getSink(sinkName1)).thenReturn(sink1);
         when(sinkHelperSpy.getSink(sinkName2)).thenReturn(sink2);
 
-        ISystemManager systemManagerMock = mock(ISystemManager.class);
-        when(systemManagerMock.resolveObjectName(anyString())).thenReturn("TestSink");
-        when(systemManagerMock.resolveObjectName(sink1)).thenReturn(sinkName1);
-        when(systemManagerMock.resolveObjectName(sink2)).thenReturn(sinkName2);
-        when(systemManagerMock.resolveObject(sinkName1)).thenReturn(new TestSink(sinkName1));
-        when(systemManagerMock.resolveObject(sinkName2)).thenReturn(new TestSink(sinkName2));
-        setPrivateField(Manager.class, "systemManager", systemManagerMock);
+        systemManager = mock(ISystemManager.class);
+        when(systemManager.resolveObjectName(anyString())).thenReturn("TestSink");
+        when(systemManager.resolveObjectName(sink1)).thenReturn(sinkName1);
+        when(systemManager.resolveObjectName(sink2)).thenReturn(sinkName2);
+        when(systemManager.resolveObject(sinkName1)).thenReturn(new TestSink(sinkName1));
+        when(systemManager.resolveObject(sinkName2)).thenReturn(new TestSink(sinkName2));
+
+        sinkHelperSpy = spy(new SinkHelper(systemManager));
     }
 
     public void testFlushByNoSupportedObject() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
         try {
             sinkHelper.flush(Arrays.asList(Color.ORANGE));
             TestCase.fail("Exception must be thrown.");
@@ -162,7 +163,7 @@ public class TestSinkHelper extends TestCase {
 
 
     public void testFlushNoParamsWithPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.put(sinkResolverMock1, testEvent1);
         sinkHelper.flush();
@@ -171,7 +172,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testFlushNoParamsWithTryPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.tryPut(sinkResolverMock1, testEvent1);
         sinkHelper.flush();
@@ -180,7 +181,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testFlushBySinkObjectsWithPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.put(sinkResolverMock1, testEvent1);
         sinkHelper.flush(sinkResolverMock1);
@@ -189,7 +190,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testFlushBySinkObjectsWithTryPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.tryPut(sinkResolverMock1, testEvent1);
         sinkHelper.flush(sinkResolverMock1);
@@ -198,7 +199,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testFlushBySinkObjectCollectionWithPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.put(sinkResolverMock1, testEvent1);
         sinkHelper.flush(Arrays.asList(sinkResolverMock1));
@@ -207,7 +208,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testFlushBySinkObjectCollectionWithTryPutBySinkObj() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.tryPut(sinkResolverMock1, testEvent1);
         sinkHelper.flush(Arrays.asList(sinkResolverMock1));
@@ -305,85 +306,6 @@ public class TestSinkHelper extends TestCase {
         assertEquals(Arrays.asList(testEvent1, testEvent2, testEvent3, testEvent4), suspendedEvents);
     }
 
-    public void testSplitByKeyBySinkName() throws Exception {
-        final IEvent testEvent1 = new TestEvent("name1");
-        final IEvent testEvent2 = new TestEvent("name2");
-        final IEvent testEvent3 = new TestEvent("name3");
-        final IEvent testEvent4 = new TestEvent("name4");
-
-        final String key1 = "key1";
-        final String key2 = "key2";
-        final String key3 = "key3";
-        final String key4 = "key4";
-
-        SH_EVENT_KEY_ATTR.set(testEvent1, key1);
-        SH_EVENT_KEY_ATTR.set(testEvent2, key2);
-        SH_EVENT_KEY_ATTR.set(testEvent3, key3);
-        SH_EVENT_KEY_ATTR.set(testEvent4, key4);
-
-        SH_SINK_NAME_ATTR.set(testEvent1, sinkName1);
-        SH_SINK_NAME_ATTR.set(testEvent2, sinkName1);
-        SH_SINK_NAME_ATTR.set(testEvent3, sinkName2);
-        SH_SINK_NAME_ATTR.set(testEvent4, sinkName2);
-
-        Map<String, Map<Object, IEvent>> expectedEventByKeyBySinkName = new HashMap<String, Map<Object, IEvent>>();
-        expectedEventByKeyBySinkName.put(sinkName1, new HashMap<Object, IEvent>() {
-            {
-                put(key1, testEvent1);
-                put(key2, testEvent2);
-            }
-        });
-        expectedEventByKeyBySinkName.put(sinkName2, new HashMap<Object, IEvent>() {
-            {
-                put(key3, testEvent3);
-                put(key4, testEvent4);
-            }
-        });
-
-        List<IEvent> eventList = Arrays.asList(testEvent1, testEvent2, testEvent3, testEvent4);
-
-        assertEquals(expectedEventByKeyBySinkName, splitByKeyBySinkName(eventList));
-    }
-
-    public void testSplitByKeyBySink() throws Exception {
-        final IEvent testEvent1 = new TestEvent("name1");
-        final IEvent testEvent2 = new TestEvent("name2");
-        final IEvent testEvent3 = new TestEvent("name3");
-        final IEvent testEvent4 = new TestEvent("name4");
-
-        final String key1 = "key1";
-        final String key2 = "key2";
-        final String key3 = "key3";
-        final String key4 = "key4";
-
-        SH_EVENT_KEY_ATTR.set(testEvent1, key1);
-        SH_EVENT_KEY_ATTR.set(testEvent2, key2);
-        SH_EVENT_KEY_ATTR.set(testEvent3, key3);
-        SH_EVENT_KEY_ATTR.set(testEvent4, key4);
-
-        SH_SINK_NAME_ATTR.set(testEvent1, sinkName1);
-        SH_SINK_NAME_ATTR.set(testEvent2, sinkName1);
-        SH_SINK_NAME_ATTR.set(testEvent3, sinkName2);
-        SH_SINK_NAME_ATTR.set(testEvent4, sinkName2);
-
-        Map<ISink, Map<Object, IEvent>> expectedEventByKeyBySinkName = new HashMap<ISink, Map<Object, IEvent>>();
-        expectedEventByKeyBySinkName.put(sink1, new HashMap<Object, IEvent>() {
-            {
-                put(key1, testEvent1);
-                put(key2, testEvent2);
-            }
-        });
-        expectedEventByKeyBySinkName.put(sink2, new HashMap<Object, IEvent>() {
-            {
-                put(key3, testEvent3);
-                put(key4, testEvent4);
-            }
-        });
-
-        List<IEvent> eventList = Arrays.asList(testEvent1, testEvent2, testEvent3, testEvent4);
-
-        assertEquals(expectedEventByKeyBySinkName, splitByKeyBySink(eventList));
-    }
 
     public void testRefuseBySinkNames() throws Exception {
         sinkHelperSpy.tryPut(sink1, getTestEvents().get(0));
@@ -400,7 +322,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testRefuseBySinkArray() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         sinkHelper.put(sink1, getTestEvents().get(0));
         sinkHelper.put(sink2, getTestEvents().get(1));
@@ -416,7 +338,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testRefuseByKeyCollection() throws Exception {
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManager);
 
         List<IEvent> testEvents = getTestEvents();
 
@@ -642,9 +564,8 @@ public class TestSinkHelper extends TestCase {
         ISuspender<IEvent> suspenderMock = mock(ISuspender.class);
         when(pendingStoreMock.getSuspender()).thenReturn(suspenderMock);
 
-        setPrivateField(Manager.class, "systemManager", systemManagerMock);
 
-        SinkHelper sinkHelper = new SinkHelper();
+        SinkHelper sinkHelper = new SinkHelper(systemManagerMock);
         assertTrue(suspenderMock == sinkHelper.getSuspender());
     }
 
@@ -760,13 +681,6 @@ public class TestSinkHelper extends TestCase {
             return id != null ? id.hashCode() : 0;
         }
 
-    }
-
-    private static void setPrivateField(final Class aClass, final String fieldName, final Object object)
-            throws NoSuchFieldException, IllegalAccessException {
-        final Field field = aClass.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(Manager.instance, object);
     }
 
 }

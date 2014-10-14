@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.persistentqueue.berkeley;
 
-import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
@@ -29,42 +29,43 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
                 getContextName(), TestBerkeleyPersistentQueue.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        PersistentQueue queue = new PersistentQueue(ctx.getBean(ISystemManager.class.getName(),
-                ISystemManager.class), 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
+        ISystemManagerInternal systemManager = ctx.getBean(ISystemManager.class.getName(),
+                ISystemManagerInternal.class);
+
+        PersistentQueue queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
 
-        Manager.getTM().begin();
+       systemManager.getTransactionManager().begin();
         try {
             queue.put(Arrays.asList(new TestEvent("TestContextController")));
-            Manager.getTM().commit();
+            systemManager.getTransactionManager().commit();
         } catch (SinkException e) {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
         }
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeLost();
         factoryJE.closeConnection(0l);
 
-        queue = new PersistentQueue(ctx.getBean(ISystemManager.class.getName(),
-                ISystemManager.class), 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
+        queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
 
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         try {
             assertEquals(queue.take(10).size(), 1);
-            Manager.getTM().commit();
+            systemManager.getTransactionManager().commit();
         } catch (Exception e) {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
             throw e;
         }
 
-        Manager.getTM().begin();
+        systemManager.getTransactionManager().begin();
         try {
             assertNull(queue.take(10));
-            Manager.getTM().commit();
+            systemManager.getTransactionManager().commit();
         } catch (Exception e) {
-            Manager.getTM().rollback();
+            systemManager.getTransactionManager().rollback();
             throw e;
         }
 

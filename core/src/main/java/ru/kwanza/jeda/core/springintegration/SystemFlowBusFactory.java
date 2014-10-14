@@ -1,16 +1,17 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 
 /**
  * @author Guzanov Alexander
  */
 public class SystemFlowBusFactory implements SmartFactoryBean<IFlowBus>, BeanNameAware {
     private IFlowBus original;
-    private ISystemManager manager;
+    private ISystemManagerInternal manager;
     private String name;
 
     public boolean isPrototype() {
@@ -41,7 +42,7 @@ public class SystemFlowBusFactory implements SmartFactoryBean<IFlowBus>, BeanNam
         this.original = original;
     }
 
-    public void setManager(ISystemManager manager) {
+    public void setManager(ISystemManagerInternal manager) {
         this.manager = manager;
     }
 }

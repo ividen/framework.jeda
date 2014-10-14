@@ -4,9 +4,10 @@ import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.MarkTransactionRollbackException;
 import ru.kwanza.jeda.api.internal.IResourceController;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -22,10 +23,10 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
     private volatile boolean active = true;
     private ReentrantLock mainLock = new ReentrantLock();
     private Condition notActive = mainLock.newCondition();
-    private ISystemManager manager;
+    private ISystemManagerInternal manager;
     private TM threadManager;
 
-    protected AbstractProcessingThread(String name, ISystemManager manager, TM threadManager) {
+    protected AbstractProcessingThread(String name, ISystemManagerInternal manager, TM threadManager) {
         super(name);
         this.manager = manager;
         this.threadManager = threadManager;

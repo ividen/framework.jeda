@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.teststand;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.manager.DefaultSystemManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
@@ -62,8 +62,11 @@ public class Main {
     }
 
     public static class InputThread extends Thread {
-        public InputThread() {
+        private final ISystemManager manager;
+
+        public InputThread(ISystemManager manager) {
             super("InputThread");
+            this.manager = manager;
         }
 
         public void run() {
@@ -78,7 +81,7 @@ public class Main {
                 }
 
                 try {
-                    Manager.getStage("TestStage-" + j).<Event>getSink().put(events);
+                    manager.getStage("TestStage-" + j).<Event>getSink().put(events);
                 } catch (SinkException e) {
                     e.printStackTrace();
                 }
@@ -99,7 +102,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", Main.class);
-        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", DefaultSystemManager.class);
+        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager", DefaultSystemManager.class);
 //        SharedThreadManager stageThreadManager = new SharedThreadManager("testThreads", systemManager);
 //        stageThreadManager.setMaxThreadCount(1);
         for (int i = 0; i < 1; i++) {
@@ -111,7 +114,7 @@ public class Main {
             resourceController.setMaxElementCount(1000);
             resourceController.setWaitForFillingTimeout(3000);
             TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
-                    ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", ISystemManager.class),
+                    systemManager,
                     ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
 
             StageThreadManager testThread = new StageThreadManager("testThread", systemManager);
@@ -120,7 +123,7 @@ public class Main {
             systemManager.registerStage(testStage);
         }
 
-        new InputThread().start();
+        new InputThread(systemManager).start();
         Thread.currentThread().join();
     }
 }

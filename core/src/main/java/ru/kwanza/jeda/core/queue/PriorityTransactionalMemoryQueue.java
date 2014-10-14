@@ -2,7 +2,8 @@ package ru.kwanza.jeda.core.queue;
 
 import ru.kwanza.jeda.api.IPriorityEvent;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 
 import java.util.*;
 
@@ -13,11 +14,11 @@ public class PriorityTransactionalMemoryQueue<E extends IPriorityEvent> extends 
     private Map<IPriorityEvent.Priority, Node> heads = new HashMap<IPriorityEvent.Priority, Node>();
     private Map<IPriorityEvent.Priority, Node> tails = new HashMap<IPriorityEvent.Priority, Node>();
 
-    public PriorityTransactionalMemoryQueue(ISystemManager manager) {
+    public PriorityTransactionalMemoryQueue(ISystemManagerInternal manager) {
         this(manager, ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
     }
 
-    public PriorityTransactionalMemoryQueue(ISystemManager manager, ObjectCloneType objectCloneType, long maxSize) {
+    public PriorityTransactionalMemoryQueue(ISystemManagerInternal manager, ObjectCloneType objectCloneType, long maxSize) {
         super(manager, objectCloneType, maxSize);
         for (IPriorityEvent.Priority p : IPriorityEvent.Priority.values()) {
             Node lastNode;

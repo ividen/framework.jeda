@@ -3,10 +3,7 @@ package ru.kwanza.jeda.core.pendingstore;
 import ru.kwanza.autokey.api.AutoKeyValueSequence;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.ISink;
-import ru.kwanza.jeda.api.ISuspender;
-import ru.kwanza.jeda.api.SuspendException;
+import ru.kwanza.jeda.api.*;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -14,21 +11,22 @@ import java.util.List;
 
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_ID_ATTR;
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_SINK_NAME_ATTR;
-import static ru.kwanza.jeda.api.Manager.resolveObjectName;
 
 public class Suspender<E extends IEvent> implements ISuspender<E> {
 
     private static final String SEQUENCE_NAME = Suspender.class.getName();
 
+    private ISystemManager manager;
     private IAutoKey autoKey;
     private SuspenderDbInteraction dbInteraction;
     private String insertSql;
 
     private List<IEvent> suspends = new LinkedList<IEvent>();
 
-    public Suspender(IAutoKey autoKey,
+    public Suspender(ISystemManager manager, IAutoKey autoKey,
                      SuspenderDbInteraction dbInteraction,
                      String insertSql) {
+        this.manager = manager;
         this.autoKey = autoKey;
         this.dbInteraction = dbInteraction;
         this.insertSql = insertSql;
@@ -78,7 +76,7 @@ public class Suspender<E extends IEvent> implements ISuspender<E> {
     }
 
     protected String getSinkName(ISink sink) {
-        return resolveObjectName(sink);
+        return manager.resolveObjectName(sink);
     }
 
     protected Long getNextSuspendInfoId() {

@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.nio.server.http;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.nio.utils.HttpUtil;
 import org.glassfish.grizzly.http.HttpPacket;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -91,7 +92,7 @@ public class HttpServer implements IHttpServer {
         }
     }
 
-    public HttpServer(ISystemManager manager, String name) {
+    public HttpServer(ISystemManagerInternal manager, String name) {
         this.name = name;
         this.threadPoolConfig = ThreadPoolConfig.defaultConfig();
         this.threadPoolConfig.setCorePoolSize(1);

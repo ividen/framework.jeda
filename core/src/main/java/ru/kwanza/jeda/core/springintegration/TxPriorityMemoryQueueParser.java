@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.PriorityTransactionalMemoryQueue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

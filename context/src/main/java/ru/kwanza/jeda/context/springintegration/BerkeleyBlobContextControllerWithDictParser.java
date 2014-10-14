@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

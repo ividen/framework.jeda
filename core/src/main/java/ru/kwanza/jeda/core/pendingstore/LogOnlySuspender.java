@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.core.pendingstore;
 
-import ru.kwanza.jeda.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.*;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_ID_ATTR;
 import static ru.kwanza.jeda.api.IPendingStore.SUSPEND_SINK_NAME_ATTR;
-import static ru.kwanza.jeda.api.Manager.resolveObjectName;
 
 public class LogOnlySuspender<E extends IEvent> implements ISuspender<E> {
 
@@ -19,6 +18,11 @@ public class LogOnlySuspender<E extends IEvent> implements ISuspender<E> {
 
     private List<E> suspends = new LinkedList<E>();
     private static AtomicLong counter = new AtomicLong(0l);
+    private ISystemManager manager;
+
+    public LogOnlySuspender(ISystemManager manager) {
+        this.manager = manager;
+    }
 
     public E suspend(ISink<E> sink, E event) {
         return suspendEvent(getSinkName(sink), event);
@@ -47,7 +51,7 @@ public class LogOnlySuspender<E extends IEvent> implements ISuspender<E> {
     }
 
     protected String getSinkName(ISink sink) {
-        return resolveObjectName(sink);
+        return manager.resolveObjectName(sink);
     }
 
     protected Collection<E> suspendEvents(String sinkName, Collection<E> events) {

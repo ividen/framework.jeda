@@ -15,11 +15,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Guzanov Alexander
  */
 public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
-    protected ISystemManager manager;
+    protected ISystemManagerInternal manager;
     private ClassPathXmlApplicationContext context;
 
 
-    public static class StubSystemManager implements ISystemManager {
+    public static class StubSystemManager implements ISystemManagerInternal {
       private ITransactionManagerInternal tm;
 
         public StubSystemManager(ITransactionManagerInternal tm) {

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.JedaHttpHandler;

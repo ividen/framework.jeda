@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.nio.server;
 
 import ru.kwanza.jeda.api.IEventProcessor;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.nio.server.http.IHttpRequest;
 import ru.kwanza.jeda.nio.server.http.IHttpEvent;
 import ru.kwanza.jeda.nio.server.http.RequestID;
@@ -16,6 +17,8 @@ import java.util.Collection;
  * @author Guzanov Alexander
  */
 public class TestEventProcessor implements IEventProcessor<IHttpEvent> {
+    private ISystemManager systemManager;
+
     public void process(Collection<IHttpEvent> events) {
 
         for (IHttpEvent e : events) {
@@ -203,7 +206,7 @@ public class TestEventProcessor implements IEventProcessor<IHttpEvent> {
             try {
                 String requestString = httpRequest.getID().asString();
 //                System.out.println(requestString);
-                RequestID.findRequest(requestString).finish(build);
+                RequestID.findRequest(systemManager,requestString).finish(build);
             } catch (RequestIDException e1) {
                 e1.printStackTrace();
             }

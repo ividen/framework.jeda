@@ -128,39 +128,39 @@ public class TestManager extends TestCase {
     public void testManager() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
                 TestManager.class);
-        ISystemManager systemManager = (ISystemManager) ctx
-                .getBean("ru.kwanza.jeda.api.internal.ISystemManager");
+        ISystemManagerInternal systemManager = (ISystemManagerInternal) ctx
+                .getBean("ru.kwanza.jeda.api.ISystemManager");
 
         try {
-            Manager.getTM();
+            systemManager.getTransactionManager();
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getTransactionManager", e.getMessage());
         }
 
         try {
-            Manager.getFlowBus("TetstFlowBus");
+            systemManager.getFlowBus("TetstFlowBus");
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getFlowBus_TetstFlowBus", e.getMessage());
         }
 
         try {
-            Manager.getStage("TestStage");
+            systemManager.getStage("TestStage");
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getStage_TestStage", e.getMessage());
         }
 
         try {
-            Manager.getTimer("TestTimer");
+            systemManager.getTimer("TestTimer");
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getTimer_TestTimer", e.getMessage());
         }
 
         try {
-            Manager.<Object, IContext>getContextController("TestContext");
+            systemManager.<Object, IContext>getContextController("TestContext");
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getContext_TestContext", e.getMessage());
@@ -170,19 +170,16 @@ public class TestManager extends TestCase {
         TestStage testStage = new TestStage("TestStage");
         systemManager.setCurrentStage(testStage);
 
-        assertEquals(Manager.getCurrentStage(), testStage);
+        assertEquals(systemManager.getCurrentStage(), testStage);
 
         try {
-            Manager.getFlowBus("TestContext");
+            systemManager.getFlowBus("TestContext");
             fail("Excpected " + UnsupportedOperationException.class);
         } catch (UnsupportedOperationException e) {
             assertEquals("getFlowBus_TestContext", e.getMessage());
         }
 
-
         systemManager.setCurrentStage(null);
-
-        System.out.println(Manager.getInstance());
 
     }
 

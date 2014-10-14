@@ -2,10 +2,9 @@ package ru.kwanza.jeda.nio.server.http;
 
 import liquibase.util.StreamUtil;
 import org.glassfish.grizzly.http.HttpRequestPacket;
-import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.nio.utils.HttpUtil;
 
 import java.io.ByteArrayOutputStream;

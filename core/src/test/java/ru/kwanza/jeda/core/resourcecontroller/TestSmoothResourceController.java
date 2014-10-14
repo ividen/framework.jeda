@@ -8,7 +8,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -33,7 +33,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease_throuputlimit() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -59,7 +59,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testThrouhgPut_NotSucess() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -86,7 +86,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease_throughputtime_limit() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -114,7 +114,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease_maxbatchSize_limit() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -149,7 +149,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease_SlowIncrease() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -172,7 +172,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testLineEncrease_throuputlimit_slowinc_dec() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();
@@ -202,7 +202,7 @@ public class TestSmoothResourceController/* extends TestCase */ {
 //    public void testThreadCountAdjust() throws InterruptedException {
 //        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
 //                TestSmoothResourceController.class);
-//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager",
+//        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager",
 //                DefaultSystemManager.class);
 //
 //        TestStage stage = new TestStage();

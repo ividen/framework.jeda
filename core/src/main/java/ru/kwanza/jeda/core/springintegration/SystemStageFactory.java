@@ -5,7 +5,8 @@ import ru.kwanza.jeda.api.IStage;
 import ru.kwanza.jeda.api.internal.IAdmissionController;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IResourceController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.core.stage.Stage;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;
 import org.springframework.beans.factory.BeanNameAware;
@@ -20,7 +21,7 @@ class SystemStageFactory implements SmartFactoryBean<IStage>, BeanNameAware {
     private IQueue queue;
     private IResourceController resourceController;
     private AbstractThreadManager threadManager;
-    private ISystemManager manager;
+    private ISystemManagerInternal manager;
     private boolean hasTransaction = true;
     private String name;
 
@@ -49,7 +50,7 @@ class SystemStageFactory implements SmartFactoryBean<IStage>, BeanNameAware {
         this.threadManager = threadManager;
     }
 
-    public void setManager(ISystemManager manager) {
+    public void setManager(ISystemManagerInternal manager) {
         this.manager = manager;
     }
 

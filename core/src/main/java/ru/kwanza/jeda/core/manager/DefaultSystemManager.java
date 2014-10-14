@@ -1,10 +1,9 @@
 package ru.kwanza.jeda.core.manager;
 
-import ru.kwanza.autokey.api.IAutoKey;
-import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.core.stage.SystemQueue;
 
@@ -14,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Guzanov Alexander
  */
-public class DefaultSystemManager implements ISystemManager {
+public class DefaultSystemManager implements ISystemManagerInternal {
     public ThreadLocal<IStageInternal> currentStage = new ThreadLocal<IStageInternal>();
     private ConcurrentMap<String, IContextController> contextControllers = new ConcurrentHashMap<String, IContextController>();
 

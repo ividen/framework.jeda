@@ -2,7 +2,7 @@ package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IContext;
 import ru.kwanza.jeda.api.IContextController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;

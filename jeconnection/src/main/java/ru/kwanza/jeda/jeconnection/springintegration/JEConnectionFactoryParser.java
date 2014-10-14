@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.jeconnection.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;

@@ -32,13 +32,15 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
     protected Connection conn;
     protected DBUnitUtil dbUnitUtil;
     protected IPendingStore pendingStore;
+    protected ISystemManager manager;
 
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextFileName(), AbstractDefaultPendingStoreTest.class);
         conn = ctx.getBean("dataSource", BasicDataSource.class).getConnection();
+        manager = ctx.getBean(ISystemManager.class);
         dbUnitUtil = new DBUnitUtil(conn);
-        pendingStore = Manager.getPendingStore();
+        pendingStore = manager.getPendingStore();
         conn.prepareStatement("DELETE FROM " + PENDING_STORE_TABLE_NAME).execute();
         resetAutoKey();
         FlowBusEventStore.clear();
@@ -62,7 +64,7 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
 
     public void testSuspendEventBySinkObject() throws Exception {
         ISuspender<TestEvent> suspender = pendingStore.getSuspender();
-        @SuppressWarnings("unchecked") ISink<TestEvent> sink = Manager.getFlowBus(TEST_FLOW_BUS_1);
+        @SuppressWarnings("unchecked") ISink<TestEvent> sink = manager.getFlowBus(TEST_FLOW_BUS_1);
         Assert.assertEquals(getTestSuspendItem(1, sink), suspender.suspend(sink, createTestEvent(1, sink)));
 
         suspender.flush();
@@ -72,9 +74,9 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
     @SuppressWarnings("unchecked")
     public void testSuspendSeveralSeparateEvents() throws Exception {
         ISuspender<TestEvent> suspender = pendingStore.getSuspender();
-        ISink<TestEvent> sink1 = Manager.getFlowBus(TEST_FLOW_BUS_1);
-        ISink<TestEvent> sink2 = Manager.getFlowBus(TEST_FLOW_BUS_2);
-        ISink<TestEvent> sink3 = Manager.getFlowBus(TEST_FLOW_BUS_3);
+        ISink<TestEvent> sink1 = manager.getFlowBus(TEST_FLOW_BUS_1);
+        ISink<TestEvent> sink2 = manager.getFlowBus(TEST_FLOW_BUS_2);
+        ISink<TestEvent> sink3 = manager.getFlowBus(TEST_FLOW_BUS_3);
 
         Assert.assertEquals(getTestSuspendItem(1, sink1), suspender.suspend(sink1, createTestEvent(1, sink1)));
         Assert.assertEquals(getTestSuspendItem(2, sink2), suspender.suspend(sink2, createTestEvent(2, sink2)));
@@ -105,12 +107,12 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
         ISuspender<TestEvent> suspender = pendingStore.getSuspender();
 
         @SuppressWarnings("unchecked")
-        ISink<TestEvent> sink1 = Manager.getFlowBus(TEST_FLOW_BUS_1);
+        ISink<TestEvent> sink1 = manager.getFlowBus(TEST_FLOW_BUS_1);
         Assert.assertEquals(getExpectedEventToIdMapping(TEST_FLOW_BUS_1, 1l),
                 suspender.suspend(sink1, getTestEventsBySinkName().get(TEST_FLOW_BUS_1)));
 
         @SuppressWarnings("unchecked")
-        ISink<TestEvent> sink3 = Manager.getFlowBus(TEST_FLOW_BUS_3);
+        ISink<TestEvent> sink3 = manager.getFlowBus(TEST_FLOW_BUS_3);
         Assert.assertEquals(getExpectedEventToIdMapping(TEST_FLOW_BUS_3, 4l),
                 suspender.suspend(sink3, getTestEventsBySinkName().get(TEST_FLOW_BUS_3)));
 
@@ -305,13 +307,13 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
     private TestEvent getTestSuspendItem(int i, ISink<TestEvent> sink) {
         final TestEvent testEvent = createTestEvent(i, sink);
         IPendingStore.SUSPEND_ID_ATTR.set(testEvent,(long)i);
-        IPendingStore.SUSPEND_SINK_NAME_ATTR.set(testEvent,Manager.resolveObjectName(sink));
+        IPendingStore.SUSPEND_SINK_NAME_ATTR.set(testEvent,manager.resolveObjectName(sink));
         return testEvent;
     }
 
     @SuppressWarnings("unchecked")
     private TestEvent getTestSuspendItem(int i, String sinkName) {
-        return getTestSuspendItem(i, Manager.getFlowBus(sinkName));
+        return getTestSuspendItem(i, manager.getFlowBus(sinkName));
     }
 
     private Map<String, List<TestEvent>> getTestEventsBySinkName() {
@@ -341,7 +343,7 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
     }
 
     private <T> TestEvent createTestEvent(Integer number, T sink) {
-        String postfix = sink instanceof String ? (String) sink : Manager.resolveObjectName(sink);
+        String postfix = sink instanceof String ? (String) sink : manager.resolveObjectName(sink);
         return new TestEvent(number, "testParam-" + postfix);
     }
 
