@@ -6,9 +6,9 @@ package ru.kwanza.jeda.clusterservice;
 public interface IClusteredModule {
     String getName();
 
-    void handleConnected();
+    void handleStart();
 
-    void handleConnectionLost();
+    void handleStop();
 
     boolean handleRepair(Node node);
 }
