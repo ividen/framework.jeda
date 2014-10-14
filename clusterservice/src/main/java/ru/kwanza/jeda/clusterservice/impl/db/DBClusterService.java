@@ -6,6 +6,7 @@ import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
+import ru.kwanza.dbtool.orm.api.LockType;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.jeda.clusterservice.Node;
@@ -14,6 +15,7 @@ import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,7 +32,7 @@ public class DBClusterService implements IClusterService {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Resource(name = "")
+    @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
 
     private IQuery<NodeEntity> queryActive;
@@ -48,7 +50,7 @@ public class DBClusterService implements IClusterService {
     private int repairThreadCount = 4;
 
     private ExecutorService repairExecutor;
-    private ActivitySupervisor supervisor;
+    private ActivitySupervisor activitySupervisor;
     private RepairSupervisor repairSupervisor;
     private ConcurrentMap<String, IClusteredModule> modules = new ConcurrentHashMap<String, IClusteredModule>();
 
@@ -59,11 +61,19 @@ public class DBClusterService implements IClusterService {
         initSupervisors();
     }
 
+    @PreDestroy
+    public void destroy() {
+        logger.info("Stopping {} ...", ACTIVITY_SUPERVISOR_NAME);
+        activitySupervisor.interrupt();
+        logger.info("Stopping {} ...", REPAIR_SUPERVISOR_NAME);
+        repairSupervisor.interrupt();
+    }
+
     private void initQuery() {
         queryActive = em.queryBuilder(NodeEntity.class).where(If.isGreater("lastActivity")).create();
         queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
         queryAll = em.queryBuilder(NodeEntity.class).create();
-        queryModules = em.queryBuilder(ModuleEntity.class).where(If.isEqual("nodeId")).create();
+        queryModules = em.queryBuilder(ModuleEntity.class).where(If.and(If.isEqual("nodeId", "nodeId"), If.in("name", "name"))).create();
     }
 
     private void initCurrentNode() {
@@ -81,10 +91,12 @@ public class DBClusterService implements IClusterService {
     }
 
     private void initSupervisors() {
-        supervisor = new ActivitySupervisor();
+        activitySupervisor = new ActivitySupervisor();
         repairSupervisor = new RepairSupervisor();
 
-        supervisor.start();
+        logger.info("Starting {} ...", ACTIVITY_SUPERVISOR_NAME);
+        activitySupervisor.start();
+        logger.info("Starting {} ...", REPAIR_SUPERVISOR_NAME);
         repairSupervisor.start();
     }
 
@@ -124,42 +136,60 @@ public class DBClusterService implements IClusterService {
 
         @Override
         public void run() {
+            logger.info("Started {}", ACTIVITY_SUPERVISOR_NAME);
             while (!isInterrupted()) {
                 tm.begin();
                 try {
-                    long ts = System.currentTimeMillis();
+                    long start = System.currentTimeMillis();
 
-                    lockCurrentNode(ts);
+                    if (!lockCurrentNode()) {
+                        if (isAlive) {
+                            isAlive = false;
+                            stopModules();
+                        }
 
-                    if (!isAlive) {
-                        isAlive = true;
-                        startModules();
+                    } else {
+                        waitForModulesLock();
+
+                        if (!isAlive) {
+                            isAlive = true;
+                            startModules();
+                        }
                     }
-
-
-                    sleep(Math.max(0, lockTimeout - (System.currentTimeMillis() - ts)));
-
+                    long end = System.currentTimeMillis();
+                    sleep(Math.max(0, lockTimeout - (end - start)));
+                    updateCurrentNodeActivity(end);
                 } catch (InterruptedException e) {
                     break;
                 } finally {
                     tm.commit();
                 }
             }
-            logger.info("{} stopped", ACTIVITY_SUPERVISOR_NAME);
+            logger.info("Stopped {}", ACTIVITY_SUPERVISOR_NAME);
         }
 
-        private void lockCurrentNode(long ts) {
-            currentNode.setLastActivity(ts + lockTimeout + failoverTimeout);
+        private void updateCurrentNodeActivity(long end) {
+            currentNode.setLastActivity(end + failoverTimeout);
+            try {
+                em.update(currentNode);
+            } catch (UpdateException e) {
+                logger.error("Can't encrease activity timestamp for " + currentNode.getId(), e);
+            }
+        }
 
+        private void waitForModulesLock() {
+            List<ModuleEntity> moduleEntities = queryModules.prepare().setParameter("nodeId", currentNode.getId()).setParameter("name", modules.keySet()).selectList();
+            em.lock(LockType.WAIT, moduleEntities);
+        }
+
+        private boolean lockCurrentNode() {
             try {
                 em.update(currentNode);
             } catch (Exception e) {
                 logger.error("Can't update current node " + currentNode.getId(), e);
-                if (isAlive) {
-                    isAlive = false;
-                    stopModules();
-                }
+                return false;
             }
+            return true;
         }
 
         private void startModules() {
@@ -174,7 +204,6 @@ public class DBClusterService implements IClusterService {
         }
 
         private void stopModules() {
-
             for (IClusteredModule cm : modules.values()) {
                 logger.info("Stopping module {}", cm.getName());
                 try {
@@ -196,7 +225,8 @@ public class DBClusterService implements IClusterService {
 
         @Override
         public void run() {
-            logger.info("{} stopped", ACTIVITY_SUPERVISOR_NAME);
+            logger.info("Started {}", ACTIVITY_SUPERVISOR_NAME);
+            logger.info("Stopped {}", ACTIVITY_SUPERVISOR_NAME);
         }
     }
 
