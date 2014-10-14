@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IEventProcessor;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.IStage;
 import ru.kwanza.jeda.api.internal.IAdmissionController;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;

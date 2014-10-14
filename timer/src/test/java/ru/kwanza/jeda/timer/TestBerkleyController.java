@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.timer;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.TimerItem;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
@@ -12,7 +13,7 @@ import java.util.Collection;
 public abstract class TestBerkleyController extends TestController {
 
     private JEConnectionFactory factoryJE;
-    private IJedaManagerInternal manager;
+    private IJedaManager manager;
 
 
     @Override
@@ -71,7 +72,7 @@ public abstract class TestBerkleyController extends TestController {
     public void setUp() throws Exception {
         super.setUp();
         factoryJE = getCtx().getBean("connectionFactory", JEConnectionFactory.class);
-        manager = getCtx().getBean(IJedaManagerInternal.class);
+        manager = getCtx().getBean(IJedaManager.class);
     }
 
     private void delete(File file) throws IOException {

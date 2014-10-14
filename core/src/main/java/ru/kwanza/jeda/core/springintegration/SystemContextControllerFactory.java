@@ -3,7 +3,9 @@ package ru.kwanza.jeda.core.springintegration;
 import ru.kwanza.jeda.api.IContextController;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+
 
 /**
  * @author Guzanov Alexander

@@ -1,9 +1,9 @@
 package ru.kwanza.jeda.core.queue;
 
-import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.SinkException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.IEvent;
+import ru.kwanza.jeda.api.SinkException;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;

@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.persistentqueue.berkeley;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.jeconnection.JEConnectionException;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
@@ -46,7 +47,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
 
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
@@ -129,7 +130,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testFailPersist() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
@@ -151,7 +152,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         factoryJE2.getConnection(0l);
         systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
@@ -175,7 +176,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testFailLoad() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
         Database database = factoryJE.getConnection(0l)
                 .openDatabase("test_db", new DatabaseConfig().setAllowCreate(true).setTransactional(true));
@@ -201,7 +202,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
         try {
@@ -222,7 +223,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
         try {
@@ -243,7 +244,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         factoryJE2.getConnection(0l);
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
         try {
@@ -262,7 +263,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testJEConnectionFail() {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         try {
             factoryJE.getTxConnection(0l);
             fail("Expected " + JEConnectionException.class);
@@ -276,7 +277,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
     public void testPersists_Rollback() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {

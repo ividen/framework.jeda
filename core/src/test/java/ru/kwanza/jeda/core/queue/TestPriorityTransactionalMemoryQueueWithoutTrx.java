@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriorityEventQueue {
-    public static class NonTransactionalJedaManager implements IJedaManagerInternal {
+    public static class NonTransactionalJedaManager implements IJedaManager {
         public ITransactionManagerInternal getTransactionManager() {
             return null;
         }

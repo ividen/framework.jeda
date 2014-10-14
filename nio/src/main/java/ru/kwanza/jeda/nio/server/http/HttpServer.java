@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.nio.server.http;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.nio.utils.HttpUtil;
 import org.glassfish.grizzly.http.HttpPacket;

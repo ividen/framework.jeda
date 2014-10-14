@@ -141,7 +141,7 @@ public abstract class TestBaseTransactionManager extends TestCase {
 //
     public void testRollbackActive50() throws SinkException, SystemException {
 
-        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManagerInternal() {
+        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManager() {
             public ITransactionManagerInternal getTransactionManager() {
                 return tm;
             }
@@ -246,7 +246,7 @@ public abstract class TestBaseTransactionManager extends TestCase {
 
     public void testWithMemoryQuueue() throws SinkException, SystemException {
 
-        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManagerInternal() {
+        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManager() {
             public ITransactionManagerInternal getTransactionManager() {
                 return tm;
             }

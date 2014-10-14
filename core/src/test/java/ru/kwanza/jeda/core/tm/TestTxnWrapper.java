@@ -2,6 +2,7 @@ package ru.kwanza.jeda.core.tm;
 
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 /**
@@ -11,7 +12,7 @@ public abstract class TestTxnWrapper extends TestCase {
     protected ApplicationContext ctx;
     protected TestTxnBean manager;
     protected BaseTransactionManager tm;
-    protected IJedaManagerInternal sm;
+    protected IJedaManager sm;
 
 
     public void test1() {

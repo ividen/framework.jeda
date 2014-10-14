@@ -1,7 +1,8 @@
 package ru.kwanza.jeda.core.threadmanager;
 
-import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+import ru.kwanza.jeda.api.internal.IStageInternal;
+
 import ru.kwanza.jeda.api.internal.IThreadManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -128,7 +128,7 @@ public class TestManager extends TestCase {
     public void testManager() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
                 TestManager.class);
-        IJedaManager systemManager = (IJedaManager) ctx
+        IJedaManagerInternal systemManager = (IJedaManagerInternal) ctx
                 .getBean("ru.kwanza.jeda.api.IJedaManager");
 
         try {

@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.core.queue;
 
-import ru.kwanza.jeda.api.internal.IQueueObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.internal.IQueueObserver;
 
 import java.util.ArrayList;
 

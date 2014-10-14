@@ -15,10 +15,10 @@ import java.util.Iterator;
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
-    protected IJedaManagerInternal manager;
+    protected IJedaManager manager;
     private ClassPathXmlApplicationContext context;
 
-    public static class StubJedaManager implements IJedaManagerInternal {
+    public static class StubJedaManager implements IJedaManager {
         private ITransactionManagerInternal tm;
 
         public StubJedaManager(ITransactionManagerInternal tm) {

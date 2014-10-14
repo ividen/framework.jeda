@@ -4,6 +4,7 @@ import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import ru.kwanza.jeda.api.IFlowBus;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;

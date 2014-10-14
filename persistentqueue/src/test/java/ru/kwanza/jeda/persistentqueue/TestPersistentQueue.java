@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.persistentqueue;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
@@ -35,7 +36,7 @@ public abstract class TestPersistentQueue extends TestCase {
     protected abstract String getContextName();
 
     protected PersistentQueue createQeueue() {
-        return new PersistentQueue((IJedaManagerInternal) ctx.getBean("ru.kwanza.jeda.api.IJedaManager"),
+        return new PersistentQueue((IJedaManager) ctx.getBean("ru.kwanza.jeda.api.IJedaManager"),
                 1000, controller);
     }
 

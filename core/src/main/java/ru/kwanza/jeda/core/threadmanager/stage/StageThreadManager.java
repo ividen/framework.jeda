@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.core.threadmanager.stage;
 
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.core.threadmanager.AbstractProcessingThread;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;

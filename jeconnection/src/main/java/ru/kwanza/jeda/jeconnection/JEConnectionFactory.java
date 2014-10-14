@@ -6,6 +6,7 @@ import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.TransactionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 import java.io.File;
@@ -30,7 +31,7 @@ public class JEConnectionFactory {
             .setAllowCreate(true).setTransactional(true)
             .setTxnTimeout(1, TimeUnit.MINUTES).setLockTimeout(2, TimeUnit.MINUTES);
 
-    protected IJedaManagerInternal manager;
+    protected IJedaManager manager;
 
     private ReentrantLock lock = new ReentrantLock();
     private String path;
@@ -41,7 +42,7 @@ public class JEConnectionFactory {
     private volatile boolean active = true;
 
 
-    public JEConnectionFactory(IJedaManagerInternal manager) {
+    public JEConnectionFactory(IJedaManager manager) {
         this.manager = manager;
     }
 

@@ -29,8 +29,8 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
                 getContextName(), TestBerkeleyPersistentQueue.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManagerInternal systemManager = ctx.getBean(IJedaManager.class.getName(),
-                IJedaManagerInternal.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class.getName(),
+                IJedaManager.class);
 
         PersistentQueue queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
