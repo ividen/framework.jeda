@@ -21,8 +21,6 @@ public class ModuleEntity {
 
     @Field("lastRepaired")
     private Long lastRepaired;
-    @VersionField("version")
-    private Long version;
 
     public ModuleEntity(Integer nodeId, String name) {
         this.id = nodeId.toString() + "_" + name;

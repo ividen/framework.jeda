@@ -3,10 +3,7 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.dbtool.orm.api.LockType;
+import ru.kwanza.dbtool.orm.api.*;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.jeda.clusterservice.Node;
@@ -18,9 +15,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Alexander Guzanov
@@ -29,6 +25,7 @@ public class DBClusterService implements IClusterService {
     public static final String NODE_ID_PROPERTY_NAME = "clusterservice.nodeId";
     public static final String ACTIVITY_SUPERVISOR_NAME = "DBClusterService-ActivitySupervisor";
     public static final String REPAIR_SUPERVISOR_NAME = "DBClusterService-RepairSupervisor";
+    public static final String REPAIR_SUPERVISOR_WORKER = "DBClusterService-RepairWorker";
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
@@ -38,8 +35,8 @@ public class DBClusterService implements IClusterService {
     private IQuery<NodeEntity> queryActive;
     private IQuery<NodeEntity> queryPassive;
     private IQuery<NodeEntity> queryAll;
-    private IQuery<NodeEntity> queryNode;
     private IQuery<ModuleEntity> queryModules;
+    private IQuery<NodeEntity> queryRepairableNodes;
 
     private NodeEntity currentNode;
 
@@ -47,9 +44,11 @@ public class DBClusterService implements IClusterService {
 
     private long failoverTimeout = 15 * 60 * 1000;
     private long lockTimeout = 60 * 1000;
-    private int repairThreadCount = 4;
+    private long repairInterval = 1000;
+    private int repairThreadCount = 10;
 
     private ExecutorService repairExecutor;
+    private AtomicLong counter = new AtomicLong(0);
     private ActivitySupervisor activitySupervisor;
     private RepairSupervisor repairSupervisor;
     private ConcurrentMap<String, IClusteredModule> modules = new ConcurrentHashMap<String, IClusteredModule>();
@@ -74,6 +73,8 @@ public class DBClusterService implements IClusterService {
         queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
         queryAll = em.queryBuilder(NodeEntity.class).create();
         queryModules = em.queryBuilder(ModuleEntity.class).where(If.and(If.isEqual("nodeId", "nodeId"), If.in("name", "name"))).create();
+        queryRepairableNodes = em.queryBuilder(NodeEntity.class)
+                .where(If.and(If.notEqual("nodeId", "nodeId"), If.isLessOrEqual("lastActivity", "lastActivity"))).create();
     }
 
     private void initCurrentNode() {
@@ -93,6 +94,12 @@ public class DBClusterService implements IClusterService {
     private void initSupervisors() {
         activitySupervisor = new ActivitySupervisor();
         repairSupervisor = new RepairSupervisor();
+
+        repairExecutor = new ThreadPoolExecutor(repairThreadCount,repairThreadCount,lockTimeout, TimeUnit.MILLISECONDS,new LinkedBlockingQueue<Runnable>(),new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                return new Thread(r,REPAIR_SUPERVISOR_WORKER + "-" + counter.incrementAndGet());
+            }
+        });
 
         logger.info("Starting {} ...", ACTIVITY_SUPERVISOR_NAME);
         activitySupervisor.start();
@@ -149,11 +156,12 @@ public class DBClusterService implements IClusterService {
                         }
 
                     } else {
-                        waitForModulesLock();
+                        List<ModuleEntity> moduleEntities = waitForModulesLock();
 
                         if (!isAlive) {
                             isAlive = true;
                             startModules();
+                            updateModulesLastRepaired(moduleEntities);
                         }
                     }
                     long end = System.currentTimeMillis();
@@ -168,6 +176,19 @@ public class DBClusterService implements IClusterService {
             logger.info("Stopped {}", ACTIVITY_SUPERVISOR_NAME);
         }
 
+        private void updateModulesLastRepaired(List<ModuleEntity> moduleEntities) {
+            long ts = System.currentTimeMillis();
+            for (ModuleEntity moduleEntity : moduleEntities) {
+                moduleEntity.setLastRepaired(ts);
+            }
+
+            try {
+                em.update(ModuleEntity.class,moduleEntities);
+            } catch (UpdateException e) {
+                logger.error("Error updating modules",e);
+            }
+        }
+
         private void updateCurrentNodeActivity(long end) {
             currentNode.setLastActivity(end + failoverTimeout);
             try {
@@ -177,9 +198,12 @@ public class DBClusterService implements IClusterService {
             }
         }
 
-        private void waitForModulesLock() {
-            List<ModuleEntity> moduleEntities = queryModules.prepare().setParameter("nodeId", currentNode.getId()).setParameter("name", modules.keySet()).selectList();
+        private List<ModuleEntity> waitForModulesLock() {
+            List<ModuleEntity> moduleEntities = queryModules.prepare()
+                    .setParameter("nodeId", currentNode.getId())
+                    .setParameter("name", modules.keySet()).selectList();
             em.lock(LockType.WAIT, moduleEntities);
+            return moduleEntities;
         }
 
         private boolean lockCurrentNode() {
@@ -193,6 +217,7 @@ public class DBClusterService implements IClusterService {
         }
 
         private void startModules() {
+
             for (IClusteredModule cm : modules.values()) {
                 logger.info("Starting module {}", cm.getName());
                 try {
@@ -207,7 +232,7 @@ public class DBClusterService implements IClusterService {
             for (IClusteredModule cm : modules.values()) {
                 logger.info("Stopping module {}", cm.getName());
                 try {
-                    cm.handleStart();
+                    cm.handleStop();
                 } catch (Throwable e) {
                     logger.error("Can't stop module " + cm.getName(), e);
                 }
@@ -226,7 +251,91 @@ public class DBClusterService implements IClusterService {
         @Override
         public void run() {
             logger.info("Started {}", ACTIVITY_SUPERVISOR_NAME);
+            while (!isInterrupted()) {
+                List<NodeEntity> nodeEntities = queryRepairableNodes.prepare()
+                        .setParameter("nodeId", currentNode.getId())
+                        .setParameter("lastActivity", System.currentTimeMillis()).selectList();
+
+                if (!nodeEntities.isEmpty()) {
+
+
+                }
+
+                try {
+                    sleep(failoverTimeout);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
             logger.info("Stopped {}", ACTIVITY_SUPERVISOR_NAME);
+        }
+    }
+
+
+    public final class RepairWorker implements Runnable {
+        private volatile boolean alive = true;
+        private NodeEntity node;
+        private IClusteredModule module;
+        private ModuleEntity moduleEntity;
+
+        public RepairWorker(NodeEntity node, IClusteredModule module, ModuleEntity moduleEntity) {
+            this.node = node;
+            this.module = module;
+            this.moduleEntity = moduleEntity;
+        }
+
+        public void run() {
+            while (!Thread.currentThread().isInterrupted() && alive && !isNodeChangeStatus() && !isModuleRepaired()) {
+                tm.begin();
+                try {
+                    if (lockModule()) {
+                        if (module.handleRepair(node)) {
+                            updateModuleAsRepaired();
+                            alive = false;
+                            break;
+                        }
+                    }
+                }catch (Throwable e){
+                    logger.error("Error in repair thread!",e);
+                } finally {
+                    tm.commit();
+                }
+
+                try {
+                    Thread.currentThread().sleep(repairInterval);
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }
+
+        private void updateModuleAsRepaired() {
+            moduleEntity.setLastRepaired(System.currentTimeMillis());
+            try {
+                em.update(moduleEntity);
+            } catch (UpdateException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private boolean lockModule() {
+            LockResult<ModuleEntity> result = em.lock(LockType.SKIP_LOCKED, moduleEntity);
+            return !result.getLocked().isEmpty();
+        }
+
+
+        private boolean isNodeChangeStatus() {
+            NodeEntity nodeEntity = em.readByKey(NodeEntity.class, node.getId());
+            return nodeEntity == null || nodeEntity.getLastActivity() > node.getLastActivity();
+        }
+
+        public boolean isModuleRepaired() {
+            ModuleEntity me = em.readByKey(ModuleEntity.class, moduleEntity.getId());
+            return me == null || me.getLastRepaired() > moduleEntity.getLastRepaired();
+        }
+
+        public void stopWorker() {
+            alive = false;
         }
     }
 
