@@ -72,6 +72,12 @@
         </dependency>
 
         <dependency>
+            <groupId>ru.kwanza.txn</groupId>
+            <artifactId>txn</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>com.oracle.jdbc</groupId>
             <artifactId>ojdbc6</artifactId>
             <scope>test</scope>

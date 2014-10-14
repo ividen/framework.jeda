@@ -11,6 +11,7 @@ import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ModuleEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -29,6 +30,8 @@ public class DBClusterService implements IClusterService {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
+    @Resource(name = "")
+    private ITransactionManager tm;
 
     private IQuery<NodeEntity> queryActive;
     private IQuery<NodeEntity> queryPassive;
@@ -122,35 +125,65 @@ public class DBClusterService implements IClusterService {
         @Override
         public void run() {
             while (!isInterrupted()) {
-                currentNode.setLastActivity(System.currentTimeMillis() + lockTimeout + failoverTimeout);
+                tm.begin();
                 try {
-                    em.update(currentNode);
-                } catch (Exception e) {
-                    logger.error("Can't update current node " + currentNode.getId(), e);
+                    long ts = System.currentTimeMillis();
 
-                    if (isAlive) {
-                        for (IClusteredModule cm : modules.values()) {
-                            logger.info("Stopping module {}", cm.getName());
-                            cm.handleStart();
-                        }
+                    lockCurrentNode(ts);
+
+                    if (!isAlive) {
+                        isAlive = true;
+                        startModules();
                     }
-                }
 
-                if (!isAlive) {
-                    isAlive = true;
-                    for (IClusteredModule cm : modules.values()) {
-                        logger.info("Starting module {}", cm.getName());
-                        cm.handleStart();
-                    }
-                }
 
-                try {
-                    sleep(lockTimeout);
+                    sleep(Math.max(0, lockTimeout - (System.currentTimeMillis() - ts)));
+
                 } catch (InterruptedException e) {
                     break;
+                } finally {
+                    tm.commit();
                 }
             }
             logger.info("{} stopped", ACTIVITY_SUPERVISOR_NAME);
+        }
+
+        private void lockCurrentNode(long ts) {
+            currentNode.setLastActivity(ts + lockTimeout + failoverTimeout);
+
+            try {
+                em.update(currentNode);
+            } catch (Exception e) {
+                logger.error("Can't update current node " + currentNode.getId(), e);
+                if (isAlive) {
+                    isAlive = false;
+                    stopModules();
+                }
+            }
+        }
+
+        private void startModules() {
+            for (IClusteredModule cm : modules.values()) {
+                logger.info("Starting module {}", cm.getName());
+                try {
+                    cm.handleStart();
+                } catch (Throwable e) {
+                    logger.error("Can't start module " + cm.getName(), e);
+                }
+            }
+        }
+
+        private void stopModules() {
+
+            for (IClusteredModule cm : modules.values()) {
+                logger.info("Stopping module {}", cm.getName());
+                try {
+                    cm.handleStart();
+                } catch (Throwable e) {
+                    logger.error("Can't stop module " + cm.getName(), e);
+                }
+            }
+
         }
 
     }
