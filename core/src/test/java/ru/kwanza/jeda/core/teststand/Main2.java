@@ -1,10 +1,9 @@
 package ru.kwanza.jeda.core.teststand;
 
-import org.postgresql.translation.messages_nl;
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
-import ru.kwanza.jeda.core.manager.DefaultSystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+import ru.kwanza.jeda.core.manager.DefaultJedaManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import ru.kwanza.jeda.core.resourcecontroller.SmartResourceController;
@@ -59,9 +58,9 @@ public class Main2 {
     }
 
     public static class InputThread1 extends Thread {
-        private final ISystemManager manager;
+        private final IJedaManager manager;
 
-        public InputThread1(ISystemManager manager) {
+        public InputThread1(IJedaManager manager) {
             super("InputThread1");
             this.manager = manager;
         }
@@ -96,9 +95,9 @@ public class Main2 {
     }
 
     public static class InputThread2 extends Thread {
-        private ISystemManager manager;
+        private IJedaManager manager;
 
-        public InputThread2(ISystemManager manager) {
+        public InputThread2(IJedaManager manager) {
             super("InputThread2");
             this.manager = manager;
         }
@@ -134,7 +133,7 @@ public class Main2 {
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", Main.class);
-        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager", DefaultSystemManager.class);
+        DefaultJedaManager systemManager = ctx.getBean("ru.kwanza.jeda.api.IJedaManager", DefaultJedaManager.class);
         SharedThreadManager stageThreadManager = new SharedThreadManager("testThreads", systemManager);
         stageThreadManager.setMaxThreadCount(10);
         InputRateAndWaitingTimeComparator stageComparator = new InputRateAndWaitingTimeComparator();
@@ -144,7 +143,7 @@ public class Main2 {
         for (int i = 0; i < 10; i++) {
             SmartResourceController resourceController = new SmartResourceController();
             resourceController.setMaxBatchSize(100000);
-            TransactionalMemoryQueue queue = new TransactionalMemoryQueue(ctx.getBean("ru.kwanza.jeda.api.ISystemManager", ISystemManagerInternal.class),
+            TransactionalMemoryQueue queue = new TransactionalMemoryQueue(ctx.getBean("ru.kwanza.jeda.api.IJedaManager", IJedaManagerInternal.class),
                     ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
             Stage testStage = new Stage(systemManager, "TestStage-" + i,
                     new EventProcessor("TestStage-" + i), queue, stageThreadManager, null, resourceController,  true);

@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.core.queue;
 
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 import java.util.ArrayList;
 
@@ -14,11 +13,11 @@ public class TransactionalMemoryQueue<E extends IEvent> extends AbstractTransact
     private Node firstNode;
     private Node lastNode;
 
-    public TransactionalMemoryQueue(ISystemManagerInternal manager) {
+    public TransactionalMemoryQueue(IJedaManagerInternal manager) {
         this(manager, ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
     }
 
-    public TransactionalMemoryQueue(ISystemManagerInternal manager, ObjectCloneType objectCloneType, long maxSize) {
+    public TransactionalMemoryQueue(IJedaManagerInternal manager, ObjectCloneType objectCloneType, long maxSize) {
         super(manager, objectCloneType, maxSize);
         lastNode = firstNode = new Node(null);
     }

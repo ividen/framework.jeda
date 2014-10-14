@@ -4,8 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
 
@@ -27,7 +26,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     protected ConcurrentMap<Transaction, Tx> transactions = new ConcurrentHashMap<Transaction, Tx>();
     protected long maxSize;
 
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
     private AtomicInteger size = new AtomicInteger(0);
@@ -35,7 +34,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     private AtomicInteger txTakes = new AtomicInteger(0);
     private ObjectCloneType objectCloneType;
 
-    public AbstractTransactionalMemoryQueue(ISystemManagerInternal manager, ObjectCloneType objectCloneType, long maxSize) {
+    public AbstractTransactionalMemoryQueue(IJedaManagerInternal manager, ObjectCloneType objectCloneType, long maxSize) {
         this.objectCloneType = objectCloneType;
         this.maxSize = maxSize;
         this.manager = manager;

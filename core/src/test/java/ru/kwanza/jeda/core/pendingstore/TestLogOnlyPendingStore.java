@@ -2,7 +2,7 @@ package ru.kwanza.jeda.core.pendingstore;
 
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.SuspendException;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.core.pendingstore.env.TestEvent;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -20,12 +20,12 @@ public class TestLogOnlyPendingStore extends TestCase {
 
     protected ApplicationContext ctx;
     protected LogOnlyPendingStore pendingStore;
-    protected ISystemManagerInternal manager;
+    protected IJedaManagerInternal manager;
 
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(CONTEXT_FILE_NAME, AbstractDefaultPendingStoreTest.class);
-        manager = ctx.getBean(ISystemManagerInternal.class);
+        manager = ctx.getBean(IJedaManagerInternal.class);
         pendingStore = (LogOnlyPendingStore) manager.getPendingStore();
     }
 

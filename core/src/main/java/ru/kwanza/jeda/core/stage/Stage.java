@@ -19,9 +19,9 @@ public class Stage implements IStageInternal, IQueueObserver {
     protected IEventProcessor processor;
     private String name;
     private boolean hasTransaction;
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
 
-    public Stage(ISystemManagerInternal manager, String name, IEventProcessor processor,
+    public Stage(IJedaManagerInternal manager, String name, IEventProcessor processor,
             IQueue queue, AbstractThreadManager threadManager, IAdmissionController admissionController,
             IResourceController resourceController, boolean hasTransaction) {
         this.manager = manager;

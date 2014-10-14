@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.core.threadmanager;
 
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IThreadManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +23,14 @@ public abstract class AbstractThreadManager implements IThreadManager {
     protected List<AbstractProcessingThread> pool = new ArrayList<AbstractProcessingThread>();
     protected List<AbstractProcessingThread> inActive = new ArrayList<AbstractProcessingThread>();
     private String threadNamePrefix;
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
     private long idleTimeout = 1 * 60 * 1000l;
     private ReentrantLock lock = new ReentrantLock();
     private Condition wakeUpCondition = lock.newCondition();
     private int maxThreadCount = Runtime.getRuntime().availableProcessors();
     private int maxSingleEventAttempt = DEFAULT_MAX_SINGLE_EVENT_ATTEMPT;
 
-    protected AbstractThreadManager(String threadNamePrefix, ISystemManagerInternal manager) {
+    protected AbstractThreadManager(String threadNamePrefix, IJedaManagerInternal manager) {
         this.threadNamePrefix = threadNamePrefix;
         this.manager = manager;
     }
@@ -60,7 +59,7 @@ public abstract class AbstractThreadManager implements IThreadManager {
         this.idleTimeout = idleTimeout;
     }
 
-    public ISystemManagerInternal getManager() {
+    public IJedaManagerInternal getManager() {
         return manager;
     }
 

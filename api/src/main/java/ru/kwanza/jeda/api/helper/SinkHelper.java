@@ -22,12 +22,12 @@ public class SinkHelper {
     public static final IAttribute<String> SH_SINK_NAME_ATTR = AttributeFactory.create();
     public static final FieldHelper.Field<IEvent, String> SH_SINK_NAME_FIELD = new AttributeField<IEvent, String>(SH_SINK_NAME_ATTR);
 
-    private final ISystemManager manager;
+    private final IJedaManager manager;
     private Map<ISink, Map<Object, IEvent>> puts = new HashMap<ISink, Map<Object, IEvent>>();
     private Map<ISink, Map<Object, IEvent>> tryPuts = new HashMap<ISink, Map<Object, IEvent>>();
     private Map<String, ISink> sinks = new HashMap<String, ISink>();
 
-    public SinkHelper(ISystemManager manager){
+    public SinkHelper(IJedaManager manager){
         this.manager = manager;
     }
 

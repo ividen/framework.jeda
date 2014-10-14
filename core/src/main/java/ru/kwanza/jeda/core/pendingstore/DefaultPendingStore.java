@@ -21,7 +21,7 @@ public class DefaultPendingStore implements IPendingStore {
 
     private static final SuspendedEventRemoveSetter SUSPENDED_EVENT_REMOVE_SETTER = new SuspendedEventRemoveSetter();
 
-    private ISystemManager manager;
+    private IJedaManager manager;
     private DBTool dbTool;
     private IAutoKey autoKey;
     private SuspendInfoRowMapper suspendInfoRowMapper;
@@ -37,7 +37,7 @@ public class DefaultPendingStore implements IPendingStore {
     public DefaultPendingStore() {
     }
 
-    public DefaultPendingStore(ISystemManager manager, DBTool dbTool, IAutoKey autoKey, SuspenderDbInteraction suspenderDbInteraction) {
+    public DefaultPendingStore(IJedaManager manager, DBTool dbTool, IAutoKey autoKey, SuspenderDbInteraction suspenderDbInteraction) {
         this.manager = manager;
         this.dbTool = dbTool;
         this.autoKey = autoKey;

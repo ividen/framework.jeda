@@ -2,16 +2,16 @@ package ru.kwanza.jeda.core.pendingstore;
 
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IPendingStore;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.ResumeException;
 
 import java.util.Collection;
 
 public class LogOnlyPendingStore implements IPendingStore {
 
-    private ISystemManager manager;
+    private IJedaManager manager;
 
-    public LogOnlyPendingStore(ISystemManager manager) {
+    public LogOnlyPendingStore(IJedaManager manager) {
         this.manager = manager;
     }
 

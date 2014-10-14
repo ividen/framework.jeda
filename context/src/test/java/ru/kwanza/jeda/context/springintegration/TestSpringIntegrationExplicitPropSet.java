@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
@@ -8,7 +8,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class TestSpringIntegrationExplicitPropSet extends TestCase {
 
-    private ISystemManager manager;
+    private IJedaManager manager;
 
     private static final String JDBC_BLOB_CONTEXT_CONTROLLER_BEAN = "ru.kwanza.jeda.context.springintegration.JDBCBlobContextControllerFactory#0";
     private static final String JDBC_BLOB_CONTEXT_CONTROLLER_WITH_DICT_BEAN = "ru.kwanza.jeda.context.springintegration.JDBCBlobContextControllerWithDictFactory#0";
@@ -19,7 +19,7 @@ public class TestSpringIntegrationExplicitPropSet extends TestCase {
     @Override
     public void setUp() throws Exception {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-integration-explicit-prop-set-test.xml", TestSpringIntegrationExplicitPropSet.class);
-        manager = (ISystemManager) ctx.getBean(ISystemManager.class.getName());
+        manager = (IJedaManager) ctx.getBean(IJedaManager.class.getName());
     }
 
     public void testSmoke() throws Exception {

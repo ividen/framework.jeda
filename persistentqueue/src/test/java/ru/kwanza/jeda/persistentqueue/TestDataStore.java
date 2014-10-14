@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
 import javax.transaction.Status;
@@ -15,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Guzanov Alexander
  */
 public class TestDataStore {
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
     private static final TestDataStore instance = new TestDataStore();
 
     private AtomicLong idCounter = new AtomicLong(0l);

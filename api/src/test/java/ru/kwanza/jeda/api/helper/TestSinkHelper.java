@@ -1,17 +1,15 @@
 package ru.kwanza.jeda.api.helper;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import junit.framework.TestCase;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.awt.*;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
-import static ru.kwanza.jeda.api.helper.SinkHelper.*;
 import static org.mockito.Mockito.*;
 
 public class TestSinkHelper extends TestCase {
@@ -34,7 +32,7 @@ public class TestSinkHelper extends TestCase {
     private TestSink sink2;
 
     private ISuspender<IEvent> suspenderMock;
-    private ISystemManager systemManager;
+    private IJedaManager systemManager;
 
     @Override
     public void setUp() throws Exception {
@@ -59,7 +57,7 @@ public class TestSinkHelper extends TestCase {
         when(sinkHelperSpy.getSink(sinkName1)).thenReturn(sink1);
         when(sinkHelperSpy.getSink(sinkName2)).thenReturn(sink2);
 
-        systemManager = mock(ISystemManager.class);
+        systemManager = mock(IJedaManager.class);
         when(systemManager.resolveObjectName(anyString())).thenReturn("TestSink");
         when(systemManager.resolveObjectName(sink1)).thenReturn(sinkName1);
         when(systemManager.resolveObjectName(sink2)).thenReturn(sinkName2);
@@ -557,7 +555,7 @@ public class TestSinkHelper extends TestCase {
     }
 
     public void testGetSuspender() throws Exception {
-        ISystemManager systemManagerMock = mock(ISystemManager.class);
+        IJedaManager systemManagerMock = mock(IJedaManager.class);
 
         IPendingStore pendingStoreMock = mock(IPendingStore.class);
         when(systemManagerMock.getPendingStore()).thenReturn(pendingStoreMock);

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -22,7 +22,7 @@ class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(BerkeleyBlobContextControllerFactory.class);
 
-        definitionBuilder.addPropertyReference(MANAGER, ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
 
         setSimplePropertyValue(definitionBuilder, element, DATABASE_NAME);
 

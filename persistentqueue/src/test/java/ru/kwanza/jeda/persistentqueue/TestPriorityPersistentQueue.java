@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 /**
  * @author Guzanov Alexander
@@ -10,8 +9,8 @@ public abstract class TestPriorityPersistentQueue extends TestPersistentQueue {
 
     @Override
     protected PersistentQueue createQeueue() {
-        return new PriorityPersistentQueue((ISystemManagerInternal)
-                ctx.getBean("ru.kwanza.jeda.api.ISystemManager"), 1000, controller);
+        return new PriorityPersistentQueue((IJedaManagerInternal)
+                ctx.getBean("ru.kwanza.jeda.api.IJedaManager"), 1000, controller);
     }
 
     @Override

@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.jeconnection;
 
 
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.toolbox.SerializationHelper;
 import com.sleepycat.je.*;
 import junit.framework.TestCase;
@@ -28,7 +27,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         ClassPathXmlApplicationContext ctx;
         ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getConnection(0l).openDatabase("test",
@@ -127,7 +126,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testCommitLoad_2() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getTxConnection(0l).openDatabase("test",
@@ -177,7 +176,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testCommitLoad_3() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
         Database db = factoryJE.getConnection(0l).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Database db1 = factoryJE.getConnection(0l).openDatabase("test_1",
@@ -225,7 +224,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testRollbacktLoad() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getConnection(0l).openDatabase("test",
@@ -266,7 +265,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testInnerTransaction_CommitCommit() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getConnection(0l).openDatabase("test",
@@ -313,7 +312,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testInnerTransaction_CommitRollback() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getConnection(0l).openDatabase("test",
@@ -356,7 +355,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testInnerTransaction_RollbackCommit() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         sm.getTransactionManager().begin();
         Database db = factoryJE.getConnection(0l).openDatabase("test",
@@ -401,7 +400,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
         factoryJE.setLockingTimeout(1000);
         assertEquals(1000, factoryJE.getLockingTimeout());
         assertEquals("./target/berkeley_db/", factoryJE.getPath());
@@ -433,7 +432,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testActive() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
         factoryJE.destroy();
         try {
             factoryJE.getConnection(0l);
@@ -453,7 +452,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
     public void testGetTxConection() throws Exception, RollbackException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal sm = ctx.getBean(ISystemManagerInternal.class);
+        IJedaManagerInternal sm = ctx.getBean(IJedaManagerInternal.class);
 
         try {
             factoryJE.getTxConnection(0l);

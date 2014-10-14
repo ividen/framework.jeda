@@ -2,7 +2,7 @@ package ru.kwanza.jeda.mock;
 
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * @author Guzanov Alexander
  */
-public class MockSystemManager implements ISystemManager {
-    public static MockSystemManager instance;
+public class MockJedaManager implements IJedaManager {
+    public static MockJedaManager instance;
     public static final String MOCK_CURRENT_STAGE = "MOCK_CURRENT_STAGE";
 
     public ConcurrentMap<String, IContextController> contextControllers =
@@ -21,9 +21,9 @@ public class MockSystemManager implements ISystemManager {
     public ConcurrentMap<String, MockStage> stages = new ConcurrentHashMap<String, MockStage>();
     public ConcurrentMap<String, ITimer> timers = new ConcurrentHashMap<String, ITimer>();
 
-    public static synchronized MockSystemManager getInstance() {
+    public static synchronized MockJedaManager getInstance() {
         if (instance == null) {
-            instance = new MockSystemManager();
+            instance = new MockJedaManager();
         }
 
         return instance;

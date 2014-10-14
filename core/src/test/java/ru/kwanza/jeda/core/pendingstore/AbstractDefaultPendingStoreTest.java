@@ -32,13 +32,13 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
     protected Connection conn;
     protected DBUnitUtil dbUnitUtil;
     protected IPendingStore pendingStore;
-    protected ISystemManager manager;
+    protected IJedaManager manager;
 
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextFileName(), AbstractDefaultPendingStoreTest.class);
         conn = ctx.getBean("dataSource", BasicDataSource.class).getConnection();
-        manager = ctx.getBean(ISystemManager.class);
+        manager = ctx.getBean(IJedaManager.class);
         dbUnitUtil = new DBUnitUtil(conn);
         pendingStore = manager.getPendingStore();
         conn.prepareStatement("DELETE FROM " + PENDING_STORE_TABLE_NAME).execute();

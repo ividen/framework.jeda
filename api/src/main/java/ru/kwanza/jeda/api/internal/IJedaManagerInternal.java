@@ -5,10 +5,8 @@ import ru.kwanza.jeda.api.*;
 /**
  * @author Alexander Guzanov
  */
-public interface ISystemManagerInternal extends ISystemManager {
+public interface IJedaManagerInternal extends IJedaManager {
     IStageInternal getStageInternal(String name);
-
-    ITransactionManagerInternal getTransactionManager();
 
     IContextController registerContextController(String name, IContextController contextController);
 

@@ -1,13 +1,12 @@
 package ru.kwanza.jeda.jeconnection;
 
 import ru.kwanza.filelock.FileLockHelper;
-import ru.kwanza.jeda.api.ISystemManager;
 import com.sleepycat.je.Durability;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.TransactionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class JEConnectionFactory {
             .setAllowCreate(true).setTransactional(true)
             .setTxnTimeout(1, TimeUnit.MINUTES).setLockTimeout(2, TimeUnit.MINUTES);
 
-    protected ISystemManagerInternal manager;
+    protected IJedaManagerInternal manager;
 
     private ReentrantLock lock = new ReentrantLock();
     private String path;
@@ -42,7 +41,7 @@ public class JEConnectionFactory {
     private volatile boolean active = true;
 
 
-    public JEConnectionFactory(ISystemManagerInternal manager) {
+    public JEConnectionFactory(IJedaManagerInternal manager) {
         this.manager = manager;
     }
 

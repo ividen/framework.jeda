@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IEventProcessor;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.*;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.util.StringUtils;
@@ -38,7 +38,7 @@ class StageBeanBuilder {
     }
 
     public void build(BeanDefinitionBuilder definitionBuilder) {
-        definitionBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
         addPropertyReference("eventProcessor", definitionBuilder, eventProcessorDef);
         addPropertyReference("queue", definitionBuilder, queueDef);
         addPropertyReference("threadManager", definitionBuilder, threadManagerDef);

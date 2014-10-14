@@ -1,9 +1,11 @@
 package ru.kwanza.jeda.api;
 
+import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
+
 /**
  * @author Guzanov Alexander
  */
-public interface ISystemManager {
+public interface IJedaManager {
     IContextController getContextController(String name);
 
     IStage getCurrentStage();
@@ -13,6 +15,8 @@ public interface ISystemManager {
     IStage getStage(String name);
 
     ITimer getTimer(String name);
+
+    ITransactionManagerInternal getTransactionManager();
 
     IPendingStore getPendingStore();
 

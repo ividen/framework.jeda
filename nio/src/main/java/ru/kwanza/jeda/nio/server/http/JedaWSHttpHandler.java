@@ -2,9 +2,9 @@ package ru.kwanza.jeda.nio.server.http;
 
 import liquibase.util.StreamUtil;
 import org.glassfish.grizzly.http.HttpRequestPacket;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.nio.utils.HttpUtil;
 
 import java.io.ByteArrayOutputStream;
@@ -19,18 +19,18 @@ public class JedaWSHttpHandler extends JedaHttpHandler {
     private AtomicReference<byte[]> wsdlContent = new AtomicReference<byte[]>();
 
 
-    public static JedaWSHttpHandler createForObjectRef(ISystemManager manager, ISink object, long timeout,String wsdl) {
+    public static JedaWSHttpHandler createForObjectRef(IJedaManager manager, ISink object, long timeout,String wsdl) {
         return new JedaWSHttpHandler(manager, object, timeout,wsdl);
     }
 
-    public static JedaWSHttpHandler createForObject(ISystemManager manager, String objectName,
+    public static JedaWSHttpHandler createForObject(IJedaManager manager, String objectName,
                                                     long timeout, String wsdl) {
         Object obj = manager.resolveObject(objectName);
         ISink sink = obj instanceof IStage ? ((IStage) obj).getSink() : (ISink) obj;
         return createForObjectRef(manager, sink,timeout,wsdl);
     }
 
-    public JedaWSHttpHandler(ISystemManager manager, ISink<IHttpEvent> sink, long timeout, String wsdl) {
+    public JedaWSHttpHandler(IJedaManager manager, ISink<IHttpEvent> sink, long timeout, String wsdl) {
         super(manager, sink, timeout);
         this.wsdl = wsdl;
     }

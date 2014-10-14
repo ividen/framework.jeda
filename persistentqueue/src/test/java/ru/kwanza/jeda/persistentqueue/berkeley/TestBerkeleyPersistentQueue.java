@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.persistentqueue.berkeley;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
@@ -29,8 +29,8 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
                 getContextName(), TestBerkeleyPersistentQueue.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        ISystemManagerInternal systemManager = ctx.getBean(ISystemManager.class.getName(),
-                ISystemManagerInternal.class);
+        IJedaManagerInternal systemManager = ctx.getBean(IJedaManager.class.getName(),
+                IJedaManagerInternal.class);
 
         PersistentQueue queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();

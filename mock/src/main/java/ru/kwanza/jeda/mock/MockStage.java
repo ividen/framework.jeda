@@ -29,7 +29,7 @@ public class MockStage implements IStageInternal {
     }
 
     public IFlowBus getFlowBus() {
-        return MockSystemManager.getInstance().getFlowBus(name);
+        return MockJedaManager.getInstance().getFlowBus(name);
     }
 
     public IEventProcessor getProcessor() {

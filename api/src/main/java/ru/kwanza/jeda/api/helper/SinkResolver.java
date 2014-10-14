@@ -9,11 +9,11 @@ import java.util.Collection;
  */
 public class SinkResolver<E extends IEvent> implements ISink<E> {
 
-    private final ISystemManager manager;
+    private final IJedaManager manager;
     private ISink<E> original;
     private String name;
 
-    public SinkResolver(ISystemManager manager,String name) {
+    public SinkResolver(IJedaManager manager,String name) {
         this.name = name;
         this.manager = manager;
     }

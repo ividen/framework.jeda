@@ -10,7 +10,7 @@ import org.glassfish.grizzly.ssl.SSLFilter;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.nio.server.http.JKSEntryPointKeystore;
 
@@ -178,7 +178,7 @@ public class ClientMain {
 
     public static void main(String[] args) throws InterruptedException, IOException, SinkException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("application.xml", ClientMain.class);
-        ISystemManager systemManager = ctx.getBean(ISystemManager.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         IFlowBus flowBus = systemManager.getFlowBus("client-transport-flow-bus");
 
         URL url1 = new URL("http://localhost:18081/admin/start.wsm");

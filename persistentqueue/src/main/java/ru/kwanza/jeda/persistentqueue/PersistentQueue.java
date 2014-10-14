@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.*;
 import ru.kwanza.jeda.clusterservice.ClusterService;
@@ -25,7 +24,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
     private AtomicLong maxTransferCount = new AtomicLong(0l);
     private IQueuePersistenceController persistenceController;
     private IQueueObserver originalObserver;
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
     private QueueObserverChain observer;
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
@@ -35,7 +34,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
     private volatile long waitingForTransfer = 0;
     private long maxSize;
 
-    public PersistentQueue(ISystemManagerInternal manager, long maxSize, IQueuePersistenceController controller) {
+    public PersistentQueue(IJedaManagerInternal manager, long maxSize, IQueuePersistenceController controller) {
         observer = new QueueObserverChain();
         observer.addObserver(this);
         this.manager = manager;
@@ -44,7 +43,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         ClusterService.subscribe(this);
     }
 
-    public ISystemManagerInternal getManager() {
+    public IJedaManagerInternal getManager() {
         return manager;
     }
 
@@ -209,7 +208,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         return active;
     }
 
-    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(ISystemManagerInternal manager, long maxSize) {
+    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManagerInternal manager, long maxSize) {
         return new TransactionalMemoryQueue<EventWithKey>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
 

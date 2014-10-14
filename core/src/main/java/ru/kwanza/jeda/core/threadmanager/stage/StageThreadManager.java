@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.core.threadmanager.stage;
 
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
 import ru.kwanza.jeda.core.threadmanager.AbstractProcessingThread;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ public class StageThreadManager extends AbstractThreadManager {
     private static final Logger logger = LoggerFactory.getLogger(StageThreadManager.class);
     private long nameCounter = 0;
 
-    public StageThreadManager(String threadNamePrefix, ISystemManagerInternal manager) {
+    public StageThreadManager(String threadNamePrefix, IJedaManagerInternal manager) {
         super(threadNamePrefix, manager);
     }
 

@@ -2,8 +2,7 @@ package ru.kwanza.jeda.persistentqueue.springintegration;
 
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.dbtool.core.DBTool;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;
 import ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController;
 import org.springframework.beans.factory.SmartFactoryBean;
@@ -21,7 +20,7 @@ class JDBCQueueFactory implements SmartFactoryBean<PersistentQueue> {
     private String nodeIdColumn;
     private String queueNameColumn;
     private String queueName;
-    private ISystemManagerInternal manager;
+    private IJedaManagerInternal manager;
 
     public void setMaxSize(long maxSize) {
         this.maxSize = maxSize;
@@ -59,7 +58,7 @@ class JDBCQueueFactory implements SmartFactoryBean<PersistentQueue> {
         this.queueNameColumn = queueNameColumn;
     }
 
-    public void setManager(ISystemManagerInternal manager) {
+    public void setManager(IJedaManagerInternal manager) {
         this.manager = manager;
     }
 

@@ -10,7 +10,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestManager extends TestCase {
 
-    public static class TestSystemManager implements ISystemManager {
+    public static class TestJedaManager implements IJedaManager {
 
         private IStageInternal stage;
 
@@ -128,8 +128,8 @@ public class TestManager extends TestCase {
     public void testManager() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml",
                 TestManager.class);
-        ISystemManagerInternal systemManager = (ISystemManagerInternal) ctx
-                .getBean("ru.kwanza.jeda.api.ISystemManager");
+        IJedaManager systemManager = (IJedaManager) ctx
+                .getBean("ru.kwanza.jeda.api.IJedaManager");
 
         try {
             systemManager.getTransactionManager();

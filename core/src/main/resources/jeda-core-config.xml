@@ -12,18 +12,14 @@
     <context:annotation-config/>
     <aop:aspectj-autoproxy/>
 
-    <bean id="ru.kwanza.jeda.api.internal.ISystemManager"
-          class="ru.kwanza.jeda.core.manager.DefaultSystemManager" scope="singleton">
+    <bean id="ru.kwanza.jeda.api.internal.IJedaManager"
+          class="ru.kwanza.jeda.core.manager.DefaultJedaManager" scope="singleton">
         <property name="transactionManager" ref="jeda.ITransactionManagerInternal"/>
         <property name="pendingStore" ref="pendingStore"/>
     </bean>
 
     <bean id="jeda.ITransactionManagerInternal" class="ru.kwanza.jeda.core.tm.BaseTransactionManager" scope="singleton">
         <constructor-arg ref="txn.ITransactionManager"/>
-    </bean>
-
-    <bean class="ru.kwanza.jeda.api.Manager" scope="singleton"
-          factory-method="getInstance">
     </bean>
 
 </beans>

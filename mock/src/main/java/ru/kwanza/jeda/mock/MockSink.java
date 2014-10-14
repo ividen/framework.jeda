@@ -97,10 +97,10 @@ public class MockSink implements ISink<IEvent> {
     }
 
     public static void setMaxSinkSize(String stageName, long value) {
-        MockSystemManager.getInstance().getStageInternal(stageName).getSink().setMaxSize(value);
+        MockJedaManager.getInstance().getStageInternal(stageName).getSink().setMaxSize(value);
     }
 
     public static MockSink getSink(String stageName) {
-        return MockSystemManager.getInstance().getStage(stageName).getSink();
+        return MockJedaManager.getInstance().getStage(stageName).getSink();
     }
 }

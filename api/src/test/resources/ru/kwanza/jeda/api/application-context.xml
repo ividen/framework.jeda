@@ -10,7 +10,7 @@
 
 
     <bean id="ru.kwanza.jeda.api.internal.ISystemManager"
-          class="ru.kwanza.jeda.api.TestManager$TestSystemManager" scope="singleton">
+          class="ru.kwanza.jeda.api.TestManager$TestJedaManager" scope="singleton">
     </bean>
 
     <bean id="manager" class="ru.kwanza.jeda.api.Manager" scope="singleton"

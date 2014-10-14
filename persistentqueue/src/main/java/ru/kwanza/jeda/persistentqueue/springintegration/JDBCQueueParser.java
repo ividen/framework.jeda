@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -23,7 +23,7 @@ class JDBCQueueParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("queueName", queueName);
         }
 
-        definitionBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
 
         String maxSize = element.getAttribute("maxSize");
         if (StringUtils.hasText(maxSize)) {

@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.core.teststand;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.core.manager.DefaultSystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.core.manager.DefaultJedaManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import ru.kwanza.jeda.core.resourcecontroller.SmartResourceController;
@@ -62,9 +62,9 @@ public class Main {
     }
 
     public static class InputThread extends Thread {
-        private final ISystemManager manager;
+        private final IJedaManager manager;
 
-        public InputThread(ISystemManager manager) {
+        public InputThread(IJedaManager manager) {
             super("InputThread");
             this.manager = manager;
         }
@@ -102,7 +102,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", Main.class);
-        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.ISystemManager", DefaultSystemManager.class);
+        DefaultJedaManager systemManager = ctx.getBean("ru.kwanza.jeda.api.IJedaManager", DefaultJedaManager.class);
 //        SharedThreadManager stageThreadManager = new SharedThreadManager("testThreads", systemManager);
 //        stageThreadManager.setMaxThreadCount(1);
         for (int i = 0; i < 1; i++) {

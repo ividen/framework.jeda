@@ -18,9 +18,9 @@ public class LogOnlySuspender<E extends IEvent> implements ISuspender<E> {
 
     private List<E> suspends = new LinkedList<E>();
     private static AtomicLong counter = new AtomicLong(0l);
-    private ISystemManager manager;
+    private IJedaManager manager;
 
-    public LogOnlySuspender(ISystemManager manager) {
+    public LogOnlySuspender(IJedaManager manager) {
         this.manager = manager;
     }
 

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.HttpServer;
@@ -32,7 +32,7 @@ class HttpServerParser extends JedaBeanDefinitionParser {
         XmlReaderContext readerContext = parserContext.getReaderContext();
         NamespaceHandlerResolver namespaceHandlerResolver = readerContext.getNamespaceHandlerResolver();
 
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
         String name = element.getAttribute("name");
         definitionBuilder.addConstructorArgValue(name);
 

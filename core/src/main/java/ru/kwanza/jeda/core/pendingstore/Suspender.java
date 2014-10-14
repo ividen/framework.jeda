@@ -16,14 +16,14 @@ public class Suspender<E extends IEvent> implements ISuspender<E> {
 
     private static final String SEQUENCE_NAME = Suspender.class.getName();
 
-    private ISystemManager manager;
+    private IJedaManager manager;
     private IAutoKey autoKey;
     private SuspenderDbInteraction dbInteraction;
     private String insertSql;
 
     private List<IEvent> suspends = new LinkedList<IEvent>();
 
-    public Suspender(ISystemManager manager, IAutoKey autoKey,
+    public Suspender(IJedaManager manager, IAutoKey autoKey,
                      SuspenderDbInteraction dbInteraction,
                      String insertSql) {
         this.manager = manager;

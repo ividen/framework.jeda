@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.ITimer;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -17,7 +17,7 @@ class TimerParser implements BeanDefinitionParser {
                 .parseBeanDefinitionElement(element, null, ITimer.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemTimerFactory.class);
-        factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", IJedaManager.class.getName());
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 ITimer.class, factoryBuilder.getBeanDefinition());

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -17,7 +17,7 @@ class TxMemoryQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(TransactionalMemoryQueue.class);
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
         String sType = element.getAttribute("cloneType");
         ObjectCloneType type = ObjectCloneType.SERIALIZE;
         if (StringUtils.hasText(sType)) {

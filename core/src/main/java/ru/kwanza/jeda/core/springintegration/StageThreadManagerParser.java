@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.core.springintegration;
 
-import ru.kwanza.jeda.api.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IThreadManager;
 import ru.kwanza.jeda.core.threadmanager.stage.StageThreadManager;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -19,7 +19,7 @@ class StageThreadManagerParser extends JedaBeanDefinitionParser {
                 .genericBeanDefinition(StageThreadManager.class);
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("threadNamePrefix"));
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
 
 
         String maxThreadCount = element.getAttribute("maxThreadCount");

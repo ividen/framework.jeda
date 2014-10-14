@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.CustomBeanDefinitionParserDelegate;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
@@ -26,7 +26,7 @@ class PersistentQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(PersistentQueue.class);
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("maxSize"));
 

@@ -1,10 +1,10 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IResourceController;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.ISystemManager;
-import ru.kwanza.jeda.api.internal.ISystemManagerInternal;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.manager.SystemContextController;
 import ru.kwanza.jeda.core.manager.SystemFlowBus;
 import ru.kwanza.jeda.core.manager.SystemTimer;
@@ -25,7 +25,7 @@ public class TestSpringIntegration extends TestCase {
 
     public void test1() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config.xml", TestSpringIntegration.class);
-        ISystemManagerInternal manager = (ISystemManagerInternal) ctx.getBean(ISystemManager.class);
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean(IJedaManager.class);
 
         IStageInternal stage = manager.getStageInternal("TestStage1");
         assertEquals(stage.getName(), "TestStage1");
@@ -190,7 +190,7 @@ public class TestSpringIntegration extends TestCase {
 
     public void test2() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config_1.xml", TestSpringIntegration.class);
-        ISystemManagerInternal manager = (ISystemManagerInternal) ctx.getBean(ISystemManager.class.getName());
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean(IJedaManager.class.getName());
 
         assertEquals(manager.getFlowBus("CPAReqFlowBus").getClass(), SystemFlowBus.class);
         assertEquals(manager.<Object, IContext>getContextController("TestContext").getClass(), SystemContextController.class);
