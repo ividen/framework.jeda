@@ -8,11 +8,8 @@ import ru.kwanza.jeda.clusterservice.Node;
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "cluster_service_nodes")
+@Entity(table = "cluster_service_nodes",  name="jeda.clusterservice.NodeEntity")
 public class NodeEntity extends Node {
-//    @VersionField("version")
-//    private Long version;
-
     public NodeEntity(Integer id, Long lastActivity) {
         this.id = id;
         this.lastActivity = lastActivity;

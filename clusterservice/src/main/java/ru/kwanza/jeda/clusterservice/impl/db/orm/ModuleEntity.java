@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "cluster_service_module")
+@Entity(table = "cluster_service_module", name="jeda.clusterservice.ModuleEntity")
 public class ModuleEntity {
     @IdField("id")
     private String id;

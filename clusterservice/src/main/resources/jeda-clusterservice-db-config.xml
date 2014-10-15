@@ -2,20 +2,15 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd">
 
-    <context:annotation-config/>
-
-    <bean id="clusterServiceImpl"
-          class="ru.kwanza.jeda.clusterservice.old.impl.db.DBClusterServiceImpl"
+    <bean id="jeda.clusterservice.DBClusterService"
+          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService"
           scope="singleton">
-        <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean id="clusterService" class="ru.kwanza.jeda.clusterservice.old.ClusterService" scope="singleton"
-          factory-method="getInstance">
-    </bean>
+    <dbtool-orm:entityMapping scan-package="ru.kwanza.jeda.clusterservice.impl.db.orm"/>
 
 </beans>
