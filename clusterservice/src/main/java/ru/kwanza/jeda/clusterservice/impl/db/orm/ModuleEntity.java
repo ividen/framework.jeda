@@ -4,6 +4,11 @@ import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
 import ru.kwanza.dbtool.orm.annotations.VersionField;
+import ru.kwanza.jeda.clusterservice.IClusteredModule;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Alexander Guzanov
@@ -23,10 +28,14 @@ public class ModuleEntity {
     private Long lastRepaired;
 
     public ModuleEntity(Integer nodeId, String name) {
-        this.id = nodeId.toString() + "_" + name;
+        this.id = createId(nodeId, name);
         this.nodeId = nodeId;
         this.name = name;
         this.lastRepaired = System.currentTimeMillis();
+    }
+
+    private static String createId(Integer nodeId, String name) {
+        return nodeId.toString() + "_" + name;
     }
 
     public String getId() {
@@ -47,5 +56,13 @@ public class ModuleEntity {
 
     public void setLastRepaired(Long lastRepaired) {
         this.lastRepaired = lastRepaired;
+    }
+
+    public static Collection<String> getIds(final int nodeId,Collection<IClusteredModule> modules){
+        return FieldHelper.getFieldCollection(modules,new FieldHelper.Field<IClusteredModule, String>() {
+            public String value(IClusteredModule cm) {
+                return createId(nodeId,cm.getName());
+            }
+        });
     }
 }
