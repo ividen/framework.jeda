@@ -128,9 +128,7 @@ public class DBClusterService implements IClusterService {
         return currentNode;
     }
 
-    //todo under construction
     public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
-
         while (!safe) {
             safeLock.lock();
             try {
@@ -146,8 +144,23 @@ public class DBClusterService implements IClusterService {
         }
     }
 
-    public <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit) {
-        return null;
+    public <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit)
+            throws InterruptedException, InvocationTargetException, TimeoutException {
+        while (!safe) {
+            safeLock.lock();
+            try {
+                if (!isSafe.await(waiteTimeout, unit)) {
+                    throw new TimeoutException();
+                }
+            } finally {
+                safeLock.unlock();
+            }
+        }
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new InvocationTargetException(e);
+        }
     }
 
     public void registerModule(IClusteredModule module) {
@@ -329,7 +342,7 @@ public class DBClusterService implements IClusterService {
 
         private void removeWorker(RepairWorker worker) {
             ConcurrentMap<RepairWorker, ModuleEntity> workers = repairingNodes.get(worker.node.getId());
-            if(workers!=null){
+            if (workers != null) {
                 workers.remove(worker);
             }
         }

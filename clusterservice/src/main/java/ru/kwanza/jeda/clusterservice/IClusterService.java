@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Alexander Guzanov
@@ -22,7 +23,7 @@ public interface IClusterService {
 
     <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException;
 
-    <R> R criticalSection(Callable<R> callable,long waiteTimeout, TimeUnit unit);
+    <R> R criticalSection(Callable<R> callable,long waiteTimeout, TimeUnit unit) throws InterruptedException, InvocationTargetException, TimeoutException;
 
     void registerModule(IClusteredModule module);
 }
