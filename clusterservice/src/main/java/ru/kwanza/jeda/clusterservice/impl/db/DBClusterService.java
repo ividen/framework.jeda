@@ -14,9 +14,12 @@ import ru.kwanza.txn.api.spi.ITransactionManager;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Alexander Guzanov
@@ -52,6 +55,10 @@ public class DBClusterService implements IClusterService {
     private ActivitySupervisor activitySupervisor;
     private RepairSupervisor repairSupervisor;
     private ConcurrentMap<String, IClusteredModule> modules = new ConcurrentHashMap<String, IClusteredModule>();
+
+    private volatile boolean safe = false;
+    private ReentrantLock safeLock = new ReentrantLock();
+    private Condition isSafe = safeLock.newCondition();
 
     @PostConstruct
     public void init() {
@@ -124,8 +131,21 @@ public class DBClusterService implements IClusterService {
     }
 
     //todo under construction
-    public <R> R criticalSection(Callable<R> callable) {
-        return null;
+    public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
+
+        while (!safe) {
+            safeLock.lock();
+            try {
+                isSafe.await();
+            } finally {
+                safeLock.unlock();
+            }
+        }
+        try {
+            return callable.call();
+        } catch (Exception e) {
+            throw new InvocationTargetException(e);
+        }
     }
 
     public <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit) {
@@ -163,12 +183,21 @@ public class DBClusterService implements IClusterService {
                         tm.begin();
                         if (waitForModulesLock()) {
                             startModulesIfNeed();
+                            safeLock.lock();
+                            try {
+                                safe = true;
+                                isSafe.signalAll();
+                            } finally {
+                                safeLock.unlock();
+                            }
+
                         } else {
                             stopModulesIfNeed();
                         }
 
                         lockTimeout(start);
                     } finally {
+                        safe = false;
                         tm.commit();
                     }
                 } catch (InterruptedException e) {
