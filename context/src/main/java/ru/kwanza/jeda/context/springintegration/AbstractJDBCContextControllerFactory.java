@@ -6,11 +6,12 @@ import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.IJedaManager;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 abstract class AbstractJDBCContextControllerFactory
         implements SmartFactoryBean<IContextController>, BeanNameAware {
 
-    protected IJedaManager manager;
+    protected IJedaManagerInternal manager;
     protected String name;
 
     protected DBTool dbTool;
@@ -33,7 +34,7 @@ abstract class AbstractJDBCContextControllerFactory
         return true;
     }
 
-    public void setManager(IJedaManager manager) {
+    public void setManager(IJedaManagerInternal manager) {
         this.manager = manager;
     }
 

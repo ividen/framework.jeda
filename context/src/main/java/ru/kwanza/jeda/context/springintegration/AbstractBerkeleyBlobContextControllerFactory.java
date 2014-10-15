@@ -3,6 +3,7 @@ package ru.kwanza.jeda.context.springintegration;
 import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
 abstract class AbstractBerkeleyBlobContextControllerFactory
         implements SmartFactoryBean<IContextController>, BeanNameAware {
 
-    protected IJedaManager manager;
+    protected IJedaManagerInternal manager;
     protected String name;
 
     protected String databaseName;
@@ -34,7 +35,7 @@ abstract class AbstractBerkeleyBlobContextControllerFactory
         return true;
     }
 
-    public void setManager(IJedaManager manager) {
+    public void setManager(IJedaManagerInternal manager) {
         this.manager = manager;
     }
 
