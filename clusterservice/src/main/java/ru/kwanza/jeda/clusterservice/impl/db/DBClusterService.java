@@ -95,9 +95,9 @@ public class DBClusterService implements IClusterService {
         activitySupervisor = new ActivitySupervisor();
         repairSupervisor = new RepairSupervisor();
 
-        repairExecutor = new ThreadPoolExecutor(repairThreadCount,repairThreadCount,lockTimeout, TimeUnit.MILLISECONDS,new LinkedBlockingQueue<Runnable>(),new ThreadFactory() {
+        repairExecutor = new ThreadPoolExecutor(repairThreadCount, repairThreadCount, lockTimeout, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
             public Thread newThread(Runnable r) {
-                return new Thread(r,REPAIR_SUPERVISOR_WORKER + "-" + counter.incrementAndGet());
+                return new Thread(r, REPAIR_SUPERVISOR_WORKER + "-" + counter.incrementAndGet());
             }
         });
 
@@ -123,6 +123,15 @@ public class DBClusterService implements IClusterService {
         return currentNode;
     }
 
+    //todo under construction
+    public <R> R criticalSection(Callable<R> callable) {
+        return null;
+    }
+
+    public <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit) {
+        return null;
+    }
+
     public void registerModule(IClusteredModule module) {
         try {
             em.create(new ModuleEntity(currentNode.getId(), module.getName()));
@@ -135,6 +144,7 @@ public class DBClusterService implements IClusterService {
 
     public final class ActivitySupervisor extends Thread {
         private boolean isAlive = false;
+        private List<ModuleEntity> moduleEntities;
 
         public ActivitySupervisor() {
             super(ACTIVITY_SUPERVISOR_NAME);
@@ -145,35 +155,55 @@ public class DBClusterService implements IClusterService {
         public void run() {
             logger.info("Started {}", ACTIVITY_SUPERVISOR_NAME);
             while (!isInterrupted()) {
-                tm.begin();
+                long start = System.currentTimeMillis();
                 try {
-                    long start = System.currentTimeMillis();
+                    if (!tryUpdateCurrentNode(start)) continue;
 
-                    if (!lockCurrentNode()) {
-                        if (isAlive) {
-                            isAlive = false;
-                            stopModules();
+                    try {
+                        tm.begin();
+                        if (waitForModulesLock()) {
+                            startModulesIfNeed();
+                        } else {
+                            stopModulesIfNeed();
                         }
 
-                    } else {
-                        List<ModuleEntity> moduleEntities = waitForModulesLock();
-
-                        if (!isAlive) {
-                            isAlive = true;
-                            startModules();
-                            updateModulesLastRepaired(moduleEntities);
-                        }
+                        lockTimeout(start);
+                    } finally {
+                        tm.commit();
                     }
-                    long end = System.currentTimeMillis();
-                    sleep(Math.max(0, lockTimeout - (end - start)));
-                    updateCurrentNodeActivity(end);
                 } catch (InterruptedException e) {
                     break;
-                } finally {
-                    tm.commit();
                 }
             }
             logger.info("Stopped {}", ACTIVITY_SUPERVISOR_NAME);
+        }
+
+        private boolean tryUpdateCurrentNode(long start) throws InterruptedException {
+            if (!updateCurrentNodeActivity(start)) {
+                stopModulesIfNeed();
+                lockTimeout(start);
+                return false;
+            }
+            return true;
+        }
+
+        private void startModulesIfNeed() {
+            if (!isAlive) {
+                isAlive = true;
+                startModules();
+                updateModulesLastRepaired(moduleEntities);
+            }
+        }
+
+        private void stopModulesIfNeed() {
+            if (isAlive) {
+                isAlive = false;
+                stopModules();
+            }
+        }
+
+        private void lockTimeout(long start) throws InterruptedException {
+            sleep(Math.max(0, lockTimeout - (System.currentTimeMillis() - start)));
         }
 
         private void updateModulesLastRepaired(List<ModuleEntity> moduleEntities) {
@@ -183,36 +213,34 @@ public class DBClusterService implements IClusterService {
             }
 
             try {
-                em.update(ModuleEntity.class,moduleEntities);
-            } catch (UpdateException e) {
-                logger.error("Error updating modules",e);
+                em.update(ModuleEntity.class, moduleEntities);
+            } catch (Throwable e) {
+                logger.error("Error updating modules", e);
             }
         }
 
-        private void updateCurrentNodeActivity(long end) {
-            currentNode.setLastActivity(end + failoverTimeout);
+        private boolean updateCurrentNodeActivity(long ts) {
+            currentNode.setLastActivity(ts + failoverTimeout);
             try {
                 em.update(currentNode);
-            } catch (UpdateException e) {
+            } catch (Throwable e) {
                 logger.error("Can't encrease activity timestamp for " + currentNode.getId(), e);
-            }
-        }
-
-        private List<ModuleEntity> waitForModulesLock() {
-            List<ModuleEntity> moduleEntities = queryModules.prepare()
-                    .setParameter("nodeId", currentNode.getId())
-                    .setParameter("name", modules.keySet()).selectList();
-            em.lock(LockType.WAIT, moduleEntities);
-            return moduleEntities;
-        }
-
-        private boolean lockCurrentNode() {
-            try {
-                em.update(currentNode);
-            } catch (Exception e) {
-                logger.error("Can't update current node " + currentNode.getId(), e);
                 return false;
             }
+
+            return true;
+        }
+
+        private boolean waitForModulesLock() {
+            try {
+                moduleEntities = queryModules.prepare()
+                        .setParameter("nodeId", currentNode.getId())
+                        .setParameter("name", modules.keySet()).selectList();
+                em.lock(LockType.WAIT, moduleEntities);
+            } catch (Throwable e) {
+                return false;
+            }
+
             return true;
         }
 
@@ -295,8 +323,8 @@ public class DBClusterService implements IClusterService {
                             break;
                         }
                     }
-                }catch (Throwable e){
-                    logger.error("Error in repair thread!",e);
+                } catch (Throwable e) {
+                    logger.error("Error in repair thread!", e);
                 } finally {
                     tm.commit();
                 }
