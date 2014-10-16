@@ -7,15 +7,16 @@ import ru.kwanza.dbtool.orm.annotations.VersionField;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
+import java.sql.Types;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "cluster_service_module", name="jeda.clusterservice.ModuleEntity")
+@Entity(table = "jeda_clustered_module", name="jeda.clusterservice.ModuleEntity")
 public class ModuleEntity {
-    @IdField("id")
+    @IdField(value = "id", type = Types.VARCHAR)
     private String id;
 
     @Field("node_id")
@@ -24,7 +25,7 @@ public class ModuleEntity {
     @Field("name")
     private String name;
 
-    @Field("lastRepaired")
+    @Field("las_repaired")
     private Long lastRepaired;
 
     public ModuleEntity(Integer nodeId, String name) {

@@ -23,7 +23,9 @@
     </bean>
 
     <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:dbtool-orm-config.xml"/>
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
 
 
 </beans>

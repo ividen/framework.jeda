@@ -2,34 +2,43 @@ package ru.kwanza.jeda.clusterservice.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.clusterservice.IClusterService;
+import ru.kwanza.jeda.clusterservice.IClusteredModule;
+import ru.kwanza.jeda.clusterservice.Node;
 
 public class NodeMonitorTest /* extends TestCase*/ {
     private static final Logger logger = LoggerFactory.getLogger(NodeMonitorTest.class);
 
-//    public void testClusterMonitor() throws Exception {
-//        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", NodeMonitorTest.class);
-//        //NodeMonitor monitor = new NodeMonitor();
-//        ClusterService clusterService = ctx.getBean(ClusterService.class);
-//        ClusterService.subscribe(new NodeMonitor());
-//        assertNotNull(clusterService);
-//        Thread.sleep(250000);
-//    }
-//
-//    private class NodeMonitor implements INodeListener {
-//        public void onNodeLost(Long nodeId, long lastNodeTs) {
-//            logger.warn("Node lost {}", nodeId);
-//        }
-//
-//        public void onNodeActivate(Long nodeId, long lastNodeTs) {
-//            logger.warn("Node activate {}", nodeId);
-//        }
-//
-//        public void onCurrentNodeActivate() {
-//            logger.warn("Current node activate");
-//        }
-//
-//        public void onCurrentNodeLost() {
-//            logger.warn("Current node lost");
-//        }
-//    }
+    public static void main(String[] args) throws InterruptedException {
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", NodeMonitorTest.class);
+
+
+
+
+        IClusterService bean = ctx.getBean(IClusterService.class);
+
+        bean.registerModule(new IClusteredModule() {
+            int counter = 10;
+            public String getName() {
+                return "Test";
+            }
+
+            public void handleStart() {
+                System.out.println("Started");
+            }
+
+            public void handleStop() {
+                System.out.print("Stoped");
+            }
+
+            public boolean handleRepair(Node node) {
+                System.out.println("REpair " + node.getId());
+                return counter-- <0;
+            }
+        });
+
+        Thread.currentThread().join();
+    }
 }

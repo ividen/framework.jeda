@@ -45,8 +45,8 @@ public class DBClusterService implements IClusterService {
 
     private static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
 
-    private long failoverTimeout = 15 * 60 * 1000;
-    private long lockTimeout = 60 * 1000;
+    private long failoverTimeout = 60 * 1000;
+    private long lockTimeout = 5000;
     private long repairInterval = 1000;
     private int repairThreadCount = 10;
 
@@ -78,7 +78,7 @@ public class DBClusterService implements IClusterService {
         queryAll = em.queryBuilder(NodeEntity.class).create();
         queryModules = em.queryBuilder(ModuleEntity.class).where(If.in("id", "id")).create();
         queryRepairableNodes = em.queryBuilder(NodeEntity.class)
-                .where(If.and(If.notEqual("nodeId", "nodeId"), If.isLessOrEqual("lastActivity", "lastActivity"))).create();
+                .where(If.and(If.notEqual("id", "nodeId"), If.isLessOrEqual("lastActivity", "lastActivity"))).create();
     }
 
     private void initCurrentNode() {
@@ -187,6 +187,11 @@ public class DBClusterService implements IClusterService {
         @Override
         public void run() {
             logger.info("Started {}", SUPERVISOR_NAME);
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while (!isInterrupted()) {
                 long start = System.currentTimeMillis();
                 try {
@@ -243,6 +248,8 @@ public class DBClusterService implements IClusterService {
         }
 
         private void updateModulesLastRepaired(List<ModuleEntity> moduleEntities) {
+            if (moduleEntities.isEmpty()) return;
+
             long ts = System.currentTimeMillis();
             for (ModuleEntity moduleEntity : moduleEntities) {
                 moduleEntity.setLastRepaired(ts);
@@ -270,7 +277,9 @@ public class DBClusterService implements IClusterService {
         private boolean waitForModulesLock() {
             try {
                 moduleEntities = selectModuleEntities(currentNode.getId());
-                em.lock(LockType.WAIT, moduleEntities);
+                if (!moduleEntities.isEmpty()) {
+                    em.lock(LockType.WAIT, ModuleEntity.class, moduleEntities);
+                }
             } catch (Throwable e) {
                 return false;
             }
@@ -307,6 +316,9 @@ public class DBClusterService implements IClusterService {
 
             if (!staleNodes.isEmpty()) {
                 findNewRepairableNodes(staleNodes);
+            }
+
+            if(!repairingNodes.isEmpty()){
                 findReactivatedNodes(staleNodes);
             }
         }
@@ -434,6 +446,4 @@ public class DBClusterService implements IClusterService {
             safeLock.unlock();
         }
     }
-
-
 }
