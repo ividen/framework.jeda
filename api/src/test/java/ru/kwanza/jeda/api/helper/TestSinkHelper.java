@@ -36,6 +36,8 @@ public class TestSinkHelper extends TestCase {
 
     @Override
     public void setUp() throws Exception {
+        systemManager = mock(IJedaManager.class);
+        sinkHelperSpy = spy(new SinkHelper(systemManager));
         sinkResolverMock1 = mock(SinkResolver.class);
         sinkResolverMock2 = mock(SinkResolver.class);
 
@@ -57,14 +59,12 @@ public class TestSinkHelper extends TestCase {
         when(sinkHelperSpy.getSink(sinkName1)).thenReturn(sink1);
         when(sinkHelperSpy.getSink(sinkName2)).thenReturn(sink2);
 
-        systemManager = mock(IJedaManager.class);
         when(systemManager.resolveObjectName(anyString())).thenReturn("TestSink");
         when(systemManager.resolveObjectName(sink1)).thenReturn(sinkName1);
         when(systemManager.resolveObjectName(sink2)).thenReturn(sinkName2);
         when(systemManager.resolveObject(sinkName1)).thenReturn(new TestSink(sinkName1));
         when(systemManager.resolveObject(sinkName2)).thenReturn(new TestSink(sinkName2));
 
-        sinkHelperSpy = spy(new SinkHelper(systemManager));
     }
 
     public void testFlushByNoSupportedObject() throws Exception {
