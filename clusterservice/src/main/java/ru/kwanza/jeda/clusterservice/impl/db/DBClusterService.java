@@ -48,8 +48,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
 
-    private long failoverTimeout = 60 * 1000;
-    private long lockTimeout = 5000;
+    private long failoverTimeout = 5 *60 * 1000;
+    private long lockTimeout = 60*1000;
     private long repairInterval = 1000;
     private int repairThreadCount = 10;
 
@@ -201,11 +201,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         @Override
         public void run() {
             logger.info("Started {}", SUPERVISOR_NAME);
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             while (!isInterrupted()) {
                 long start = System.currentTimeMillis();
                 try {

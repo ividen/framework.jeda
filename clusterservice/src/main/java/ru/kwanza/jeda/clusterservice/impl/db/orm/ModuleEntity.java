@@ -25,7 +25,7 @@ public class ModuleEntity {
     @Field("name")
     private String name;
 
-    @Field("las_repaired")
+    @Field("last_repaired")
     private Long lastRepaired;
 
     public ModuleEntity(Integer nodeId, String name) {

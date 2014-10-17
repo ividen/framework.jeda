@@ -9,8 +9,12 @@
     <dbtool-orm:entityMapping scan-package="ru.kwanza.jeda.clusterservice.impl.db.orm"/>
 
     <bean id="jeda.clusterservice.DBClusterService"
-          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService"
-          scope="singleton">
+          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService" depends-on="jeda.clusterservice.Liquibase">
+    </bean>
+
+    <bean id="jeda.clusterservice.Liquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:jeda-clusterservice-db-liquibase.xml"/>
     </bean>
 
 </beans>

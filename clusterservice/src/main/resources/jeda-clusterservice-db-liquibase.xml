@@ -1,0 +1,39 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <property dbms="oracle" name="long.type" value="NUMBER(19,0)"/>
+    <property dbms="mysql" name="long.type" value="bigint"/>
+    <property dbms="mssql" name="long.type" value="bigint"/>
+    <property dbms="postgresql" name="long.type" value="bigint"/>
+    <property dbms="h2" name="long.type" value="bigint"/>
+
+    <changeSet author="aguzanov" id="1">
+        <createTable tableName="jeda_cluster_service">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="last_activity" defaultValue="0" type="${long.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="2">
+        <createTable tableName="jeda_clustered_module">
+            <column name="id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id" type="${long.type}">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="last_repaired" type="${long.type}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
