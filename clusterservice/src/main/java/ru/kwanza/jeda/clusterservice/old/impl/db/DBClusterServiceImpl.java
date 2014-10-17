@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class DBClusterServiceImpl implements IClusterServiceImpl, ApplicationListener<ContextRefreshedEvent> {
     private static final Logger logger = LoggerFactory.getLogger(IClusterServiceImpl.class);
-    private static final String NODE_ID_PROPERTY = "jeda.node.id";
+    public static final String NODE_ID_PROPERTY = "jeda.node.id";
     /**
      * id узла
      */

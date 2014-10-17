@@ -2,6 +2,7 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.kwanza.dbtool.core.UpdateException;
@@ -29,7 +30,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Alexander Guzanov
  */
 public class DBClusterService implements IClusterService, ApplicationListener<ContextRefreshedEvent> {
-    public static final String NODE_ID_PROPERTY_NAME = "clusterservice.nodeId";
     public static final String SUPERVISOR_NAME = "DBClusterService-Supervisor";
     public static final String REPAIR_WORKER = "DBClusterService-RepairWorker";
 
@@ -45,6 +45,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private IQuery<NodeEntity> queryRepairableNodes;
 
     private NodeEntity currentNode;
+    private Integer currentNodeId;
 
     private static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
 
@@ -71,9 +72,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     @PreDestroy
-    public void destroy() {
+    public void destroy() throws InterruptedException {
         logger.info("Stopping {} ...", SUPERVISOR_NAME);
         supervisor.interrupt();
+        supervisor.join(60000);
+        logger.info("Stopping RepairWorker's threads ...");
+        repairExecutor.shutdownNow();
+        repairExecutor.awaitTermination(60000,TimeUnit.MILLISECONDS);
     }
 
     private void initQuery() {
@@ -86,7 +91,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void initCurrentNode() {
-        currentNode = new NodeEntity(Integer.valueOf(System.getProperty(NODE_ID_PROPERTY_NAME)), System.currentTimeMillis());
+        currentNode = new NodeEntity(currentNodeId, System.currentTimeMillis());
 
         if (em.readByKey(NodeEntity.class, currentNode.getId()) == null) {
             try {
@@ -97,6 +102,14 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
             }
         }
+    }
+
+    public Integer getCurrentNodeId() {
+        return currentNodeId;
+    }
+
+    public void setCurrentNodeId(Integer currentNodeId) {
+        this.currentNodeId = currentNodeId;
     }
 
     private void initSupervisors() {

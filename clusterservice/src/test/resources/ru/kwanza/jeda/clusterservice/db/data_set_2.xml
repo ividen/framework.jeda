@@ -1,0 +1,5 @@
+<dataset>
+    <jeda_clustered_module id="1_module_1" node_id="1" name="module_1"/>
+    <jeda_clustered_module id="1_module_2" node_id="1" name="module_2"/>
+    <jeda_clustered_module id="1_module_3" node_id="1" name="module_3"/>
+</dataset>

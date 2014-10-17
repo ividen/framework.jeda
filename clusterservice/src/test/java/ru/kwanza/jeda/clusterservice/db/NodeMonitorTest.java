@@ -12,7 +12,7 @@ public class NodeMonitorTest /* extends TestCase*/ {
     private static final Logger logger = LoggerFactory.getLogger(NodeMonitorTest.class);
 
     public static void main(String[] args) throws InterruptedException {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", NodeMonitorTest.class);
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config.xml", NodeMonitorTest.class);
 
 
 

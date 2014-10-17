@@ -10,6 +10,7 @@
 
     <bean id="jeda.clusterservice.DBClusterService"
           class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService" depends-on="jeda.clusterservice.Liquibase">
+        <property name="currentNodeId" value="${jeda.clusterservice.nodeId}"/>
     </bean>
 
     <bean id="jeda.clusterservice.Liquibase" class="liquibase.integration.spring.SpringLiquibase">
