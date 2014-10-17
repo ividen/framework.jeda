@@ -396,7 +396,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     tm.begin();
                     try {
                         if (lockModule()) {
-                            if (module.handleRepair(node)) {
+                            if (moduleEntity.getLastRepaired()>node.getLastActivity() || module.handleRepair(node)) {
                                 updateModuleAsRepaired();
                                 alive = false;
                                 break;
