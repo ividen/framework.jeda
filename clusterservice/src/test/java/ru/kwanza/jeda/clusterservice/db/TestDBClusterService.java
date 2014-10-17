@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.clusterservice.IClusterService;
+import ru.kwanza.jeda.clusterservice.impl.db.DBClusterService;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -28,7 +29,7 @@ public class TestDBClusterService extends AbstractJUnit4SpringContextTests {
     private DBTool dbTool;
 
     @Resource(name = "jeda.clusterservice.DBClusterService")
-    private IClusterService service;
+    private DBClusterService service;
 
     @Component
     public static class InitDB {
@@ -49,13 +50,21 @@ public class TestDBClusterService extends AbstractJUnit4SpringContextTests {
     }
 
     @Test
+    public void testPropertySet() throws Exception {
+        Assert.assertEquals(1,service.getCurrentNodeId().intValue());
+        Assert.assertEquals(60000,service.getFailoverTimeout());
+        Assert.assertEquals(20000,service.getLockTimeout());
+        Assert.assertEquals(1000,service.getRepairInterval());
+        Assert.assertEquals(1,service.getRepairThreadCount());
+    }
+
+    @Test
     public void testCreateNodeEntityAndModules() throws Exception {
         Assertion.assertEqualsIgnoreCols(getResourceSet("data_set_1.xml"),
                 getActualDataSet("jeda_cluster_service"), "jeda_cluster_service", new String[]{"last_activity"});
 
         Assertion.assertEqualsIgnoreCols(getResourceSet("data_set_2.xml"),
                 getActualDataSet("jeda_clustered_module"), "jeda_clustered_module", new String[]{"last_repaired"});
-
     }
 
     @Test

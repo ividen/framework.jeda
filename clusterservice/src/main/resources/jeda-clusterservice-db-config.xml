@@ -11,6 +11,10 @@
     <bean id="jeda.clusterservice.DBClusterService"
           class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService" depends-on="jeda.clusterservice.Liquibase">
         <property name="currentNodeId" value="${jeda.clusterservice.nodeId}"/>
+        <property name="failoverTimeout" value="${jeda.clusterservice.db.failoverTimeout:300000}"/>
+        <property name="lockTimeout" value="${jeda.clusterservice.db.lockTimeout:60000}"/>
+        <property name="repairInterval" value="${jeda.clusterservice.db.repairInterval:1000}"/>
+        <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
     </bean>
 
     <bean id="jeda.clusterservice.Liquibase" class="liquibase.integration.spring.SpringLiquibase">

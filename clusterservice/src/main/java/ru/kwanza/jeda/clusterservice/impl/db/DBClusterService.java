@@ -49,10 +49,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
 
-    private long failoverTimeout = 5 *60 * 1000;
-    private long lockTimeout = 60*1000;
-    private long repairInterval = 1000;
-    private int repairThreadCount = 10;
+    private long failoverTimeout;
+    private long lockTimeout;
+    private long repairInterval;
+    private int repairThreadCount;
 
     private ExecutorService repairExecutor;
     private AtomicLong counter = new AtomicLong(0);
@@ -106,6 +106,38 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     public Integer getCurrentNodeId() {
         return currentNodeId;
+    }
+
+    public long getFailoverTimeout() {
+        return failoverTimeout;
+    }
+
+    public void setFailoverTimeout(long failoverTimeout) {
+        this.failoverTimeout = failoverTimeout;
+    }
+
+    public long getLockTimeout() {
+        return lockTimeout;
+    }
+
+    public void setLockTimeout(long lockTimeout) {
+        this.lockTimeout = lockTimeout;
+    }
+
+    public long getRepairInterval() {
+        return repairInterval;
+    }
+
+    public void setRepairInterval(long repairInterval) {
+        this.repairInterval = repairInterval;
+    }
+
+    public int getRepairThreadCount() {
+        return repairThreadCount;
+    }
+
+    public void setRepairThreadCount(int repairThreadCount) {
+        this.repairThreadCount = repairThreadCount;
     }
 
     public void setCurrentNodeId(Integer currentNodeId) {

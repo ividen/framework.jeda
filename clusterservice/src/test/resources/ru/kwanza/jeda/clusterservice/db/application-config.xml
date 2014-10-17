@@ -9,7 +9,7 @@
     <context:annotation-config/>
 
     <context:component-scan base-package="ru.kwanza.jeda.clusterservice.db"/>
-    
+
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
@@ -19,7 +19,7 @@
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:db_h2.properties</value>
+                <value>classpath:test.properties</value>
             </list>
         </property>
     </bean>
