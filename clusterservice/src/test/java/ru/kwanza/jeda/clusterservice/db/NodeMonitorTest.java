@@ -16,28 +16,7 @@ public class NodeMonitorTest /* extends TestCase*/ {
 
 
 
-
         IClusterService bean = ctx.getBean(IClusterService.class);
-
-        bean.registerModule(new IClusteredModule() {
-            int counter = 10;
-            public String getName() {
-                return "Test";
-            }
-
-            public void handleStart() {
-                System.out.println("Started");
-            }
-
-            public void handleStop() {
-                System.out.print("Stoped");
-            }
-
-            public boolean handleRepair(Node node) {
-                System.out.println("REpair " + node.getId());
-                return counter-- <0;
-            }
-        });
 
         Thread.currentThread().join();
     }

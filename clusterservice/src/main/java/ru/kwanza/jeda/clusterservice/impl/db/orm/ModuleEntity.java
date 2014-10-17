@@ -35,7 +35,7 @@ public class ModuleEntity {
         this.lastRepaired = System.currentTimeMillis();
     }
 
-    private static String createId(Integer nodeId, String name) {
+    public static String createId(Integer nodeId, String name) {
         return nodeId.toString() + "_" + name;
     }
 
