@@ -10,8 +10,6 @@
         <aspectj.version>1.5.4</aspectj.version>
         <slf4j.version>1.6.3</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
-        <jtds.version>1.2.1</jtds.version>
         <cglib.version>2.2.2</cglib.version>
         <atamicos.version>3.7.0</atamicos.version>
         <jbossts.version>4.9.0</jbossts.version>
@@ -258,12 +256,14 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.dbunit</groupId>
                 <artifactId>dbunit</artifactId>
                 <version>${dbunit.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -353,27 +353,10 @@
             </dependency>
 
             <dependency>
-                <groupId>com.oracle.jdbc</groupId>
-                <artifactId>ojdbc6</artifactId>
-                <version>${oracle.jdbc.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.oracle.jdbc</groupId>
-                <artifactId>orai18n</artifactId>
-                <version>${oracle.jdbc.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.sourceforge.jtds</groupId>
-                <artifactId>jtds</artifactId>
-                <version>${jtds.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>commons-dbcp</groupId>
                 <artifactId>commons-dbcp</artifactId>
                 <version>${commons-dbcp.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -458,6 +441,7 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>

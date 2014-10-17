@@ -20,7 +20,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -52,7 +51,6 @@
         <dependency>
             <groupId>jboss.jbossts</groupId>
             <artifactId>jbossts-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -93,30 +91,11 @@
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc6</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>orai18n</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.dbunit</groupId>
             <artifactId>dbunit</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.jtds</groupId>
-            <artifactId>jtds</artifactId>
             <scope>test</scope>
         </dependency>
 

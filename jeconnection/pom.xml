@@ -15,7 +15,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -26,7 +25,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -42,13 +40,11 @@
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>atomikos-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>jboss.jbossts</groupId>
             <artifactId>jbossts-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -60,7 +56,6 @@
             <groupId>ru.kwanza.filelock</groupId>
             <artifactId>filelock</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -90,14 +85,6 @@
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
-            <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.jtds</groupId>
-            <artifactId>jtds</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 </project>
