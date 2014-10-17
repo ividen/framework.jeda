@@ -26,7 +26,6 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -38,19 +37,16 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -62,19 +58,16 @@
         <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
             <artifactId>dbtool-core</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
             <artifactId>dbtool-orm</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.txn</groupId>
             <artifactId>txn</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>

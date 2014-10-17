@@ -26,19 +26,16 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.txn</groupId>
             <artifactId>txn</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -50,7 +47,6 @@
         <dependency>
             <groupId>ru.kwanza.toolbox</groupId>
             <artifactId>toolbox</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
