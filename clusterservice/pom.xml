@@ -94,6 +94,10 @@
             <artifactId>jtds</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.atomikos</groupId>
+            <artifactId>atomikos-extention</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

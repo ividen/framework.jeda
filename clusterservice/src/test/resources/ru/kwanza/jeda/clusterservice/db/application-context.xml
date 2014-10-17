@@ -2,8 +2,9 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <context:annotation-config/>
 
@@ -22,14 +23,20 @@
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+        <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>
     </bean>
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
-    <import resource="classpath:txn-ds-config.xml"/>
+    <import resource="classpath:txn-jta-config.xml"/>
 
     <bean class="ru.kwanza.jeda.clusterservice.db.TestClusteredModule"/>
 
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
 
 </beans>
