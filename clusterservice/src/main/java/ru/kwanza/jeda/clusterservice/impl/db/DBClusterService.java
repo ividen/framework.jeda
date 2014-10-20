@@ -2,7 +2,6 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.kwanza.dbtool.core.UpdateException;
@@ -79,7 +78,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         supervisor.join(60000);
         logger.info("Stopping RepairWorker's threads ...");
         repairExecutor.shutdownNow();
-        repairExecutor.awaitTermination(60000,TimeUnit.MILLISECONDS);
+        repairExecutor.awaitTermination(60000, TimeUnit.MILLISECONDS);
+
     }
 
     private void initQuery() {
@@ -241,6 +241,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         public Supervisor() {
             super(SUPERVISOR_NAME);
+            setDaemon(true);
         }
 
         @Override
@@ -250,7 +251,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 long start = System.currentTimeMillis();
                 try {
                     if (!tryUpdateCurrentNode(start)) continue;
-
                     try {
                         tm.begin();
                         if (waitForModulesLock()) {
@@ -268,8 +268,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     }
                 } catch (InterruptedException e) {
                     break;
-                }catch (Throwable e){
-                    logger.error("Eror in supervisor!",e);
+                } catch (Throwable e) {
+                    logger.error("Error in supervisor!", e);
                     continue;
                 }
             }
@@ -436,7 +436,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     tm.begin();
                     try {
                         if (lockModule()) {
-                            if (moduleEntity.getLastRepaired()>node.getLastActivity() || module.handleRepair(node)) {
+                            if (moduleEntity.getLastRepaired() > node.getLastActivity() || module.handleRepair(node)) {
                                 updateModuleAsRepaired();
                                 alive = false;
                                 break;

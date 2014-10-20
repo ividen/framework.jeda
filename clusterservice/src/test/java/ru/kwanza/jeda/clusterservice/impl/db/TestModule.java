@@ -1,6 +1,5 @@
-package ru.kwanza.jeda.clusterservice.db;
+package ru.kwanza.jeda.clusterservice.impl.db;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.jeda.clusterservice.Node;
@@ -13,8 +12,10 @@ import javax.annotation.Resource;
  */
 public class TestModule implements IClusteredModule {
     private String name;
+    private volatile boolean started;
+    private volatile boolean stopped;
 
-    @Resource(name="jeda.clusterservice.DBClusterService")
+    @Resource(name = "jeda.clusterservice.DBClusterService")
     private IClusterService service;
 
     public TestModule(String name) {
@@ -22,7 +23,7 @@ public class TestModule implements IClusteredModule {
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         service.registerModule(this);
     }
 
@@ -31,11 +32,21 @@ public class TestModule implements IClusteredModule {
     }
 
     public void handleStart() {
-
+        this.started = true;
+        this.stopped = false;
     }
 
     public void handleStop() {
+        this.started = false;
+        this.stopped = true;
+    }
 
+    public boolean isStarted() {
+        return started;
+    }
+
+    public boolean isStopped() {
+        return stopped;
     }
 
     public boolean handleRepair(Node node) {

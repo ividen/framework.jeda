@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.clusterservice.db;
+package ru.kwanza.jeda.clusterservice.impl.db;
 
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;

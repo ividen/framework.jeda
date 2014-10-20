@@ -1,0 +1,6 @@
+<dataset>
+    <jeda_cluster_service id="1" last_activity="0"/>
+    <jeda_clustered_module id="1_module_1" node_id="1" name="module_1" last_repaired="0"/>
+    <jeda_clustered_module id="1_module_2" node_id="1" name="module_2" last_repaired="0"/>
+    <jeda_clustered_module id="1_module_3" node_id="1" name="module_3" last_repaired="0"/>
+</dataset>
