@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Alexander Guzanov
@@ -59,9 +57,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private Supervisor supervisor;
     private ConcurrentMap<String, IClusteredModule> modules = new ConcurrentHashMap<String, IClusteredModule>();
 
-    private volatile boolean startCritical = false;
-    private ReentrantLock criticalLock = new ReentrantLock();
-    private Condition isStartCritical = criticalLock.newCondition();
+    private CriticalSection criticalSection = new CriticalSection();
 
     @PostConstruct
     public void init() {
@@ -176,38 +172,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
-        while (!startCritical) {
-            criticalLock.lock();
-            try {
-                isStartCritical.await();
-            } finally {
-                criticalLock.unlock();
-            }
-        }
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            throw new InvocationTargetException(e);
-        }
+        return criticalSection.execute(callable);
     }
 
-    public <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit)
+    public <R> R criticalSection(Callable<R> callable, long waitTimeout, TimeUnit unit)
             throws InterruptedException, InvocationTargetException, TimeoutException {
-        while (!startCritical) {
-            criticalLock.lock();
-            try {
-                if (!isStartCritical.await(waiteTimeout, unit)) {
-                    throw new TimeoutException();
-                }
-            } finally {
-                criticalLock.unlock();
-            }
-        }
-        try {
-            return callable.call();
-        } catch (Exception e) {
-            throw new InvocationTargetException(e);
-        }
+        return criticalSection.execute(callable, waitTimeout, unit);
     }
 
     public void registerModule(IClusteredModule module) {
@@ -251,11 +221,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 long start = System.currentTimeMillis();
                 try {
                     if (!tryUpdateCurrentNode(start)) continue;
+                    boolean isInCritical = false;
                     try {
                         tm.begin();
                         if (waitForModulesLock()) {
                             startModulesIfNeed();
-                            criticalSectionSignal();
+                            isInCritical = true;
+                            criticalSection.enter();
                             tryRepair();
                         } else {
                             stopModulesIfNeed();
@@ -263,7 +235,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
                         lockTimeout(start);
                     } finally {
-                        startCritical = false;
+                        if (isInCritical) {
+                            criticalSection.exit();
+                        }
                         tm.commit();
                     }
                 } catch (InterruptedException e) {
@@ -273,6 +247,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     continue;
                 }
             }
+            stopModulesIfNeed();
             logger.info("Stopped {}", SUPERVISOR_NAME);
         }
 
@@ -338,6 +313,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     em.lock(LockType.WAIT, ModuleEntity.class, moduleEntities);
                 }
             } catch (Throwable e) {
+                e.printStackTrace();
                 return false;
             }
 
@@ -461,7 +437,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 try {
                     em.update(moduleEntity);
                 } catch (UpdateException e) {
-                    e.printStackTrace();
+                    logger.error("Error updating module lastRepaired!", e);
                 }
             }
 
@@ -488,13 +464,4 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     }
 
-    private void criticalSectionSignal() {
-        criticalLock.lock();
-        try {
-            startCritical = true;
-            isStartCritical.signalAll();
-        } finally {
-            criticalLock.unlock();
-        }
-    }
 }

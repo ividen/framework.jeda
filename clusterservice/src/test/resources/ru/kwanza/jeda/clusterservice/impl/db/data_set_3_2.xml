@@ -1,0 +1,4 @@
+<dataset>
+    <jeda_clustered_module id="1_repairable_module" node_id="1" name="repairable_module"/>
+    <jeda_clustered_module id="2_repairable_module" node_id="2" name="repairable_module"/>
+</dataset>
