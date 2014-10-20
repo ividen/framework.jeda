@@ -10,6 +10,7 @@ import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
@@ -31,7 +32,8 @@ public class TestDBClusterService extends AbstractJUnit4SpringContextTests {
     @Resource(name = "jeda.clusterservice.DBClusterService")
     private DBClusterService service;
 
-    @Component
+    @Component()
+    @DependsOn("jeda.clusterservice.SpringLiquibase")
     public static class InitDB {
         @Resource(name = "dbTester")
         private IDatabaseTester dbTester;
@@ -78,7 +80,6 @@ public class TestDBClusterService extends AbstractJUnit4SpringContextTests {
         Assertion.assertEqualsIgnoreCols(getResourceSet("data_set_2.xml"),
                 getActualDataSet("jeda_clustered_module"), "jeda_clustered_module", new String[]{"last_repaired"});
     }
-
 
     protected IDataSet getActualDataSet(String tablename) throws Exception {
         return new SortedDataSet(new DatabaseConnection(dbTool.getJDBCConnection())

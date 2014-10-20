@@ -74,6 +74,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     @PreDestroy
     public void destroy() throws InterruptedException {
         logger.info("Stopping {} ...", SUPERVISOR_NAME);
+        started = false;
         supervisor.interrupt();
         supervisor.join(60000);
         logger.info("Stopping RepairWorker's threads ...");
@@ -240,13 +241,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         public Supervisor() {
             super(SUPERVISOR_NAME);
-            this.setDaemon(true);
         }
 
         @Override
         public void run() {
             logger.info("Started {}", SUPERVISOR_NAME);
-            while (!isInterrupted()) {
+            while (started && !isInterrupted()) {
                 long start = System.currentTimeMillis();
                 try {
                     if (!tryUpdateCurrentNode(start)) continue;
