@@ -1,7 +1,7 @@
-package ru.kwanza.jeda.clusterservice.impl.mock;
+package ru.kwanza.jeda.clusterservice.old.impl.mock;
 
-import ru.kwanza.jeda.clusterservice.INodeListener;
-import ru.kwanza.jeda.clusterservice.impl.IClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.INodeListener;
+import ru.kwanza.jeda.clusterservice.old.impl.IClusterServiceImpl;
 
 import java.util.ArrayList;
 import java.util.HashMap;

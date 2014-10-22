@@ -20,79 +20,66 @@
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-core</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-framework</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.grizzly</groupId>
             <artifactId>grizzly-http-ajp</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>atomikos-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>jboss.jbossts</groupId>
             <artifactId>jbossts-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.atomikos</groupId>
             <artifactId>atomikos-extention</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

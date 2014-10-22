@@ -12,7 +12,7 @@ import com.sleepycat.je.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static ru.kwanza.jeda.clusterservice.ClusterService.getNodeId;
+import static ru.kwanza.jeda.clusterservice.old.ClusterService.getNodeId;
 import static ru.kwanza.toolbox.SerializationHelper.bytesToObject;
 import static ru.kwanza.toolbox.SerializationHelper.objectToBytes;
 

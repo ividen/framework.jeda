@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.timer;
 
 import ru.kwanza.jeda.api.TimerItem;
-import ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl;
+import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

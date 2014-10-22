@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.dictionary.dbinteractor;
 
-import ru.kwanza.jeda.clusterservice.ClusterService;
+import ru.kwanza.jeda.clusterservice.old.ClusterService;
 import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.toolbox.SerializationHelper;

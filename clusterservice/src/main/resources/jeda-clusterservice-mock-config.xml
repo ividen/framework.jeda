@@ -6,13 +6,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:annotation-config/>
 
-    <bean id="clusterServiceImpl" class="ru.kwanza.jeda.clusterservice.impl.mock.MockClusterServiceImpl"
+    <bean id="clusterServiceImpl" class="ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl"
           scope="singleton" factory-method="getInstance">
     </bean>
 
-    <bean id="clusterService" class="ru.kwanza.jeda.clusterservice.ClusterService" scope="singleton"
+    <bean id="clusterService" class="ru.kwanza.jeda.clusterservice.old.ClusterService" scope="singleton"
           factory-method="getInstance">
     </bean>
 

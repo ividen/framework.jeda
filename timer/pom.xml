@@ -20,31 +20,26 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-api</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -62,79 +57,51 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <scope>compile</scope>
         </dependency>
 
          <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.txn</groupId>
             <artifactId>txn</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-persistentqueue</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-clusterservice</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.dbtool</groupId>
             <artifactId>dbtool-core</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.autokey</groupId>
             <artifactId>autokey</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc6</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>orai18n</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>net.sourceforge.jtds</groupId>
-            <artifactId>jtds</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.sleepycat</groupId>
             <artifactId>je</artifactId>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-jeconnection</artifactId>
-            <scope>compile</scope>
         </dependency>
 
     </dependencies>

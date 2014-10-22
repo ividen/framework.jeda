@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd">
+
+    <context:annotation-config/>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.InitDB" depends-on="jeda.clusterservice.SpringLiquibase">
+        <constructor-arg index="0" value="init_data_set_1.xml"/>
+    </bean>
+
+    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:dbtool-orm-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
+
+
+    <dbtool-orm:entityMapping scan-package="ru.kwanza.jeda.clusterservice.impl.db.orm"/>
+
+    <bean id="jeda.clusterservice.DBClusterService"
+          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService"
+          depends-on="jeda.clusterservice.SpringLiquibase">
+        <property name="currentNodeId" value="1"/>
+        <property name="failoverTimeout" value="${jeda.clusterservice.db.failoverTimeout:300000}"/>
+        <property name="lockTimeout" value="${jeda.clusterservice.db.lockTimeout:60000}"/>
+        <property name="repairInterval" value="${jeda.clusterservice.db.repairInterval:1000}"/>
+        <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
+    </bean>
+
+    <bean id="jeda.clusterservice.DBClusterService2"
+          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService"
+          depends-on="jeda.clusterservice.SpringLiquibase">
+        <property name="currentNodeId" value="2"/>
+        <property name="failoverTimeout" value="${jeda.clusterservice.db.failoverTimeout:300000}"/>
+        <property name="lockTimeout" value="${jeda.clusterservice.db.lockTimeout:60000}"/>
+        <property name="repairInterval" value="${jeda.clusterservice.db.repairInterval:1000}"/>
+        <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
+    </bean>
+
+
+    <bean id="jeda.clusterservice.DBClusterService3"
+          class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterService"
+          depends-on="jeda.clusterservice.SpringLiquibase">
+        <property name="currentNodeId" value="3"/>
+        <property name="failoverTimeout" value="${jeda.clusterservice.db.failoverTimeout:300000}"/>
+        <property name="lockTimeout" value="${jeda.clusterservice.db.lockTimeout:60000}"/>
+        <property name="repairInterval" value="${jeda.clusterservice.db.repairInterval:1000}"/>
+        <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
+    </bean>
+
+
+    <bean id="jeda.clusterservice.SpringLiquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:jeda-clusterservice-db-liquibase.xml"/>
+    </bean>
+
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:test.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="repair_module_1" class="ru.kwanza.jeda.clusterservice.impl.db.RepairableTestModule">
+        <constructor-arg index="0" ref="jeda.clusterservice.DBClusterService"/>
+    </bean>
+
+    <bean id="repair_module_2" class="ru.kwanza.jeda.clusterservice.impl.db.RepairableTestModule">
+        <constructor-arg index="0" ref="jeda.clusterservice.DBClusterService2"/>
+    </bean>
+
+    <bean id="repair_module_3" class="ru.kwanza.jeda.clusterservice.impl.db.RepairableTestModule">
+        <constructor-arg index="0" ref="jeda.clusterservice.DBClusterService3"/>
+    </bean>
+
+    <bean id="dbTester" class="org.dbunit.JdbcDatabaseTester">
+        <constructor-arg index="0" value="${jdbc.driverClass}"/>
+        <constructor-arg index="1" value="${jdbc.connectionUrl}"/>
+        <constructor-arg index="2" value="${jdbc.username}"/>
+        <constructor-arg index="3" value="${jdbc.password}"/>
+    </bean>
+</beans>

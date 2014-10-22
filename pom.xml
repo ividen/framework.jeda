@@ -10,15 +10,13 @@
         <aspectj.version>1.5.4</aspectj.version>
         <slf4j.version>1.6.3</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
-        <jtds.version>1.2.1</jtds.version>
         <cglib.version>2.2.2</cglib.version>
         <atamicos.version>3.7.0</atamicos.version>
         <jbossts.version>4.9.0</jbossts.version>
         <junit.version>4.10</junit.version>
-        <dbunit.version>2.4.8</dbunit.version>
+        <dbunit.version>2.5.0</dbunit.version>
         <txn.version>1.0</txn.version>
-        <dbtool.version>1.0</dbtool.version>
+        <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <autokey.version>1.0</autokey.version>
         <filelock.version>1.0</filelock.version>
         <toolbox.version>1.0</toolbox.version>
@@ -252,19 +250,20 @@
                 <groupId>ru.kwanza.jeda</groupId>
                 <artifactId>jeda-persistentqueue</artifactId>
                 <version>${project.version}</version>
-                <scope>compile</scope>
             </dependency>
 
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.dbunit</groupId>
                 <artifactId>dbunit</artifactId>
                 <version>${dbunit.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -329,6 +328,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${org.springframework.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
                 <version>${aspectj.version}</version>
@@ -354,27 +360,10 @@
             </dependency>
 
             <dependency>
-                <groupId>com.oracle.jdbc</groupId>
-                <artifactId>ojdbc6</artifactId>
-                <version>${oracle.jdbc.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.oracle.jdbc</groupId>
-                <artifactId>orai18n</artifactId>
-                <version>${oracle.jdbc.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>net.sourceforge.jtds</groupId>
-                <artifactId>jtds</artifactId>
-                <version>${jtds.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>commons-dbcp</groupId>
                 <artifactId>commons-dbcp</artifactId>
                 <version>${commons-dbcp.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <dependency>
@@ -386,6 +375,12 @@
             <dependency>
                 <groupId>ru.kwanza.dbtool</groupId>
                 <artifactId>dbtool-core</artifactId>
+                <version>${dbtool.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ru.kwanza.dbtool</groupId>
+                <artifactId>dbtool-orm</artifactId>
                 <version>${dbtool.version}</version>
             </dependency>
 
@@ -453,6 +448,7 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
             </dependency>
 
         </dependencies>
