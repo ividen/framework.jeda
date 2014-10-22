@@ -18,11 +18,20 @@
     <jeda-core:flow-bus name="TestFlowBus3" class="ru.kwanza.jeda.core.pendingstore.env.TestFlowBus3"/>
 
 
+    <bean id="propertyPlaceholderConfigurer1"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db_h2.properties</value>
+            </list>
+        </property>
+    </bean>
+
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${dbunit.driverClass}"/>
-        <property name="url" value="${dbunit.connectionUrl}"/>
-        <property name="username" value="${dbunit.username}"/>
-        <property name="password" value="${dbunit.password}"/>
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.connectionUrl}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
     </bean>
 
 </beans>

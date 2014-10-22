@@ -12,7 +12,7 @@
     <context:annotation-config/>
     <aop:aspectj-autoproxy/>
 
-    <bean id="ru.kwanza.jeda.api.internal.IJedaManager"
+    <bean id="jeda.IJedaManager"
           class="ru.kwanza.jeda.core.manager.DefaultJedaManager" scope="singleton">
         <property name="transactionManager" ref="jeda.ITransactionManagerInternal"/>
         <property name="pendingStore" ref="pendingStore"/>

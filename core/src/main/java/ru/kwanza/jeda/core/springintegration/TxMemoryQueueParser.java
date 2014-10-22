@@ -17,7 +17,7 @@ class TxMemoryQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(TransactionalMemoryQueue.class);
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
         String sType = element.getAttribute("cloneType");
         ObjectCloneType type = ObjectCloneType.SERIALIZE;
         if (StringUtils.hasText(sType)) {

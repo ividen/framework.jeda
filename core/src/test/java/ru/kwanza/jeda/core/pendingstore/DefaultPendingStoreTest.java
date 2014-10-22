@@ -1,16 +1,16 @@
 package ru.kwanza.jeda.core.pendingstore;
 
+import junit.framework.Assert;
+import junit.framework.TestCase;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.autokey.mock.MockAutoKeyImpl;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.core.pendingstore.env.FlowBusBehaviour;
 import ru.kwanza.jeda.core.pendingstore.env.FlowBusEventStore;
 import ru.kwanza.jeda.core.pendingstore.env.TestEvent;
-import junit.framework.Assert;
-import junit.framework.TestCase;
-import org.apache.commons.dbcp.BasicDataSource;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.EOFException;
 import java.io.NotSerializableException;
@@ -18,10 +18,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.*;
 
-import static ru.kwanza.jeda.core.pendingstore.env.FlowBusBehaviour.SinkExceptionType.OTHER;
 import static java.util.Arrays.asList;
+import static ru.kwanza.jeda.core.pendingstore.env.FlowBusBehaviour.SinkExceptionType.OTHER;
 
-public abstract class AbstractDefaultPendingStoreTest extends TestCase {
+public class DefaultPendingStoreTest extends TestCase {
 
     protected static final String TEST_FLOW_BUS_1 = "TestFlowBus1";
     protected static final String TEST_FLOW_BUS_2 = "TestFlowBus2";
@@ -36,11 +36,18 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
 
     @Override
     public void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext(getContextFileName(), AbstractDefaultPendingStoreTest.class);
+        ctx = new ClassPathXmlApplicationContext(getContextFileName(), DefaultPendingStoreTest.class);
         conn = ctx.getBean("dataSource", BasicDataSource.class).getConnection();
         manager = ctx.getBean(IJedaManager.class);
         dbUnitUtil = new DBUnitUtil(conn);
         pendingStore = manager.getPendingStore();
+
+        //todo aguzanov перенести в liquibase
+        try {
+            conn.createStatement().execute("CREATE TABLE PENDING_STORE(id NUMBER, " +
+                    "SINK_NAME VARCHAR2(255), EVENT_DESCRIPTION varchar2(4000) not null, EVENT_BINARY BLOB," +
+                    "CONSTRAINT ID_PENDING_STORE PRIMARY KEY (ID))");
+        }catch (Throwable e){}
         conn.prepareStatement("DELETE FROM " + PENDING_STORE_TABLE_NAME).execute();
         resetAutoKey();
         FlowBusEventStore.clear();
@@ -52,7 +59,9 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
         ((ClassPathXmlApplicationContext) ctx).close();
     }
 
-    protected abstract String getContextFileName();
+    protected String getContextFileName() {
+        return "env-context.xml";
+    }
 
     public void testSuspendEventBySinkName() throws Exception {
         ISuspender<TestEvent> suspender = pendingStore.getSuspender();
@@ -306,8 +315,8 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
 
     private TestEvent getTestSuspendItem(int i, ISink<TestEvent> sink) {
         final TestEvent testEvent = createTestEvent(i, sink);
-        IPendingStore.SUSPEND_ID_ATTR.set(testEvent,(long)i);
-        IPendingStore.SUSPEND_SINK_NAME_ATTR.set(testEvent,manager.resolveObjectName(sink));
+        IPendingStore.SUSPEND_ID_ATTR.set(testEvent, (long) i);
+        IPendingStore.SUSPEND_SINK_NAME_ATTR.set(testEvent, manager.resolveObjectName(sink));
         return testEvent;
     }
 
@@ -328,7 +337,7 @@ public abstract class AbstractDefaultPendingStoreTest extends TestCase {
         Collection<TestEvent> idByEvent = new LinkedList<TestEvent>();
         for (int i = 1; i <= 3; i++) {
             final TestEvent testEvent = createTestEvent(i, sinkName);
-            IPendingStore.SUSPEND_ID_ATTR.set(testEvent,startId++);
+            IPendingStore.SUSPEND_ID_ATTR.set(testEvent, startId++);
             idByEvent.add(testEvent);
         }
         return idByEvent;

@@ -88,10 +88,6 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestPriorityTransactionalMemoryQueueWithDSTrx.class);
-    }
-
 
     public void setUp() throws Exception {
         context = new ClassPathXmlApplicationContext(getContextPath(), TestPriorityTransactionalMemoryQueueWithDSTrx.class);

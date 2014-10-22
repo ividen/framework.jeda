@@ -38,7 +38,7 @@ class StageBeanBuilder {
     }
 
     public void build(BeanDefinitionBuilder definitionBuilder) {
-        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         addPropertyReference("eventProcessor", definitionBuilder, eventProcessorDef);
         addPropertyReference("queue", definitionBuilder, queueDef);
         addPropertyReference("threadManager", definitionBuilder, threadManagerDef);

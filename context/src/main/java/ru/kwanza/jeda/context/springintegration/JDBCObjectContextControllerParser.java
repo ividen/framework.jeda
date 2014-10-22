@@ -21,7 +21,7 @@ class JDBCObjectContextControllerParser extends AbstractJDBCContextControllerPar
         addSimplePropertyValue(definitionBuilder, element, CLAZZ);
 
         definitionBuilder.addPropertyReference(TABLE_COLUMN_BY_PROPERTY_NAME, element.getAttribute(TABLE_COLUMN_BY_PROPERTY_NAME));
-        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         String dbTool = element.getAttribute(DBTOOL);
         if (StringUtils.hasText(dbTool)) {

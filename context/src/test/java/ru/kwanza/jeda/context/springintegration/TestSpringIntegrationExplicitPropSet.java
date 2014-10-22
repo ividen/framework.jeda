@@ -1,5 +1,7 @@
 package ru.kwanza.jeda.context.springintegration;
 
+import ru.kwanza.jeda.api.IContext;
+import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.IJedaManager;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -19,15 +21,20 @@ public class TestSpringIntegrationExplicitPropSet extends TestCase {
     @Override
     public void setUp() throws Exception {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("spring-integration-explicit-prop-set-test.xml", TestSpringIntegrationExplicitPropSet.class);
-        manager = (IJedaManager) ctx.getBean(IJedaManager.class.getName());
+        manager = (IJedaManager) ctx.getBean("jeda.IJedaManager");
     }
 
     public void testSmoke() throws Exception {
-        Assert.assertNotNull(manager.getContextController(JDBC_BLOB_CONTEXT_CONTROLLER_BEAN));
-        Assert.assertNotNull(manager.getContextController(JDBC_BLOB_CONTEXT_CONTROLLER_WITH_DICT_BEAN));
-        Assert.assertNotNull(manager.getContextController(JDBC_OBJECT_CONTEXT_CONTROLLER_BEAN));
-        Assert.assertNotNull(manager.getContextController(BERKELEY_BLOB_CONTEXT_CONTROLLER_BEAN));
-        Assert.assertNotNull(manager.getContextController(BERKELEY_BLOB_CONTEXT_CONTROLLER_WITH_DICT_BEAN));
+        final IContextController<Object, IContext<Object, ?>> contextController = manager.getContextController(JDBC_BLOB_CONTEXT_CONTROLLER_BEAN);
+        Assert.assertNotNull(contextController);
+        final IContextController<Object, IContext<Object, ?>> contextController1 = manager.getContextController(JDBC_BLOB_CONTEXT_CONTROLLER_WITH_DICT_BEAN);
+        Assert.assertNotNull(contextController1);
+        final IContextController<Object, IContext<Object, ?>> contextController2 = manager.getContextController(JDBC_OBJECT_CONTEXT_CONTROLLER_BEAN);
+        Assert.assertNotNull(contextController2);
+        final IContextController<Object, IContext<Object, ?>> contextController3 = manager.getContextController(BERKELEY_BLOB_CONTEXT_CONTROLLER_BEAN);
+        Assert.assertNotNull(contextController3);
+        final IContextController<Object, IContext<Object, ?>> contextController4 = manager.getContextController(BERKELEY_BLOB_CONTEXT_CONTROLLER_WITH_DICT_BEAN);
+        Assert.assertNotNull(contextController4);
     }
 
 //    <jeda-context:jdbc-blob-context-controller

@@ -17,7 +17,7 @@ class JDBCBlobContextControllerParser extends AbstractJDBCContextControllerParse
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(JDBCBlobContextControllerFactory.class);
 
-        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         String dbTool = element.getAttribute(DBTOOL);
         if (StringUtils.hasText(dbTool)) {

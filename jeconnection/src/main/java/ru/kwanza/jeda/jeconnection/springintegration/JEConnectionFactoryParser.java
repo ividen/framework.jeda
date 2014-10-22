@@ -18,7 +18,7 @@ class JEConnectionFactoryParser extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder =
                 BeanDefinitionBuilder.genericBeanDefinition(JEConnectionFactory.class);
 
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
         definitionBuilder.addPropertyValue("path", element.getAttribute("path"));
         definitionBuilder.setDestroyMethodName("destroy");
 

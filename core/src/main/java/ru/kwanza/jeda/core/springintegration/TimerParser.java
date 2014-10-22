@@ -17,7 +17,7 @@ class TimerParser implements BeanDefinitionParser {
                 .parseBeanDefinitionElement(element, null, ITimer.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemTimerFactory.class);
-        factoryBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 ITimer.class, factoryBuilder.getBeanDefinition());

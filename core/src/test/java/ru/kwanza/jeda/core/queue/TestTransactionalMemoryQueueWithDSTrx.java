@@ -89,10 +89,6 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestTransactionalMemoryQueueWithDSTrx.class);
-    }
-
     public void setUp() throws Exception {
         context = new ClassPathXmlApplicationContext(getContextPath(),TestTransactionalMemoryQueueWithDSTrx.class);
         manager = new StubJedaManager((ITransactionManagerInternal) context.getBean("transactionManager"));

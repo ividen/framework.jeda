@@ -18,7 +18,7 @@ class ContextControllerParser implements BeanDefinitionParser {
                 .parseBeanDefinitionElement(element, null, IContext.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemContextControllerFactory.class);
-        factoryBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 IContextController.class, factoryBuilder.getBeanDefinition());

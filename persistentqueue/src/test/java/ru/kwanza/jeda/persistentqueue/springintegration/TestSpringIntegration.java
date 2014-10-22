@@ -14,7 +14,7 @@ public class TestSpringIntegration extends TestCase {
 
     public void test() throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config.xml", TestSpringIntegration.class);
-        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean(IJedaManager.class.getName());
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean("jeda.IJedaManager");
 
         IStageInternal stage = manager.getStageInternal("TestStage31");
 

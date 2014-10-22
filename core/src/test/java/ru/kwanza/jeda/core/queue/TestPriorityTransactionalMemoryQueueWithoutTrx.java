@@ -76,10 +76,6 @@ public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriority
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestPriorityTransactionalMemoryQueueWithoutTrx.class);
-    }
-
     public void testMaxSize() {
         PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(new NonTransactionalJedaManager());
         assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());

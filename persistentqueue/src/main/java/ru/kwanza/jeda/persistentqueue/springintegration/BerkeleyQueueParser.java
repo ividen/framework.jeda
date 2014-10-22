@@ -23,7 +23,7 @@ class BerkeleyQueueParser extends JedaBeanDefinitionParser {
         definitionBuilder.addPropertyValue("maxSize", maxSize);
         String connectionFactory = element.getAttribute("connectionFactory");
         definitionBuilder.addPropertyReference("connectionFactory", connectionFactory);
-        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
 
 
         return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);

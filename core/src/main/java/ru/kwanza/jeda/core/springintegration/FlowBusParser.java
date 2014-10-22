@@ -17,7 +17,7 @@ class FlowBusParser implements BeanDefinitionParser {
                 .parseBeanDefinitionElement(element, null, IFlowBus.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);
-        factoryBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"), IFlowBus.class,
                 factoryBuilder.getBeanDefinition());

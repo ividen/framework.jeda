@@ -190,7 +190,7 @@ public class TestSpringIntegration extends TestCase {
 
     public void test2() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config_1.xml", TestSpringIntegration.class);
-        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean(IJedaManager.class.getName());
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean("jeda.IJedaManager");
 
         assertEquals(manager.getFlowBus("CPAReqFlowBus").getClass(), SystemFlowBus.class);
         assertEquals(manager.<Object, IContext>getContextController("TestContext").getClass(), SystemContextController.class);

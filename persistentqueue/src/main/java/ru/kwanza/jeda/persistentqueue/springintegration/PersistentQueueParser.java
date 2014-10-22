@@ -26,7 +26,7 @@ class PersistentQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(PersistentQueue.class);
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("maxSize"));
 

@@ -22,7 +22,7 @@ class BerkeleyBlobContextControllerParser extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(BerkeleyBlobContextControllerFactory.class);
 
-        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         setSimplePropertyValue(definitionBuilder, element, DATABASE_NAME);
 

@@ -19,7 +19,7 @@ public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobCon
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(BerkeleyBlobContextControllerWithDictFactory.class);
 
-        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         definitionBuilder.addPropertyReference(DB_INTERACTOR, BerkeleyDictionaryDbInteractor.class.getName());
 

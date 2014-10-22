@@ -19,7 +19,7 @@ class StageThreadManagerParser extends JedaBeanDefinitionParser {
                 .genericBeanDefinition(StageThreadManager.class);
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("threadNamePrefix"));
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
 
         String maxThreadCount = element.getAttribute("maxThreadCount");

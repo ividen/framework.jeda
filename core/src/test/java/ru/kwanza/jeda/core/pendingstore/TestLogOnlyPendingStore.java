@@ -24,7 +24,7 @@ public class TestLogOnlyPendingStore extends TestCase {
 
     @Override
     public void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext(CONTEXT_FILE_NAME, AbstractDefaultPendingStoreTest.class);
+        ctx = new ClassPathXmlApplicationContext(CONTEXT_FILE_NAME, DefaultPendingStoreTest.class);
         manager = ctx.getBean(IJedaManager.class);
         pendingStore = (LogOnlyPendingStore) manager.getPendingStore();
     }

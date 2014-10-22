@@ -6,7 +6,9 @@ import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
  * @author Guzanov Alexander
  */
 public interface IJedaManager {
-    IContextController getContextController(String name);
+
+
+    <ID, C extends IContext<ID, ?>> IContextController<ID, C> getContextController(String name);
 
     IStage getCurrentStage();
 

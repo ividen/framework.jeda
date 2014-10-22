@@ -21,7 +21,7 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
                 BeanDefinitionBuilder.genericBeanDefinition(ClientTransportFlowBus.class);
-        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
 
         String name = element.getAttribute("name");
         definitionBuilder.addPropertyValue("name", name);
@@ -53,7 +53,7 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
 
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(originalBean.getId(), originalBean);
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);
-        factoryBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(name, IResourceController.class, factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);

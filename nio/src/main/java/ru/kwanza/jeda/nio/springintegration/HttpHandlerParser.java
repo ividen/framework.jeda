@@ -65,7 +65,7 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
             paramReference = flowBus;
         }
         definitionBuilder.setFactoryMethod("createForObjectRef");
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
         definitionBuilder.addConstructorArgReference(paramReference);
 
         if (StringUtils.hasText(timedOutHandler)) {

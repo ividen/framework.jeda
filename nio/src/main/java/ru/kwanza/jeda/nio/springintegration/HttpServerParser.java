@@ -32,7 +32,7 @@ class HttpServerParser extends JedaBeanDefinitionParser {
         XmlReaderContext readerContext = parserContext.getReaderContext();
         NamespaceHandlerResolver namespaceHandlerResolver = readerContext.getNamespaceHandlerResolver();
 
-        definitionBuilder.addConstructorArgReference(IJedaManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
         String name = element.getAttribute("name");
         definitionBuilder.addConstructorArgValue(name);
 

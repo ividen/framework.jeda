@@ -16,7 +16,7 @@ class RegisterBeanDecorator implements BeanDefinitionDecorator {
                                          BeanDefinitionHolder beanDefinitionHolder,
                                          ParserContext parserContext) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(FakeObjectHolder.class);
-        builder.addConstructorArgReference(IJedaManager.class.getName());
+        builder.addConstructorArgReference("jeda.IJedaManager");
         builder.addConstructorArgValue(beanDefinitionHolder.getBeanName());
         builder.addConstructorArgReference(beanDefinitionHolder.getBeanName());
         AbstractBeanDefinition fakeBeanDefinition = builder.getBeanDefinition();

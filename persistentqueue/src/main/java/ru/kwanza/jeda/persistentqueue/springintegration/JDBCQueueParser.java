@@ -23,7 +23,7 @@ class JDBCQueueParser extends JedaBeanDefinitionParser {
             definitionBuilder.addPropertyValue("queueName", queueName);
         }
 
-        definitionBuilder.addPropertyReference("manager", IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
 
         String maxSize = element.getAttribute("maxSize");
         if (StringUtils.hasText(maxSize)) {

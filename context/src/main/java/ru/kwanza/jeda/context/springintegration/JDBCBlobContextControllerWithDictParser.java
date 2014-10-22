@@ -27,7 +27,7 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
         addSimplePropertyValue(definitionBuilder, element, DICT_PROPERTY_COLUMN_NAME);
         addSimplePropertyValue(definitionBuilder, element, DICT_ID_COLUMN_NAME);
 
-        definitionBuilder.addPropertyReference(MANAGER, IJedaManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         String dbTool = element.getAttribute(DBTOOL);
         if (StringUtils.hasText(dbTool)) {
