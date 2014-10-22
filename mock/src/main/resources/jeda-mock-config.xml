@@ -11,7 +11,7 @@
 
 
     <bean id="ru.kwanza.jeda.api.internal.ISystemManager"
-          class="ru.kwanza.jeda.mock.MockSystemManager" scope="singleton"
+          class="ru.kwanza.jeda.mock.MockJedaManager" scope="singleton"
           factory-method="getInstance">
     </bean>
 

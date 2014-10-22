@@ -4,6 +4,8 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="pendingStore" class="ru.kwanza.jeda.core.pendingstore.LogOnlyPendingStore"/>
+    <bean id="pendingStore" class="ru.kwanza.jeda.core.pendingstore.LogOnlyPendingStore">
+        <constructor-arg index="0" ref="jeda.IJedaManager"/>
+    </bean>
 
 </beans>

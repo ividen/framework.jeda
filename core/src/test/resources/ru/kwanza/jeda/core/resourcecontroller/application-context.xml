@@ -12,7 +12,7 @@
 
 
     <bean id="ru.kwanza.jeda.api.internal.ISystemManager"
-          class="ru.kwanza.jeda.core.manager.DefaultSystemManager" scope="singleton">
+          class="ru.kwanza.jeda.core.manager.DefaultJedaManager" scope="singleton">
     </bean>
 
 

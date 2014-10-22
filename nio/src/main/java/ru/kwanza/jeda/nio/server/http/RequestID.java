@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.nio.server.http;
 
-import ru.kwanza.jeda.api.Manager;
+import ru.kwanza.jeda.api.IJedaManager;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -42,8 +42,8 @@ public final class RequestID implements Serializable {
         }
     }
 
-    public static IHttpRequest findRequest(RequestID requestID) throws RequestIDException {
-        HttpServer httpServer = Manager.<HttpServer>resolveObject(requestID.serverName);
+    public static IHttpRequest findRequest(IJedaManager manager,RequestID requestID) throws RequestIDException {
+        HttpServer httpServer = manager.<HttpServer>resolveObject(requestID.serverName);
         if (httpServer == null) {
             throw new RequestIDException("HTTP server not found in jeda structure!");
         }
@@ -54,8 +54,8 @@ public final class RequestID implements Serializable {
         return result;
     }
 
-    public static IHttpRequest findRequest(String requestIDString) throws RequestIDException {
-        return findRequest(RequestID.parse(requestIDString));
+    public static IHttpRequest findRequest(IJedaManager manager,String requestIDString) throws RequestIDException {
+        return findRequest(manager,RequestID.parse(requestIDString));
     }
 
     protected RequestID(String uniqueId, String serverName) {

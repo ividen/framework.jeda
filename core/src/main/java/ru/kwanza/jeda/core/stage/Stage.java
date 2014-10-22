@@ -1,10 +1,6 @@
 package ru.kwanza.jeda.core.stage;
 
-import ru.kwanza.jeda.api.IEventProcessor;
-import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.ISink;
-import ru.kwanza.jeda.api.Manager;
-import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.*;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;
 import org.slf4j.Logger;
@@ -23,9 +19,9 @@ public class Stage implements IStageInternal, IQueueObserver {
     protected IEventProcessor processor;
     private String name;
     private boolean hasTransaction;
-    private ISystemManager manager;
+    private IJedaManagerInternal manager;
 
-    public Stage(ISystemManager manager, String name, IEventProcessor processor,
+    public Stage(IJedaManagerInternal manager, String name, IEventProcessor processor,
             IQueue queue, AbstractThreadManager threadManager, IAdmissionController admissionController,
             IResourceController resourceController, boolean hasTransaction) {
         this.manager = manager;

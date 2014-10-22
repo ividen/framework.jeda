@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.nio.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.nio.server.http.JedaHttpHandler;
@@ -65,7 +65,7 @@ class HttpHandlerParser extends JedaBeanDefinitionParser {
             paramReference = flowBus;
         }
         definitionBuilder.setFactoryMethod("createForObjectRef");
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
         definitionBuilder.addConstructorArgReference(paramReference);
 
         if (StringUtils.hasText(timedOutHandler)) {

@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.core.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IThreadManager;
 import ru.kwanza.jeda.core.threadmanager.shared.SharedThreadManager;
 import ru.kwanza.jeda.core.threadmanager.shared.comparator.*;
@@ -108,7 +108,7 @@ class SharedThreadManagerParser extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(SharedThreadManager.class);
         definitionBuilder.addConstructorArgValue(element.getAttribute("threadNamePrefix"));
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
         String maxThreadCount = element.getAttribute("maxThreadCount");
         if (StringUtils.hasText(maxThreadCount)) {

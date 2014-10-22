@@ -15,14 +15,14 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Guzanov Alexander
  */
 public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
-    protected ISystemManager manager;
+    protected IJedaManager manager;
     private ClassPathXmlApplicationContext context;
 
 
-    public static class StubSystemManager implements ISystemManager {
+    public static class StubJedaManager implements IJedaManager {
       private ITransactionManagerInternal tm;
 
-        public StubSystemManager(ITransactionManagerInternal tm) {
+        public StubJedaManager(ITransactionManagerInternal tm) {
             this.tm = tm;
         }
 
@@ -89,13 +89,9 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestTransactionalMemoryQueueWithDSTrx.class);
-    }
-
     public void setUp() throws Exception {
         context = new ClassPathXmlApplicationContext(getContextPath(),TestTransactionalMemoryQueueWithDSTrx.class);
-        manager = new StubSystemManager((ITransactionManagerInternal) context.getBean("transactionManager"));
+        manager = new StubJedaManager((ITransactionManagerInternal) context.getBean("transactionManager"));
     }
 
     public String getContextPath() {

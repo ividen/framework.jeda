@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextController;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -17,7 +17,7 @@ class JDBCBlobContextControllerParser extends AbstractJDBCContextControllerParse
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(JDBCBlobContextControllerFactory.class);
 
-        definitionBuilder.addPropertyReference(MANAGER, ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         String dbTool = element.getAttribute(DBTOOL);
         if (StringUtils.hasText(dbTool)) {

@@ -1,8 +1,9 @@
 package ru.kwanza.jeda.core.tm;
 
-import ru.kwanza.jeda.api.Manager;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 /**
  * @author Guzanov Alexander
@@ -11,6 +12,7 @@ public abstract class TestTxnWrapper extends TestCase {
     protected ApplicationContext ctx;
     protected TestTxnBean manager;
     protected BaseTransactionManager tm;
+    protected IJedaManager sm;
 
 
     public void test1() {
@@ -22,9 +24,9 @@ public abstract class TestTxnWrapper extends TestCase {
     }
 
     public void test2() {
-        Manager.getTM().begin();
+        sm.getTransactionManager().begin();
         manager.method2();
-        Manager.getTM().commit();
+        sm.getTransactionManager().commit();
     }
 
     public void test3() {

@@ -15,13 +15,13 @@ import java.util.Iterator;
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
-    protected ISystemManager manager;
+    protected IJedaManager manager;
     private ClassPathXmlApplicationContext context;
 
-    public static class StubSystemManager implements ISystemManager {
+    public static class StubJedaManager implements IJedaManager {
         private ITransactionManagerInternal tm;
 
-        public StubSystemManager(ITransactionManagerInternal tm) {
+        public StubJedaManager(ITransactionManagerInternal tm) {
             this.tm = tm;
         }
 
@@ -88,14 +88,10 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestPriorityTransactionalMemoryQueueWithDSTrx.class);
-    }
-
 
     public void setUp() throws Exception {
         context = new ClassPathXmlApplicationContext(getContextPath(), TestPriorityTransactionalMemoryQueueWithDSTrx.class);
-        manager = new StubSystemManager((ITransactionManagerInternal) context.getBean("transactionManager"));
+        manager = new StubJedaManager((ITransactionManagerInternal) context.getBean("transactionManager"));
     }
 
     public String getContextPath() {

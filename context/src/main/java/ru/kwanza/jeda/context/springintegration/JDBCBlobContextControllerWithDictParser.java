@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextControllerWithDictionary;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -27,7 +27,7 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
         addSimplePropertyValue(definitionBuilder, element, DICT_PROPERTY_COLUMN_NAME);
         addSimplePropertyValue(definitionBuilder, element, DICT_ID_COLUMN_NAME);
 
-        definitionBuilder.addPropertyReference(MANAGER, ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
         String dbTool = element.getAttribute(DBTOOL);
         if (StringUtils.hasText(dbTool)) {

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.PriorityTransactionalMemoryQueue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -17,7 +17,7 @@ class TxPriorityMemoryQueueParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(PriorityTransactionalMemoryQueue.class);
-        definitionBuilder.addConstructorArgReference(ISystemManager.class.getName());
+        definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
         String sType = element.getAttribute("cloneType");
         ObjectCloneType type = ObjectCloneType.SERIALIZE;

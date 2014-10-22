@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.core.springintegration;
 
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -16,7 +16,7 @@ class RegisterBeanDecorator implements BeanDefinitionDecorator {
                                          BeanDefinitionHolder beanDefinitionHolder,
                                          ParserContext parserContext) {
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(FakeObjectHolder.class);
-        builder.addConstructorArgReference(ISystemManager.class.getName());
+        builder.addConstructorArgReference("jeda.IJedaManager");
         builder.addConstructorArgValue(beanDefinitionHolder.getBeanName());
         builder.addConstructorArgReference(beanDefinitionHolder.getBeanName());
         AbstractBeanDefinition fakeBeanDefinition = builder.getBeanDefinition();

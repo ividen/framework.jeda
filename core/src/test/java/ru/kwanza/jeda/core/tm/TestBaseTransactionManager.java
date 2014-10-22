@@ -2,8 +2,8 @@ package ru.kwanza.jeda.core.tm;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.core.queue.Event;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
@@ -141,7 +141,7 @@ public abstract class TestBaseTransactionManager extends TestCase {
 //
     public void testRollbackActive50() throws SinkException, SystemException {
 
-        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new ISystemManager() {
+        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManager() {
             public ITransactionManagerInternal getTransactionManager() {
                 return tm;
             }
@@ -246,7 +246,7 @@ public abstract class TestBaseTransactionManager extends TestCase {
 
     public void testWithMemoryQuueue() throws SinkException, SystemException {
 
-        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new ISystemManager() {
+        TransactionalMemoryQueue queue = new TransactionalMemoryQueue(new IJedaManager() {
             public ITransactionManagerInternal getTransactionManager() {
                 return tm;
             }

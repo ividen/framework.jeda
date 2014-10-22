@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.nio.springintegration;
 
 import ru.kwanza.jeda.api.IFlowBus;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.IResourceController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.core.springintegration.SystemFlowBusFactory;
@@ -21,7 +21,7 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder =
                 BeanDefinitionBuilder.genericBeanDefinition(ClientTransportFlowBus.class);
-        definitionBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
 
         String name = element.getAttribute("name");
         definitionBuilder.addPropertyValue("name", name);
@@ -53,7 +53,7 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
 
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(originalBean.getId(), originalBean);
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemFlowBusFactory.class);
-        factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(name, IResourceController.class, factoryBuilder.getBeanDefinition());
         parserContext.getReaderContext().getRegistry().registerBeanDefinition(result.getId(), result);

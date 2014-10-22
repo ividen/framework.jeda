@@ -1,6 +1,5 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.clusterservice.ClusterService;
 import org.slf4j.Logger;
@@ -35,19 +34,19 @@ class QueueEventsTransferRunnable implements Runnable {
                 break;
             }
             try {
-                Manager.getTM().begin();
+                persistentQueue.getManager().getTransactionManager().begin();
                 boolean transfer = persistentQueue.transfer(nodeId);
-                Manager.getTM().commit();
+                persistentQueue.getManager().getTransactionManager().commit();
                 if (transfer) {
                     break;
                 }
             } catch (SinkException.Closed e) {
                 logger.warn("Queue is closed, skip transfer", e);
-                Manager.getTM().rollback();
+                persistentQueue.getManager().getTransactionManager().rollback();
                 break;
             } catch (Throwable e) {
                 logger.error("Queue is closed, transfer failed!", e);
-                Manager.getTM().rollback();
+                persistentQueue.getManager().getTransactionManager().rollback();
             }
         }
     }

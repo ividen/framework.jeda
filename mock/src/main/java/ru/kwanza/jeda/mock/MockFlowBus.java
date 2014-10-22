@@ -62,11 +62,11 @@ public class MockFlowBus implements IFlowBus<IEvent> {
 
 
     public static ArrayList<IEvent> getEvents(String name) {
-        return MockSystemManager.getInstance().getFlowBus(name).getEvents();
+        return MockJedaManager.getInstance().getFlowBus(name).getEvents();
     }
 
     public static ArrayList<IEvent> getCurrentFlowEvents() {
-        return MockSystemManager.getInstance().getFlowBus(MockSystemManager.MOCK_CURRENT_STAGE).getEvents();
+        return MockJedaManager.getInstance().getFlowBus(MockJedaManager.MOCK_CURRENT_STAGE).getEvents();
     }
 
     public void setMaxSize(int maxSize) {

@@ -1,9 +1,10 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IResourceController;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.manager.SystemContextController;
 import ru.kwanza.jeda.core.manager.SystemFlowBus;
 import ru.kwanza.jeda.core.manager.SystemTimer;
@@ -24,7 +25,7 @@ public class TestSpringIntegration extends TestCase {
 
     public void test1() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config.xml", TestSpringIntegration.class);
-        ISystemManager manager = (ISystemManager) ctx.getBean(ISystemManager.class.getName());
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean(IJedaManager.class);
 
         IStageInternal stage = manager.getStageInternal("TestStage1");
         assertEquals(stage.getName(), "TestStage1");
@@ -189,24 +190,24 @@ public class TestSpringIntegration extends TestCase {
 
     public void test2() {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-config_1.xml", TestSpringIntegration.class);
-        ISystemManager manager = (ISystemManager) ctx.getBean(ISystemManager.class.getName());
+        IJedaManagerInternal manager = (IJedaManagerInternal) ctx.getBean("jeda.IJedaManager");
 
-        assertEquals(Manager.getFlowBus("CPAReqFlowBus").getClass(), SystemFlowBus.class);
-        assertEquals(Manager.<Object, IContext>getContextController("TestContext").getClass(), SystemContextController.class);
-        assertEquals(Manager.getTimer("TestTimer").getClass(), SystemTimer.class);
+        assertEquals(manager.getFlowBus("CPAReqFlowBus").getClass(), SystemFlowBus.class);
+        assertEquals(manager.<Object, IContext>getContextController("TestContext").getClass(), SystemContextController.class);
+        assertEquals(manager.getTimer("TestTimer").getClass(), SystemTimer.class);
 
-        assertEquals("CPAReqFlowBus", Manager.resolveObjectName(Manager.getFlowBus("CPAReqFlowBus")));
-        assertEquals(ctx.getBean("CPAReqFlowBus"), Manager.getFlowBus("CPAReqFlowBus"));
-        assertEquals("CPAResFlowBus", Manager.resolveObjectName(Manager.getFlowBus("CPAResFlowBus")));
-        assertEquals(ctx.getBean("CPAResFlowBus"), Manager.getFlowBus("CPAResFlowBus"));
+        assertEquals("CPAReqFlowBus", manager.resolveObjectName(manager.getFlowBus("CPAReqFlowBus")));
+        assertEquals(ctx.getBean("CPAReqFlowBus"), manager.getFlowBus("CPAReqFlowBus"));
+        assertEquals("CPAResFlowBus", manager.resolveObjectName(manager.getFlowBus("CPAResFlowBus")));
+        assertEquals(ctx.getBean("CPAResFlowBus"), manager.getFlowBus("CPAResFlowBus"));
 
-        assertEquals("TestContext", Manager.resolveObjectName(Manager.<Object, IContext>getContextController("TestContext")));
-        assertEquals(ctx.getBean("TestContext"), Manager.<Object, IContext>getContextController("TestContext"));
-        assertEquals("TestTimer", Manager.resolveObjectName(Manager.getTimer("TestTimer")));
-        assertEquals(ctx.getBean("TestTimer"), Manager.getTimer("TestTimer"));
+        assertEquals("TestContext", manager.resolveObjectName(manager.<Object, IContext>getContextController("TestContext")));
+        assertEquals(ctx.getBean("TestContext"), manager.<Object, IContext>getContextController("TestContext"));
+        assertEquals("TestTimer", manager.resolveObjectName(manager.getTimer("TestTimer")));
+        assertEquals(ctx.getBean("TestTimer"), manager.getTimer("TestTimer"));
 
         IStageInternal stage = manager.getStageInternal("TestStage20");
-        Manager.getStage("TestStage20");
+        manager.getStage("TestStage20");
 
         assertEquals(stage.getName(), "TestStage20");
         assertEquals(manager.resolveObjectName(stage), "TestStage20");

@@ -15,20 +15,20 @@
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:db-oracle.properties</value>
+                <value>classpath:db_h2.properties</value>
             </list>
         </property>
     </bean>
 
 
     <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${dbunit.driverClass}"/>
-        <property name="url" value="${dbunit.connectionUrl}"/>
-        <property name="username" value="${dbunit.username}"/>
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.connectionUrl}"/>
+        <property name="username" value="${jdbc.username}"/>
         <property name="initialSize" value="1"/>
         <property name="maxActive"  value="50"/>
         <property name="maxIdle" value="50"/>
-        <property name="password" value="${dbunit.password}"/>
+        <property name="password" value="${jdbc.password}"/>
     </bean>
 
     <bean id="testTxnBean" class="ru.kwanza.jeda.core.tm.TestTxnBean"/>

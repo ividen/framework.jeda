@@ -2,7 +2,7 @@ package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IContext;
 import ru.kwanza.jeda.api.IContextController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -18,7 +18,7 @@ class ContextControllerParser implements BeanDefinitionParser {
                 .parseBeanDefinitionElement(element, null, IContext.class);
 
         BeanDefinitionBuilder factoryBuilder = BeanDefinitionBuilder.genericBeanDefinition(SystemContextControllerFactory.class);
-        factoryBuilder.addPropertyReference("manager", ISystemManager.class.getName());
+        factoryBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         factoryBuilder.addPropertyReference("original", originalBean.getId());
         JedaBeanDefinition result = new JedaBeanDefinition(element.getAttribute("name"),
                 IContextController.class, factoryBuilder.getBeanDefinition());

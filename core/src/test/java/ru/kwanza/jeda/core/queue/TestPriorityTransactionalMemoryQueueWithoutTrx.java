@@ -3,7 +3,7 @@ package ru.kwanza.jeda.core.queue;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import junit.framework.TestSuite;
 
@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriorityEventQueue {
-    public static class NonTransactionalSystemManager implements ISystemManager {
+    public static class NonTransactionalJedaManager implements IJedaManager {
         public ITransactionManagerInternal getTransactionManager() {
             return null;
         }
@@ -76,17 +76,13 @@ public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriority
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestPriorityTransactionalMemoryQueueWithoutTrx.class);
-    }
-
     public void testMaxSize() {
-        PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(new NonTransactionalSystemManager());
+        PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(new NonTransactionalJedaManager());
         assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     @Override
     protected IQueue createQueue() {
-        return new PriorityTransactionalMemoryQueue(new NonTransactionalSystemManager(), ObjectCloneType.SERIALIZE, 10l);
+        return new PriorityTransactionalMemoryQueue(new NonTransactionalJedaManager(), ObjectCloneType.SERIALIZE, 10l);
     }
 }

@@ -9,11 +9,7 @@
     <context:annotation-config/>
 
 
-    <bean id="ru.kwanza.jeda.api.internal.ISystemManager"
-          class="ru.kwanza.jeda.api.TestManager$TestSystemManager" scope="singleton">
-    </bean>
-
-    <bean id="manager" class="ru.kwanza.jeda.api.Manager" scope="singleton"
-          factory-method="getInstance">
+    <bean id="ru.kwanza.jeda.api.IJedaManager"
+          class="ru.kwanza.jeda.api.TestManager$TestJedaManager" scope="singleton">
     </bean>
 </beans>

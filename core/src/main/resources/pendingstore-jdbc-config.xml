@@ -9,9 +9,10 @@
     </bean>
 
     <bean id="pendingStore" class="ru.kwanza.jeda.core.pendingstore.DefaultPendingStore">
-        <constructor-arg index="0" ref="dbtool.DBTool"/>
-        <constructor-arg index="1" ref="autokey.IAutoKey"/>
-        <constructor-arg index="2" ref="suspenderDbInteraction"/>
+        <constructor-arg index="0" ref="jeda.IJedaManager"/>
+        <constructor-arg index="1" ref="dbtool.DBTool"/>
+        <constructor-arg index="2" ref="autokey.IAutoKey"/>
+        <constructor-arg index="3" ref="suspenderDbInteraction"/>
     </bean>
 
 </beans>

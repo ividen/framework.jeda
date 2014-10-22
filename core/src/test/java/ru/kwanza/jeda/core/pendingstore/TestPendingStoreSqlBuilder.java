@@ -27,7 +27,7 @@ public class TestPendingStoreSqlBuilder extends TestCase {
     }
 
     private static DefaultPendingStore getPendingStore() {
-        DefaultPendingStore pendingStore = new DefaultPendingStore(null, null, null);
+        DefaultPendingStore pendingStore = new DefaultPendingStore(null,null, null, null);
         pendingStore.setTableName("pending_store_table");
         pendingStore.setIdColumnName("id_col");
         pendingStore.setSinkNameColumnName("sink_name_col");

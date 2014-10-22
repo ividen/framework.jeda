@@ -1,16 +1,18 @@
 package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IContextController;
-import ru.kwanza.jeda.api.internal.ISystemManager;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+
 
 /**
  * @author Guzanov Alexander
  */
 class SystemContextControllerFactory implements SmartFactoryBean<IContextController>, BeanNameAware {
     private IContextController original;
-    private ISystemManager manager;
+    private IJedaManagerInternal manager;
     private String name;
 
     public boolean isPrototype() {
@@ -41,7 +43,7 @@ class SystemContextControllerFactory implements SmartFactoryBean<IContextControl
         this.original = original;
     }
 
-    public void setManager(ISystemManager manager) {
+    public void setManager(IJedaManagerInternal manager) {
         this.manager = manager;
     }
 }

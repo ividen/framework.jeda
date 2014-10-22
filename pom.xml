@@ -15,7 +15,7 @@
         <cglib.version>2.2.2</cglib.version>
         <atamicos.version>3.7.0</atamicos.version>
         <jbossts.version>4.9.0</jbossts.version>
-        <junit.version>3.8.1</junit.version>
+        <junit.version>4.10</junit.version>
         <dbunit.version>2.4.8</dbunit.version>
         <txn.version>1.0</txn.version>
         <dbtool.version>1.0</dbtool.version>

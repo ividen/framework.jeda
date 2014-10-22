@@ -2,7 +2,6 @@ package ru.kwanza.jeda.core.springintegration;
 
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.Manager;
 import ru.kwanza.jeda.api.SinkException;
 
 import java.util.Collection;

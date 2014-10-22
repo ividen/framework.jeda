@@ -1,13 +1,13 @@
 package ru.kwanza.jeda.core.pendingstore;
 
-import ru.kwanza.jeda.api.ISink;
-import ru.kwanza.jeda.api.Manager;
-import ru.kwanza.jeda.api.SuspendException;
-import ru.kwanza.jeda.core.pendingstore.env.TestEvent;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.ISink;
+import ru.kwanza.jeda.api.SuspendException;
+import ru.kwanza.jeda.core.pendingstore.env.TestEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +20,13 @@ public class TestLogOnlyPendingStore extends TestCase {
 
     protected ApplicationContext ctx;
     protected LogOnlyPendingStore pendingStore;
+    protected IJedaManager manager;
 
     @Override
     public void setUp() throws Exception {
-        ctx = new ClassPathXmlApplicationContext(CONTEXT_FILE_NAME, AbstractDefaultPendingStoreTest.class);
-        pendingStore = (LogOnlyPendingStore) Manager.getPendingStore();
+        ctx = new ClassPathXmlApplicationContext(CONTEXT_FILE_NAME, DefaultPendingStoreTest.class);
+        manager = ctx.getBean(IJedaManager.class);
+        pendingStore = (LogOnlyPendingStore) manager.getPendingStore();
     }
 
     public void testGetSuspender() throws Exception {
@@ -101,7 +103,7 @@ public class TestLogOnlyPendingStore extends TestCase {
 
     public void testSuspenderSuspendEventBySink() throws SuspendException {
         @SuppressWarnings("unchecked")
-        ISink<TestEvent> sink = Manager.getFlowBus(TEST_FLOW_BUS_1);
+        ISink<TestEvent> sink = manager.getFlowBus(TEST_FLOW_BUS_1);
         TestEvent testEvent1 = new TestEvent(1, "param1");
 
         LogOnlySuspender<TestEvent> suspender = pendingStore.getSuspender();
@@ -115,7 +117,7 @@ public class TestLogOnlyPendingStore extends TestCase {
 
     public void testSuspenderSuspendEventsBySink() throws Exception {
         @SuppressWarnings("unchecked")
-        ISink<TestEvent> sink = Manager.getFlowBus(TEST_FLOW_BUS_1);
+        ISink<TestEvent> sink = manager.getFlowBus(TEST_FLOW_BUS_1);
         TestEvent testEvent1 = new TestEvent(1, "param1");
         TestEvent testEvent2 = new TestEvent(2, "param2");
         List<TestEvent> eventList = Arrays.asList(testEvent1, testEvent2);

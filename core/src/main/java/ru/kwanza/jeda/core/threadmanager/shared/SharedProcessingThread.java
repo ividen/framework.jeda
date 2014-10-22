@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.core.threadmanager.shared;
 
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.core.threadmanager.AbstractProcessingThread;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 class SharedProcessingThread extends AbstractProcessingThread<SharedThreadManager> {
 
-    SharedProcessingThread(String name, ISystemManager manager, SharedThreadManager threadManager) {
+    SharedProcessingThread(String name, IJedaManagerInternal manager, SharedThreadManager threadManager) {
         super(name, manager, threadManager);
     }
 

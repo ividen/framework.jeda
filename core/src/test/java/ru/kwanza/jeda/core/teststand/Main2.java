@@ -1,8 +1,9 @@
 package ru.kwanza.jeda.core.teststand;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.ISystemManager;
-import ru.kwanza.jeda.core.manager.DefaultSystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
+import ru.kwanza.jeda.core.manager.DefaultJedaManager;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import ru.kwanza.jeda.core.resourcecontroller.SmartResourceController;
@@ -57,8 +58,11 @@ public class Main2 {
     }
 
     public static class InputThread1 extends Thread {
-        public InputThread1() {
+        private final IJedaManager manager;
+
+        public InputThread1(IJedaManager manager) {
             super("InputThread1");
+            this.manager = manager;
         }
 
         public void run() {
@@ -77,7 +81,7 @@ public class Main2 {
                 }
 
                 try {
-                    Manager.getStage("TestStage-" + j).<Event>getSink().put(events);
+                    manager.getStage("TestStage-" + j).<Event>getSink().put(events);
                 } catch (SinkException e) {
                     e.printStackTrace();
                 }
@@ -91,8 +95,11 @@ public class Main2 {
     }
 
     public static class InputThread2 extends Thread {
-        public InputThread2() {
+        private IJedaManager manager;
+
+        public InputThread2(IJedaManager manager) {
             super("InputThread2");
+            this.manager = manager;
         }
 
         public void run() {
@@ -111,7 +118,7 @@ public class Main2 {
                 }
 
                 try {
-                    Manager.getStage("TestStage-" + j).<Event>getSink().put(events);
+                    manager.getStage("TestStage-" + j).<Event>getSink().put(events);
                 } catch (SinkException e) {
                     e.printStackTrace();
                 }
@@ -126,7 +133,7 @@ public class Main2 {
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", Main.class);
-        DefaultSystemManager systemManager = ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", DefaultSystemManager.class);
+        DefaultJedaManager systemManager = ctx.getBean("ru.kwanza.jeda.api.IJedaManager", DefaultJedaManager.class);
         SharedThreadManager stageThreadManager = new SharedThreadManager("testThreads", systemManager);
         stageThreadManager.setMaxThreadCount(10);
         InputRateAndWaitingTimeComparator stageComparator = new InputRateAndWaitingTimeComparator();
@@ -136,7 +143,7 @@ public class Main2 {
         for (int i = 0; i < 10; i++) {
             SmartResourceController resourceController = new SmartResourceController();
             resourceController.setMaxBatchSize(100000);
-            TransactionalMemoryQueue queue = new TransactionalMemoryQueue(ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", ISystemManager.class),
+            TransactionalMemoryQueue queue = new TransactionalMemoryQueue(ctx.getBean("ru.kwanza.jeda.api.IJedaManager", IJedaManager.class),
                     ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
             Stage testStage = new Stage(systemManager, "TestStage-" + i,
                     new EventProcessor("TestStage-" + i), queue, stageThreadManager, null, resourceController,  true);
@@ -149,8 +156,9 @@ public class Main2 {
         for (int i = 10; i < 15; i++) {
             SmartResourceController resourceController = new SmartResourceController();
             resourceController.setMaxBatchSize(100000);
+
             TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
-                    ctx.getBean("ru.kwanza.jeda.api.internal.ISystemManager", ISystemManager.class),
+                    systemManager,
                     ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
             Stage testStage = new Stage(systemManager, "TestStage-" + i, new EventProcessor("TestStage-" + i), queue,
                     stageThreadManager, null, resourceController,  true);
@@ -158,8 +166,8 @@ public class Main2 {
             systemManager.registerStage(testStage);
         }
 
-        new InputThread1().start();
-        new InputThread2().start();
+        new InputThread1(systemManager).start();
+        new InputThread2(systemManager).start();
         Thread.currentThread().join();
     }
 }

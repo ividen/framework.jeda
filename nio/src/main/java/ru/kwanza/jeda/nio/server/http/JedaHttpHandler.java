@@ -3,7 +3,7 @@ package ru.kwanza.jeda.nio.server.http;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.internal.ISystemManager;
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.nio.utils.HttpUtil;
 
 import java.util.Collections;
@@ -13,19 +13,19 @@ import java.util.Collections;
  */
 public class JedaHttpHandler extends AsyncHttpHandler {
     private ISink<IHttpEvent> sink;
-    private ISystemManager manager;
+    private IJedaManager manager;
 
-    public static JedaHttpHandler createForObjectRef(ISystemManager manager, ISink object, long timeout) {
+    public static JedaHttpHandler createForObjectRef(IJedaManager manager, ISink object, long timeout) {
         return new JedaHttpHandler(manager, object, timeout);
     }
 
-    public static JedaHttpHandler createForObject(ISystemManager manager, String objectName, long timeout) {
+    public static JedaHttpHandler createForObject(IJedaManager manager, String objectName, long timeout) {
         Object obj = manager.resolveObject(objectName);
         ISink sink = obj instanceof IStage ? ((IStage) obj).getSink() : (ISink) obj;
         return createForObjectRef(manager, sink, timeout);
     }
 
-    public JedaHttpHandler(ISystemManager manager, ISink<IHttpEvent> sink, long timeout) {
+    public JedaHttpHandler(IJedaManager manager, ISink<IHttpEvent> sink, long timeout) {
         super(timeout);
         this.manager = manager;
         this.sink = sink;
