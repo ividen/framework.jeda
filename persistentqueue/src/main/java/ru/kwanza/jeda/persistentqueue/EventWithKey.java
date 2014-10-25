@@ -3,6 +3,7 @@ package ru.kwanza.jeda.persistentqueue;
 import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IPriorityEvent;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.Collection;
 
@@ -14,7 +15,7 @@ public class EventWithKey extends AbstractEvent implements IPriorityEvent {
     private Object key;
 
     public static <E extends IEvent> Collection<E> extract(final Collection<EventWithKey> events) {
-        return events == null ? null : new WrappedEventCollection<E>(events);
+        return FieldHelper.getFieldCollection(events, FieldHelper.<EventWithKey, E>construct(EventWithKey.class, "delegate"));
     }
 
     public EventWithKey(IEvent delegate) {
