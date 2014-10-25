@@ -1,10 +1,13 @@
 package ru.kwanza.jeda.persistentqueue;
 
+import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredModule;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -14,10 +17,12 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class QueuePersistenceController implements IClusteredModule {
     private PersistentQueue queue;
     private int repairIterationItemCount = 100;
-    private AtomicLong repairedCount = new AtomicLong(0l);
+    private AtomicLong expectedRepairing = new AtomicLong(0l);
     protected IClusterService clusterService;
+    private IJedaManager manager;
 
-    protected QueuePersistenceController(IClusterService clusterService) {
+    protected QueuePersistenceController(IJedaManager manager, IClusterService clusterService) {
+        this.manager = manager;
         this.clusterService = clusterService;
     }
 
@@ -43,7 +48,7 @@ public abstract class QueuePersistenceController implements IClusteredModule {
 
     protected abstract String getClusteredQueueName();
 
-    void init(PersistentQueue queue){
+    void init(PersistentQueue queue) {
         this.queue = queue;
         clusterService.registerModule(this);
     }
@@ -58,7 +63,40 @@ public abstract class QueuePersistenceController implements IClusteredModule {
 
     public boolean handleRepair(Node currentNode, Node reparableNode) {
         int count = transfer(getRepairIterationItemCount(), currentNode, currentNode);
-        repairedCount.addAndGet(count);
+        expectedRepairing.addAndGet(count);
         return count < getRepairIterationItemCount();
+    }
+
+    public Collection<EventWithKey> repair(final int count) {
+        Collection<EventWithKey> result = load(count);
+        try {
+            manager.getTransactionManager().getTransaction().registerSynchronization(new ExpectedRepairingSync(result.size()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    public int getExpectedRepairing() {
+        return expectedRepairing.intValue();
+    }
+
+    private class ExpectedRepairingSync implements Synchronization {
+        private final int size;
+
+        public ExpectedRepairingSync(int size) {
+            this.size = size;
+        }
+
+        public void beforeCompletion() {
+
+        }
+
+        public void afterCompletion(int i) {
+            if (i == Status.STATUS_COMMITTED) {
+                expectedRepairing.addAndGet(size);
+            }
+        }
     }
 }

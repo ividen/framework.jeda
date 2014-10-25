@@ -7,7 +7,10 @@ import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
-import ru.kwanza.jeda.core.queue.*;
+import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
+import ru.kwanza.jeda.core.queue.ObjectCloneType;
+import ru.kwanza.jeda.core.queue.QueueObserverChain;
+import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
 
 import java.util.ArrayList;
@@ -93,7 +96,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IQueueObser
     }
 
     public int getEstimatedCount() {
-        return active ? memoryCache.getEstimatedCount() : 0;
+        return active ? memoryCache.getEstimatedCount() + persistenceController.getExpectedRepairing() : 0;
     }
 
     public boolean isReady() {
@@ -101,7 +104,6 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IQueueObser
     }
 
     public void notifyChange(long queueSize, long delta) {
-      // todo aguzanov возможно именно здесь нужно догружать элементы, которые не влезли в память
     }
 
     public void put(Collection<E> events) throws SinkException {
@@ -174,7 +176,16 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IQueueObser
                 return null;
             }
 
-            Collection<EventWithKey> result = memoryCache.take(count);
+            Collection<EventWithKey> result;
+            if (persistenceController.getExpectedRepairing() > 0) {
+                result = persistenceController.repair(count);
+                Collection<EventWithKey> take = memoryCache.take(result.size() - count);
+                if (take != null) {
+                    result.addAll(take);
+                }
+            } else {
+                result = memoryCache.take(count);
+            }
             if (result == null) {
                 return null;
             }
