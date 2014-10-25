@@ -1,10 +1,9 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
-import ru.kwanza.jeda.persistentqueue.PersistentQueue;
-import ru.kwanza.jeda.persistentqueue.berkeley.BerkeleyQueuePersistenceController;
+import ru.kwanza.jeda.persistentqueue.old.PersistentQueue;
+import ru.kwanza.jeda.persistentqueue.old.berkeley.BerkeleyQueuePersistenceController;
 import org.springframework.beans.factory.SmartFactoryBean;
 
 /**

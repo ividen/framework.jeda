@@ -4,7 +4,7 @@ import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.TimerItem;
 import ru.kwanza.jeda.clusterservice.old.ClusterService;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
-import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
+import ru.kwanza.jeda.persistentqueue.old.PersistenceQueueException;
 import ru.kwanza.jeda.timer.ITimerPersistentController;
 import ru.kwanza.jeda.timer.TimerException;
 import ru.kwanza.toolbox.SerializationHelper;

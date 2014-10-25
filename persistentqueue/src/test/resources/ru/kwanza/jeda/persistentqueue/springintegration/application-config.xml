@@ -43,7 +43,7 @@
     <jeda-core:stage name="TestStage30">
         <jeda-persistentqueue:queue maxSize="100000">
             <jeda-persistentqueue:persistence-controller
-                    class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController">
+                    class="ru.kwanza.jeda.persistentqueue.old.jdbc.JDBCQueuePersistenceController">
                 <property name="dbTool" ref="dbtool.DBTool"/>
                 <property name="autoKey" ref="autokey.IAutoKey"/>
                 <property name="idColumn" value="msg_id"/>

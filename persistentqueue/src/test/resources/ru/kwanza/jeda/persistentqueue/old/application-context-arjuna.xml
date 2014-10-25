@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath:txn-jta-config.xml"/>
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-mock-config.xml"/>
+
+    <bean id="jtaTransactionManager"
+          class="com.arjuna.ats.internal.jta.transaction.arjunacore.JBossTransactionManager">
+        <constructor-arg index="0" type="boolean" value="true"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.persistentqueue.old.TestDataStore">
+        <constructor-arg index="0" ref="jeda.IJedaManager"/>
+    </bean>
+
+</beans>

@@ -3,9 +3,8 @@ package ru.kwanza.jeda.persistentqueue.springintegration;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
-import ru.kwanza.jeda.persistentqueue.PersistentQueue;
-import ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController;
+import ru.kwanza.jeda.persistentqueue.old.PersistentQueue;
+import ru.kwanza.jeda.persistentqueue.old.jdbc.JDBCQueuePersistenceController;
 import org.springframework.beans.factory.SmartFactoryBean;
 
 /**
