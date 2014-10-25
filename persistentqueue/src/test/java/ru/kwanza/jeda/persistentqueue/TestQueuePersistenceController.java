@@ -11,7 +11,11 @@ public final class TestQueuePersistenceController implements IQueuePersistenceCo
     private boolean errorONTransfer = false;
     private boolean returnNullONTransfer = false;
     private boolean errorOnPersist = false;
+    private TestDataStore dataStore;
 
+    public TestQueuePersistenceController(TestDataStore dataStore) {
+        this.dataStore = dataStore;
+    }
 
     public void setErrorONLoad(boolean errorONLoad) {
         this.errorONLoad = errorONLoad;
@@ -30,14 +34,13 @@ public final class TestQueuePersistenceController implements IQueuePersistenceCo
     }
 
     public void delete(Collection<EventWithKey> result, long nodeId) {
-        TestDataStore.getInstance().delete(nodeId, result);
+        dataStore.delete(nodeId, result);
     }
 
     public Collection<EventWithKey> load(long nodeId) {
         if (errorONLoad) {
             throw new RuntimeException("Error On Load");
         }
-        TestDataStore dataStore = TestDataStore.getInstance();
         dataStore.lock();
         try {
             return dataStore.getEventsWithKey(nodeId);
@@ -50,7 +53,7 @@ public final class TestQueuePersistenceController implements IQueuePersistenceCo
         if (errorOnPersist) {
             throw new RuntimeException("Error on persist!");
         }
-        TestDataStore.getInstance().persist(nodeId, events);
+        dataStore.persist(nodeId, events);
     }
 
     public Collection<EventWithKey> transfer(long count, long currentNodeId, long newNodeId) {
@@ -60,7 +63,6 @@ public final class TestQueuePersistenceController implements IQueuePersistenceCo
         if (returnNullONTransfer) {
             return null;
         }
-        TestDataStore dataStore = TestDataStore.getInstance();
         dataStore.lock();
         try {
             return dataStore.transfer(count, currentNodeId, newNodeId);

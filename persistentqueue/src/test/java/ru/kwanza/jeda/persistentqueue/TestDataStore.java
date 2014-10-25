@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class TestDataStore {
     private IJedaManager manager;
-    private static final TestDataStore instance = new TestDataStore();
 
     private AtomicLong idCounter = new AtomicLong(0l);
 
@@ -98,8 +97,8 @@ public class TestDataStore {
     }
 
 
-    public static TestDataStore getInstance() {
-        return instance;
+    public TestDataStore(IJedaManager manager) {
+        this.manager = manager;
     }
 
     public void add(long nodeId, Collection<EventWithKey> events) {

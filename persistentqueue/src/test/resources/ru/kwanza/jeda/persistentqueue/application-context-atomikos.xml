@@ -15,4 +15,8 @@
         <property name="forceShutdown" value="true"/>
     </bean>
 
+    <bean class="ru.kwanza.jeda.persistentqueue.TestDataStore">
+        <constructor-arg index="0" ref="jeda.IJedaManager"/>
+    </bean>
+
 </beans>

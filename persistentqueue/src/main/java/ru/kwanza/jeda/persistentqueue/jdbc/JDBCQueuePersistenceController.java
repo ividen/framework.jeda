@@ -94,11 +94,11 @@ public class JDBCQueuePersistenceController implements IQueuePersistenceControll
         lock.lock();
         try {
             DBTool.DBType dbType = dbTool.getDbType();
-            if (dbType.equals(DBTool.DBType.ORACLE)) {
-                result = dbTool.selectList(getSelectCountOracleSQL(), ROW_MAPPER, currentNodeId, queueName, maxSize);
-            } else if (dbType.equals(DBTool.DBType.MSSQL)) {
+             if (dbType.equals(DBTool.DBType.MSSQL)) {
                 result = dbTool.selectList(getSelectCountMSSQL(maxSize), ROW_MAPPER, currentNodeId, queueName);
-            } else throw new RuntimeException("Unknown type of database!");
+            } else {
+                 result = dbTool.selectList(getSelectCountOracleSQL(), ROW_MAPPER, currentNodeId, queueName, maxSize);
+             }
             dbTool.update(getUpdateSQL(), result, new EventUpdateSetter(newNodeId));
             return result;
         } catch (UpdateException e) {

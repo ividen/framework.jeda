@@ -1,14 +1,13 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
-import ru.kwanza.jeda.api.internal.IQueueObserver;
-import ru.kwanza.jeda.api.internal.SourceException;
-import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.api.internal.IQueueObserver;
+import ru.kwanza.jeda.api.internal.SourceException;
+import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,21 +21,22 @@ public abstract class TestPersistentQueue extends TestCase {
     protected ApplicationContext ctx;
     protected PersistentQueue queue;
     protected TestQueuePersistenceController controller;
+    protected TestDataStore dataStore;
 
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextName(), TestPersistentQueue.class);
         MockClusterServiceImpl.getInstance().clear();
         MockClusterServiceImpl.getInstance().setNodeId(1l);
-        TestDataStore.getInstance().clear();
-        controller = new TestQueuePersistenceController();
+        dataStore = ctx.getBean(TestDataStore.class);
+        controller = new TestQueuePersistenceController(dataStore);
         queue = createQeueue();
     }
 
     protected abstract String getContextName();
 
     protected PersistentQueue createQeueue() {
-        return new PersistentQueue((IJedaManager) ctx.getBean("ru.kwanza.jeda.api.IJedaManager"),
+        return new PersistentQueue(ctx.getBean(IJedaManager.class),
                 1000, controller);
     }
 
@@ -161,7 +161,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -187,7 +187,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
         assertTrue(!exists(events, "Test3"));
@@ -212,7 +212,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
         assertTrue(!exists(events, "Test3"));
@@ -242,7 +242,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
-        Collection<Event> storedEvents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedEvents = dataStore.getEvents(1);
         assertNull(storedEvents);
     }
 
@@ -261,7 +261,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -287,7 +287,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 0, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
         assertTrue(!exists(events, "Test3"));
@@ -318,7 +318,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 1000, queue.size());
         assertEquals("Wrong estimate size", 1000, queue.getEstimatedCount());
 
-        Collection<Event> storedEvents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedEvents = dataStore.getEvents(1);
         assertEquals("Wrong decline size", 1000, storedEvents.size());
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(storedEvents, "Test" + i));
@@ -339,7 +339,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -359,7 +359,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong size", 0, queue.getEstimatedCount());
         assertTrue(queue.isActive());
-        TestDataStore.getInstance().add(1l, new ArrayList<EventWithKey>());
+        dataStore.add(1l, new ArrayList<EventWithKey>());
         MockClusterServiceImpl.getInstance().generateCurrentNodeLost();
         assertFalse(queue.isActive());
         assertEquals("Wrong size", 0, queue.size());
@@ -385,7 +385,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 4, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -418,7 +418,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -435,7 +435,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertNull(take);
         queue.getManager().getTransactionManager().commit();
 
-        Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedevents = dataStore.getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
@@ -454,7 +454,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -465,7 +465,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong Size", 4, take.size());
         queue.getManager().getTransactionManager().rollback();
 
-        Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedevents = dataStore.getEvents(1);
         assertEquals("Must be empty", 4, storedevents.size());
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
@@ -478,7 +478,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong Size", 4, take.size());
         queue.getManager().getTransactionManager().commit();
 
-        storedevents = TestDataStore.getInstance().getEvents(1);
+        storedevents = dataStore.getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
@@ -497,7 +497,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -516,7 +516,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong Size", 4, take.size());
         queue.getManager().getTransactionManager().commit();
 
-        Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedevents = dataStore.getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
@@ -535,7 +535,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -552,7 +552,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong Size", 4, take.size());
         queue.getManager().getTransactionManager().commit();
 
-        Collection<Event> storedevents = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> storedevents = dataStore.getEvents(1);
         assertEquals("Must be empty", 0, storedevents.size());
         assertTrue(!exists(events, "Test1"));
         assertTrue(!exists(events, "Test2"));
@@ -571,7 +571,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -620,7 +620,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals("Wrong size", 0, queue.size());
         assertEquals("Wrong estimate size", 4, queue.getEstimatedCount());
         queue.getManager().getTransactionManager().commit();
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "Test1"));
         assertTrue(exists(events, "Test2"));
         assertTrue(exists(events, "Test3"));
@@ -633,11 +633,11 @@ public abstract class TestPersistentQueue extends TestCase {
 
     public void testNodeLost_1() throws SinkException, SourceException, InterruptedException {
 
-        TestDataStore.getInstance().add(1, Arrays.asList(
+        dataStore.add(1, Arrays.asList(
                 new EventWithKey(createEvent("1")),
                 new EventWithKey(createEvent("2")),
                 new EventWithKey(createEvent("3"))));
-        TestDataStore.getInstance().add(2, Arrays.asList(
+        dataStore.add(2, Arrays.asList(
                 new EventWithKey(createEvent("4")),
                 new EventWithKey(createEvent("5")),
                 new EventWithKey(createEvent("6"))));
@@ -650,7 +650,7 @@ public abstract class TestPersistentQueue extends TestCase {
 
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "1"));
         assertTrue(exists(events, "2"));
         assertTrue(exists(events, "3"));
@@ -662,14 +662,14 @@ public abstract class TestPersistentQueue extends TestCase {
         //никак не влияет на обработку
         MockClusterServiceImpl.getInstance().generateNodeActivate(2, System.currentTimeMillis());
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         queue.getManager().getTransactionManager().commit();
 
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         assertTrue(!exists(events, "1"));
         assertTrue(!exists(events, "2"));
         assertTrue(!exists(events, "3"));
@@ -681,11 +681,11 @@ public abstract class TestPersistentQueue extends TestCase {
 
     public void testNodeLost_2() throws SinkException, SourceException, InterruptedException {
 
-        TestDataStore.getInstance().add(1, Arrays.asList(
+        dataStore.add(1, Arrays.asList(
                 new EventWithKey(createEvent("1")),
                 new EventWithKey(createEvent("2")),
                 new EventWithKey(createEvent("3"))));
-        TestDataStore.getInstance().add(2, Arrays.asList(
+        dataStore.add(2, Arrays.asList(
                 new EventWithKey(createEvent("4")),
                 new EventWithKey(createEvent("5")),
                 new EventWithKey(createEvent("6"))));
@@ -704,7 +704,7 @@ public abstract class TestPersistentQueue extends TestCase {
 
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "1"));
         assertTrue(exists(events, "2"));
         assertTrue(exists(events, "3"));
@@ -713,7 +713,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(events, "6"));
         assertEquals(events.size(), 6);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -726,7 +726,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(take, "6"));
         queue.getManager().getTransactionManager().commit();
 
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         assertTrue(!exists(events, "1"));
         assertTrue(!exists(events, "2"));
         assertTrue(!exists(events, "3"));
@@ -743,8 +743,8 @@ public abstract class TestPersistentQueue extends TestCase {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -755,13 +755,13 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 1000; i++) {
@@ -771,12 +771,12 @@ public abstract class TestPersistentQueue extends TestCase {
         }
 
         Thread.sleep(1000);
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(1000 + i)));
         }
         assertEquals(events.size(), 1000);
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -797,9 +797,9 @@ public abstract class TestPersistentQueue extends TestCase {
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
             list3.add(new EventWithKey(createEvent(String.valueOf(1500 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
-        TestDataStore.getInstance().add(3, list3);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
+        dataStore.add(3, list3);
         QueueEventsTransfer.getInstance().setMaxThreadCount(2);
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -810,15 +810,15 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(3, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 500);
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 1000; i++) {
@@ -828,15 +828,15 @@ public abstract class TestPersistentQueue extends TestCase {
         }
 
         Thread.sleep(1000);
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(1000 + i)));
         }
         assertEquals(events.size(), 1000);
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -857,9 +857,9 @@ public abstract class TestPersistentQueue extends TestCase {
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
             list3.add(new EventWithKey(createEvent(String.valueOf(1500 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
-        TestDataStore.getInstance().add(3, list3);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
+        dataStore.add(3, list3);
         QueueEventsTransfer.getInstance().setMaxThreadCount(2);
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -870,15 +870,15 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(3, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 500);
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 1000; i++) {
@@ -908,15 +908,15 @@ public abstract class TestPersistentQueue extends TestCase {
         }
 
         Thread.sleep(1000);
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(1000 + i)));
         }
         assertEquals(events.size(), 1000);
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -946,9 +946,9 @@ public abstract class TestPersistentQueue extends TestCase {
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
             list3.add(new EventWithKey(createEvent(String.valueOf(1500 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
-        TestDataStore.getInstance().add(3, list3);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
+        dataStore.add(3, list3);
         QueueEventsTransfer.getInstance().setMaxThreadCount(2);
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -959,15 +959,15 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(3, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 500);
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 500);
 
         for (int i = 0; i < 500; i++) {
@@ -993,17 +993,17 @@ public abstract class TestPersistentQueue extends TestCase {
 
 
         Thread.sleep(1000);
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(1000 + i)));
         }
 
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
-        events = TestDataStore.getInstance().getEvents(3);
+        events = dataStore.getEvents(3);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -1020,8 +1020,8 @@ public abstract class TestPersistentQueue extends TestCase {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -1032,13 +1032,13 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
@@ -1057,12 +1057,12 @@ public abstract class TestPersistentQueue extends TestCase {
         }
 
         Thread.sleep(1000);
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(1000 + i)));
         }
         assertEquals(events.size(), 1000);
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 0);
 
         queue.getManager().getTransactionManager().begin();
@@ -1073,7 +1073,7 @@ public abstract class TestPersistentQueue extends TestCase {
 
 
     public void testNodeLost_Transfer_Null() throws SinkException, SourceException, InterruptedException {
-        TestDataStore.getInstance().add(1, Arrays.asList(
+        dataStore.add(1, Arrays.asList(
                 new EventWithKey(createEvent("1")),
                 new EventWithKey(createEvent("2")),
                 new EventWithKey(createEvent("3"))));
@@ -1086,20 +1086,20 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
 
         Thread.currentThread().sleep(1000);
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "1"));
         assertTrue(exists(events, "2"));
         assertTrue(exists(events, "3"));
         assertEquals(events.size(), 3);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertNull(events);
 
         queue.getManager().getTransactionManager().begin();
         Collection<Event> take = queue.take(1000);
         queue.getManager().getTransactionManager().commit();
 
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         assertTrue(!exists(events, "1"));
         assertTrue(!exists(events, "2"));
         assertTrue(!exists(events, "3"));
@@ -1107,12 +1107,12 @@ public abstract class TestPersistentQueue extends TestCase {
     }
 
     public void testNodeLost_Transfer_WithError() throws SinkException, SourceException, InterruptedException {
-        TestDataStore.getInstance().add(1, Arrays.asList(
+        dataStore.add(1, Arrays.asList(
                 new EventWithKey(createEvent("1")),
                 new EventWithKey(createEvent("2")),
                 new EventWithKey(createEvent("3"))));
 
-        TestDataStore.getInstance().add(2, Arrays.asList(
+        dataStore.add(2, Arrays.asList(
                 new EventWithKey(createEvent("4")),
                 new EventWithKey(createEvent("5")),
                 new EventWithKey(createEvent("6"))));
@@ -1125,7 +1125,7 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
 
         Thread.currentThread().sleep(1000);
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         assertTrue(exists(events, "1"));
         assertTrue(exists(events, "2"));
         assertTrue(exists(events, "3"));
@@ -1134,7 +1134,7 @@ public abstract class TestPersistentQueue extends TestCase {
         controller.setErrorONTransfer(false);
         Thread.currentThread().sleep(1000);
 
-        events = TestDataStore.getInstance().getEvents(1);
+        events = dataStore.getEvents(1);
         assertTrue(exists(events, "1"));
         assertTrue(exists(events, "2"));
         assertTrue(exists(events, "3"));
@@ -1143,7 +1143,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertTrue(exists(events, "6"));
         assertEquals(events.size(), 6);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(0, events.size());
     }
 
@@ -1154,8 +1154,8 @@ public abstract class TestPersistentQueue extends TestCase {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -1166,13 +1166,13 @@ public abstract class TestPersistentQueue extends TestCase {
         MockClusterServiceImpl.getInstance().generateNodeLost(2, System.currentTimeMillis());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
@@ -1199,8 +1199,8 @@ public abstract class TestPersistentQueue extends TestCase {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -1210,13 +1210,13 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(1, QueueEventsTransfer.getInstance().getMaxThreadCount());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
@@ -1246,8 +1246,8 @@ public abstract class TestPersistentQueue extends TestCase {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
             list2.add(new EventWithKey(createEvent(String.valueOf(1000 + i))));
         }
-        TestDataStore.getInstance().add(1, list1);
-        TestDataStore.getInstance().add(2, list2);
+        dataStore.add(1, list1);
+        dataStore.add(2, list2);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -1257,13 +1257,13 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(1, QueueEventsTransfer.getInstance().getMaxThreadCount());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }
         assertEquals(events.size(), 1000);
 
-        events = TestDataStore.getInstance().getEvents(2);
+        events = dataStore.getEvents(2);
         assertEquals(events.size(), 1000);
 
         for (int i = 0; i < 500; i++) {
@@ -1291,7 +1291,7 @@ public abstract class TestPersistentQueue extends TestCase {
         for (int i = 0; i < 1000; i++) {
             list1.add(new EventWithKey(createEvent(String.valueOf(i))));
         }
-        TestDataStore.getInstance().add(1, list1);
+        dataStore.add(1, list1);
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
         assertEquals("Wrong size", 1000, queue.size());
@@ -1301,7 +1301,7 @@ public abstract class TestPersistentQueue extends TestCase {
         assertEquals(1, QueueEventsTransfer.getInstance().getMaxThreadCount());
         Thread.currentThread().sleep(1000);
 
-        Collection<Event> events = TestDataStore.getInstance().getEvents(1);
+        Collection<Event> events = dataStore.getEvents(1);
         for (int i = 0; i < 1000; i++) {
             assertTrue(exists(events, String.valueOf(i)));
         }

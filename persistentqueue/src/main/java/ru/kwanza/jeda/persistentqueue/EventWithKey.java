@@ -15,7 +15,8 @@ public class EventWithKey extends AbstractEvent implements IPriorityEvent {
     private Object key;
 
     public static <E extends IEvent> Collection<E> extract(final Collection<EventWithKey> events) {
-        return FieldHelper.getFieldCollection(events, FieldHelper.<EventWithKey, E>construct(EventWithKey.class, "delegate"));
+        return events == null ? null :
+                FieldHelper.getFieldCollection(events, FieldHelper.<EventWithKey, E>construct(EventWithKey.class, "delegate"));
     }
 
     public EventWithKey(IEvent delegate) {

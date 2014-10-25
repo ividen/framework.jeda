@@ -11,7 +11,7 @@ public abstract class TestPriorityPersistentQueue extends TestPersistentQueue {
     @Override
     protected PersistentQueue createQeueue() {
         return new PriorityPersistentQueue((IJedaManager)
-                ctx.getBean("ru.kwanza.jeda.api.IJedaManager"), 1000, controller);
+                ctx.getBean(IJedaManager.class), 1000, controller);
     }
 
     @Override

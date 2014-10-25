@@ -1,14 +1,13 @@
 package ru.kwanza.jeda.persistentqueue.berkeley;
 
+import junit.framework.TestCase;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
-
 import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;
-import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,13 +28,12 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(
                 getContextName(), TestBerkeleyPersistentQueue.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager systemManager = ctx.getBean("jeda.IJedaManager",
-                IJedaManager.class);
+        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
 
         PersistentQueue queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
         MockClusterServiceImpl.getInstance().generateCurrentNodeActivate();
 
-       systemManager.getTransactionManager().begin();
+        systemManager.getTransactionManager().begin();
         try {
             queue.put(Arrays.asList(new TestEvent("TestContextController")));
             systemManager.getTransactionManager().commit();

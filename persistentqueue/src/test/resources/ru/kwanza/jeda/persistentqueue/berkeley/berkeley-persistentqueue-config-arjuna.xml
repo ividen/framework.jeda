@@ -19,14 +19,14 @@
 
     <bean id="connectionFactory"
           class="ru.kwanza.jeda.jeconnection.JEConnectionFactory">
-        <constructor-arg ref="ru.kwanza.jeda.api.internal.ISystemManager"/>
+        <constructor-arg ref="jeda.IJedaManager"/>
         <property name="lockingTimeout" value="1000"/>
         <property name="path" value="./target/berkeley_db/"/>
     </bean>
 
     <bean id="connectionFactory2"
           class="ru.kwanza.jeda.jeconnection.JEConnectionFactory">
-        <constructor-arg ref="ru.kwanza.jeda.api.internal.ISystemManager"/>
+        <constructor-arg ref="jeda.IJedaManager"/>
         <property name="path" value="./target/berkeley_db/"/>
         <property name="lockingTimeout" value="1000"/>
     </bean>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+
+    <changeSet author="aguzanov" id="25.10.2014-1">
+        <createTable tableName="event_queue">
+            <column name="id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="data" type="blob"/>
+            <column name="node_id" type="bigint"/>
+            <column name="queue_name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
