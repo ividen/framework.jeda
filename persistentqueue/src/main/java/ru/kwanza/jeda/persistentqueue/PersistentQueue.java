@@ -14,7 +14,6 @@ import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.QueueObserverChain;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
-import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;

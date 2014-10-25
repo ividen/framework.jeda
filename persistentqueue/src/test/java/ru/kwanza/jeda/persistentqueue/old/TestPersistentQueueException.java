@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.old;
 
 import junit.framework.TestCase;
-import ru.kwanza.jeda.persistentqueue.old.PersistenceQueueException;
+import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
 
 /**
  * @author Guzanov Alexander

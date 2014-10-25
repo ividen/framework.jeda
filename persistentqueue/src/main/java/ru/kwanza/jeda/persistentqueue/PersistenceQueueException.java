@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.persistentqueue.old;
+package ru.kwanza.jeda.persistentqueue;
 
 /**
  * @author Ivan Baluk

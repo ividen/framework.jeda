@@ -3,7 +3,7 @@ package ru.kwanza.jeda.persistentqueue.old;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
-import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 import javax.transaction.Status;
 import javax.transaction.Synchronization;

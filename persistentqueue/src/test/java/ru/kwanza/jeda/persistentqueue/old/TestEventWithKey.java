@@ -2,6 +2,7 @@ package ru.kwanza.jeda.persistentqueue.old;
 
 import junit.framework.TestCase;
 import oracle.net.jdbc.nl.UninitializedObjectException;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 import java.util.ArrayList;
 import java.util.Collection;

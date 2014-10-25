@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.persistentqueue.old;
+package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.api.IEvent;

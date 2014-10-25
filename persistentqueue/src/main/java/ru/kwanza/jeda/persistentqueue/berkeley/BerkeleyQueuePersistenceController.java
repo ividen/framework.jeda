@@ -1,14 +1,14 @@
-package ru.kwanza.jeda.persistentqueue.old.berkeley;
+package ru.kwanza.jeda.persistentqueue.berkeley;
 
-import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
-import ru.kwanza.toolbox.SerializationHelper;
-import ru.kwanza.jeda.persistentqueue.EventWithKey;
-import ru.kwanza.jeda.persistentqueue.old.IQueuePersistenceController;
-import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
 import com.sleepycat.je.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.IEvent;
+import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
+import ru.kwanza.jeda.persistentqueue.old.IQueuePersistenceController;
+import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
+import ru.kwanza.toolbox.SerializationHelper;
 
 import java.io.Closeable;
 import java.io.IOException;

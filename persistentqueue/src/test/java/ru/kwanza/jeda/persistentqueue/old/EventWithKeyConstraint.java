@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.old;
 
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 /**
  * @author Ivan Baluk

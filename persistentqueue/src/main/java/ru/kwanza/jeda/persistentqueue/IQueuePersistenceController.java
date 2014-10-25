@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.persistentqueue;
 
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.persistentqueue.old.EventWithKey;
 
 import java.util.Collection;
 

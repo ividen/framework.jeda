@@ -1,5 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.old;
 
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
+
 import java.util.Collection;
 
 /**

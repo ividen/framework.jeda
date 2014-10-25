@@ -8,6 +8,7 @@ import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.SourceException;
 import ru.kwanza.jeda.clusterservice.old.impl.mock.MockClusterServiceImpl;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;

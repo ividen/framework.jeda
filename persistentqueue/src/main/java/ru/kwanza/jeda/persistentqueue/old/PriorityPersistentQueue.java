@@ -5,6 +5,7 @@ import ru.kwanza.jeda.api.IPriorityEvent;
 import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.PriorityTransactionalMemoryQueue;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 /**
  * @author Guzanov Alexander

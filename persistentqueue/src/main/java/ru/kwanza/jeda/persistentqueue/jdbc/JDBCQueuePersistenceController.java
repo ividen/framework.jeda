@@ -1,5 +1,6 @@
-package ru.kwanza.jeda.persistentqueue.old.jdbc;
+package ru.kwanza.jeda.persistentqueue.jdbc;
 
+import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.autokey.api.AutoKeyValueSequence;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.dbtool.core.DBTool;
@@ -7,10 +8,11 @@ import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
 import ru.kwanza.dbtool.core.lock.AppLock;
 import ru.kwanza.jeda.api.IEvent;
+import ru.kwanza.jeda.clusterservice.Node;
+import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.EventWithKey;
-import ru.kwanza.jeda.persistentqueue.old.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
-import org.springframework.jdbc.core.RowMapper;
+
 
 import java.io.*;
 import java.sql.PreparedStatement;
@@ -66,28 +68,36 @@ public class JDBCQueuePersistenceController implements IQueuePersistenceControll
         this.autoKey = autoKey;
     }
 
-    public Collection<EventWithKey> load(long nodeId) {
+    public String getQueueName() {
+        return tableName;
+    }
+
+    public int getTotalCount(Node node) {
+        return 0;
+    }
+
+    public Collection<EventWithKey> load(int count,Node node) {
         isNull();
         checkLock();
         lock.lock();
         try {
-            return dbTool.selectList(getSelectAllSQL(), ROW_MAPPER, nodeId, queueName);
+            return dbTool.selectList(getSelectAllSQL(), ROW_MAPPER, node.getId(), queueName);
         } finally {
             lock.close();
         }
     }
 
-    public void persist(Collection<EventWithKey> events, long nodeId) {
+    public void persist(Collection<EventWithKey> events, Node node) {
         isNull();
         try {
             setIds(events);
-            dbTool.update(getPersistSQL(), events, new EventPersistSetter(nodeId, queueName));
+            dbTool.update(getPersistSQL(), events, new EventPersistSetter(node.getId(), queueName));
         } catch (UpdateException e) {
             throw new PersistenceQueueException(e);
         }
     }
 
-    public Collection<EventWithKey> transfer(int maxSize, long currentNodeId, long newNodeId) {
+    public int transfer(int maxSize, Node currentNode, Node reparingNode) {
         isNull();
         checkLock();
         List<EventWithKey> result;
@@ -95,12 +105,12 @@ public class JDBCQueuePersistenceController implements IQueuePersistenceControll
         try {
             DBTool.DBType dbType = dbTool.getDbType();
              if (dbType.equals(DBTool.DBType.MSSQL)) {
-                result = dbTool.selectList(getSelectCountMSSQL(maxSize), ROW_MAPPER, currentNodeId, queueName);
+                result = dbTool.selectList(getSelectCountMSSQL(maxSize), ROW_MAPPER, reparingNode.getId(), queueName);
             } else {
-                 result = dbTool.selectList(getSelectCountOracleSQL(), ROW_MAPPER, currentNodeId, queueName, maxSize);
+                 result = dbTool.selectList(getSelectCountOracleSQL(), ROW_MAPPER, reparingNode.getId(), queueName, maxSize);
              }
-            dbTool.update(getUpdateSQL(), result, new EventUpdateSetter(newNodeId));
-            return result;
+            dbTool.update(getUpdateSQL(), result, new EventUpdateSetter(currentNode.getId()));
+            return result.size();
         } catch (UpdateException e) {
             throw new PersistenceQueueException(e);
         } finally {
@@ -108,7 +118,7 @@ public class JDBCQueuePersistenceController implements IQueuePersistenceControll
         }
     }
 
-    public void delete(Collection<EventWithKey> result, long nodeId) {
+    public void delete(Collection<EventWithKey> result, Node node) {
         isNull();
         try {
             dbTool.update(getRemoveSQL(), result, REMOVE_SETTER);

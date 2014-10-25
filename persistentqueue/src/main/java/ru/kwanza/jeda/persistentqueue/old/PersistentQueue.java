@@ -7,6 +7,7 @@ import ru.kwanza.jeda.api.internal.*;
 import ru.kwanza.jeda.clusterservice.old.ClusterService;
 import ru.kwanza.jeda.clusterservice.old.INodeListener;
 import ru.kwanza.jeda.core.queue.*;
+import ru.kwanza.jeda.persistentqueue.EventWithKey;
 
 import java.util.ArrayList;
 import java.util.Collection;
