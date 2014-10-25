@@ -257,9 +257,11 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             }
 
             Collection<EventWithKey> result;
-            if (getExpectedRepairing() > 0) {
-                result = repair(count);
-                Collection<EventWithKey> take = memoryCache.take(result.size() - count);
+            int reparingCount = getExpectedRepairing();
+            if (reparingCount > 0) {
+                reparingCount  = calcReparingCount(count, reparingCount);
+                result = repair(reparingCount);
+                Collection<EventWithKey> take = memoryCache.take(count-result.size());
                 if (take != null) {
                     result.addAll(take);
                 }
@@ -275,6 +277,10 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         } finally {
             takeLock.unlock();
         }
+    }
+
+    private int calcReparingCount(int takeCount, int expectingReparingCount) {
+        return Math.min(expectingReparingCount, Math.max(takeCount / 2, 1));
     }
 
     public int size() {
