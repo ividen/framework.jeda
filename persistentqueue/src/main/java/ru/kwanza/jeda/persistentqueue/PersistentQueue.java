@@ -72,7 +72,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
                 if (totalCount > 0) {
                     Collection<EventWithKey> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
                     if (load != null && !load.isEmpty()) {
-                        memoryCache.push(load);
+                        memoryCache.put(load);
                     }
                 }
                 tm.commit();

@@ -246,7 +246,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
             if (count > 0) {
                 Collection<EventWithKey> result = persistenceController.transfer(count, nodeId, ClusterService.getNodeId());
                 if (result != null) {
-                    memoryCache.push(result);
+                    memoryCache.put(result);
                     maxTransferCount.addAndGet(-result.size());
                     if (result.size() < count) {
                         waitingForTransfer--;
@@ -272,7 +272,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         try {
             Collection<EventWithKey> load = persistenceController.load(ClusterService.getNodeId());
             if (load != null && !load.isEmpty()) {
-                memoryCache.push(load);
+                memoryCache.put(load);
                 memoryCache.getCurrentTx().registerCallback(new ActivateOnPush());
             } else {
                 active = true;

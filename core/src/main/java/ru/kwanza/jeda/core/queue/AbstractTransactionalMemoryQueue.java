@@ -56,19 +56,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         }
         putLock();
         try {
-            doPut(events, true);
-        } finally {
-            putUnlock();
-        }
-    }
-
-    public void push(Collection<E> events) throws SinkException {
-        if (events.isEmpty()) {
-            return;
-        }
-        putLock();
-        try {
-            doPut(events, false);
+            doPut(events);
         } finally {
             putUnlock();
         }
@@ -110,11 +98,11 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         return maxSize;
     }
 
-    protected void doPut(Collection<E> events, boolean checkSize) throws SinkException.Clogged {
+    protected void doPut(Collection<E> events) throws SinkException.Clogged {
         Tx tx = getCurrentTx();
 
         int s = size.get() + getTxPutsCount();
-        if (checkSize && events.size() + s > maxSize) {
+        if (events.size() + s > maxSize) {
             throw new SinkException.Clogged("Sink maxSize=" + maxSize
                     + ",currentSize=" + s + ", try to put " + events.size() + " elements!");
         }
