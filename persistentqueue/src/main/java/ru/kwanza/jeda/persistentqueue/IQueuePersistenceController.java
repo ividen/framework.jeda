@@ -10,13 +10,15 @@ import java.util.Collection;
  */
 public interface IQueuePersistenceController {
 
-    void delete(Collection<EventWithKey> result);
+    String getQueueName();
 
-    Collection<EventWithKey> load(int count);
+    int getTotalCount(Node node);
 
-    void persist(Collection<EventWithKey> events);
+    Collection<EventWithKey> load(int count, Node node);
+
+    void delete(Collection<EventWithKey> result, Node node);
+
+    void persist(Collection<EventWithKey> events, Node node);
 
     int transfer(int count, Node currentNode, Node repairableNode);
-
-    String getQueueName();
 }

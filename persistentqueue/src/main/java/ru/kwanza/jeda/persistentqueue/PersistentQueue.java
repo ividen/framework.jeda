@@ -21,7 +21,6 @@ import javax.transaction.Synchronization;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -67,7 +66,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             tm.begin();
             try {
                 //todo aguzanov нужно учесть, что после repair может быть много событий
-                Collection<EventWithKey> load = persistenceController.load(-1);
+                Collection<EventWithKey> load = persistenceController.load(-1, clusterService.getCurrentNode());
                 if (load != null && !load.isEmpty()) {
                     memoryCache.push(load);
                 }
@@ -119,7 +118,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
     }
 
     private Collection<EventWithKey> repair(final int count) {
-        Collection<EventWithKey> result = persistenceController.load(count);
+        Collection<EventWithKey> result = persistenceController.load(count, clusterService.getCurrentNode());
         try {
             manager.getTransactionManager().getTransaction().registerSynchronization(new ExpectedRepairingSync(result.size()));
         } catch (Exception e) {
@@ -191,7 +190,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
                 result.add(new EventWithKey(e));
             }
             memoryCache.put(result);
-            persistenceController.persist(result);
+            persistenceController.persist(result, clusterService.getCurrentNode());
         } finally {
             putLock.unlock();
         }
@@ -220,7 +219,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             if (decline != null) {
                 result.removeAll(decline);
             }
-            persistenceController.persist(result);
+            persistenceController.persist(result, clusterService.getCurrentNode());
             return EventWithKey.extract(decline);
         } finally {
             putLock.unlock();
@@ -255,7 +254,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             if (result == null) {
                 return null;
             }
-            persistenceController.delete(result);
+            persistenceController.delete(result, clusterService.getCurrentNode());
 
             return EventWithKey.extract(result);
         } finally {
