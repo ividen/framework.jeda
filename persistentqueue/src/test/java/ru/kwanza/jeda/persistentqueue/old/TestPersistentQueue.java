@@ -593,7 +593,7 @@ public abstract class TestPersistentQueue extends TestCase {
         long queueSize = 0;
         long delta = 0;
 
-        public void notifyChange(long queueSize, long delta) {
+        public void notifyChange(int queueSize, int delta) {
             this.queueSize = queueSize;
             this.delta = delta;
         }

@@ -168,7 +168,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         return memoryCache.isReady();
     }
 
-    public void notifyChange(long queueSize, long delta) {
+    public void notifyChange(int queueSize, int delta) {
     }
 
     public void put(Collection<E> events) throws SinkException {

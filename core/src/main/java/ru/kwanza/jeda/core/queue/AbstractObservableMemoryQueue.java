@@ -19,7 +19,7 @@ public abstract class AbstractObservableMemoryQueue<E extends IEvent> implements
         return observer;
     }
 
-    protected void notify(long size, long delta) {
+    protected void notify(int size, int delta) {
         if (observer != null && delta != 0) {
             observer.notifyChange(size, delta);
         }

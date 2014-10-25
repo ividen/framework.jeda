@@ -37,7 +37,7 @@ public class Stage implements IStageInternal, IQueueObserver {
         this.hasTransaction = hasTransaction;
     }
 
-    public void notifyChange(long queueSize, long delta) {
+    public void notifyChange(int queueSize, int delta) {
         if (logger.isTraceEnabled()) {
             logger.trace("Queue state of Stage {} is changed.Current size={}, delta={}",
                     new Object[]{getName(), queueSize, delta});

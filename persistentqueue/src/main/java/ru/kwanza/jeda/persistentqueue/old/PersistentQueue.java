@@ -98,7 +98,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         return memoryCache.isReady();
     }
 
-    public void notifyChange(long queueSize, long delta) {
+    public void notifyChange(int queueSize, int delta) {
         if (delta < 0 && waitingForTransfer > 0) {
             transferLock.lock();
             maxTransferCount.set(memoryCache.getMaxSize() - queueSize);

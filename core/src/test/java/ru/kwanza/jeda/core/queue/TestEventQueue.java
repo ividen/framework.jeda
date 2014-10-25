@@ -92,10 +92,10 @@ public abstract class TestEventQueue extends TestCase {
 
     public void testObserving() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        final ArrayList<Long> queueSize = new ArrayList<Long>();
-        final ArrayList<Long> delta = new ArrayList<Long>();
+        final ArrayList<Integer> queueSize = new ArrayList<Integer>();
+        final ArrayList<Integer> delta = new ArrayList<Integer>();
         queue.setObserver(new IQueueObserver() {
-            public void notifyChange(long s, long d) {
+            public void notifyChange(int s, int d) {
                 queueSize.add(s);
                 delta.add(d);
             }

@@ -37,7 +37,7 @@ public class TestAbstractObservableQueue extends TestCase {
         }
 
         @Override
-        public void notify(long size, long delta) {
+        public void notify(int size, int delta) {
             super.notify(size, delta);
         }
     }
@@ -47,7 +47,7 @@ public class TestAbstractObservableQueue extends TestCase {
         private long delta;
 
 
-        public void notifyChange(long queueSize, long delta) {
+        public void notifyChange(int queueSize, int delta) {
             this.queueSize = queueSize;
             this.delta = delta;
         }

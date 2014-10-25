@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.core.queue;
 
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.*;
@@ -371,10 +370,10 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
 
     public void testObserver() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        final ArrayList<Long> queueSize = new ArrayList<Long>();
-        final ArrayList<Long> delta = new ArrayList<Long>();
+        final ArrayList<Integer> queueSize = new ArrayList<Integer>();
+        final ArrayList<Integer> delta = new ArrayList<Integer>();
         queue.setObserver(new IQueueObserver() {
-            public void notifyChange(long s, long d) {
+            public void notifyChange(int s, int d) {
                 queueSize.add(s);
                 delta.add(d);
             }

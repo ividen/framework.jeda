@@ -15,7 +15,7 @@ public class QueueObserverChain implements IQueueObserver {
     private ArrayList<IQueueObserver> observers = new ArrayList<IQueueObserver>();
 
 
-    public void notifyChange(long queueSize, long delta) {
+    public void notifyChange(int queueSize, int delta) {
         for (IQueueObserver qo : observers) {
             try {
                 qo.notifyChange(queueSize, delta);
