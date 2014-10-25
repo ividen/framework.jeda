@@ -12,10 +12,10 @@ public class MemoryQueue<E extends IEvent> extends AbstractMemoryQueue<E> {
     private Node lastNode;
 
     public MemoryQueue() {
-        this(Long.MAX_VALUE);
+        this(Integer.MAX_VALUE);
     }
 
-    public MemoryQueue(long maxSize) {
+    public MemoryQueue(int maxSize) {
         super(maxSize);
         lastNode = firstNode = new Node(null);
     }

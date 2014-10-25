@@ -35,9 +35,9 @@ class TxPriorityMemoryQueueParser extends JedaBeanDefinitionParser {
 
         String maxSize = element.getAttribute("maxSize");
         if (StringUtils.hasText(maxSize)) {
-            definitionBuilder.addConstructorArgValue(Long.valueOf(maxSize));
+            definitionBuilder.addConstructorArgValue(Integer.valueOf(maxSize));
         } else {
-            definitionBuilder.addConstructorArgValue(Long.MAX_VALUE);
+            definitionBuilder.addConstructorArgValue(Integer.MAX_VALUE);
         }
 
         return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);

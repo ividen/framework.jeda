@@ -14,10 +14,10 @@ public class TransactionalMemoryQueue<E extends IEvent> extends AbstractTransact
     private Node lastNode;
 
     public TransactionalMemoryQueue(IJedaManager manager) {
-        this(manager, ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+        this(manager, ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
     }
 
-    public TransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, long maxSize) {
+    public TransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, int maxSize) {
         super(manager, objectCloneType, maxSize);
         lastNode = firstNode = new Node(null);
     }

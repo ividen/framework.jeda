@@ -11,6 +11,7 @@ import ru.kwanza.jeda.core.queue.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -22,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListener, IQueueObserver {
     private AbstractTransactionalMemoryQueue<EventWithKey> memoryCache;
-    private AtomicLong maxTransferCount = new AtomicLong(0l);
+    private AtomicInteger maxTransferCount = new AtomicInteger(0);
     private IQueuePersistenceController persistenceController;
     private IQueueObserver originalObserver;
     private IJedaManager manager;
@@ -33,9 +34,9 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
     private Condition retransmitCondition = transferLock.newCondition();
     private volatile boolean active = false;
     private volatile long waitingForTransfer = 0;
-    private long maxSize;
+    private int maxSize;
 
-    public PersistentQueue(IJedaManager manager, long maxSize, IQueuePersistenceController controller) {
+    public PersistentQueue(IJedaManager manager, int maxSize, IQueuePersistenceController controller) {
         observer = new QueueObserverChain();
         observer.addObserver(this);
         this.manager = manager;
@@ -55,7 +56,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         try {
             waitingForTransfer++;
             if (maxTransferCount.get() == 0) {
-                long delta = memoryCache.getMaxSize() - getEstimatedCount();
+                int delta = memoryCache.getMaxSize() - getEstimatedCount();
                 maxTransferCount.set(delta);
             }
             QueueEventsTransfer.getInstance().schedule(this, nodeId, lastNodeTs);
@@ -209,7 +210,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         return active;
     }
 
-    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, long maxSize) {
+    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, int maxSize) {
         return new TransactionalMemoryQueue<EventWithKey>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
 
@@ -240,7 +241,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
             throw new SinkException.Closed(e);
         }
 
-        long count = maxTransferCount.get();
+        int count = maxTransferCount.get();
         try {
             if (count > 0) {
                 Collection<EventWithKey> result = persistenceController.transfer(count, nodeId, ClusterService.getNodeId());
@@ -263,7 +264,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         }
     }
 
-    private void init(long maxSize) {
+    private void init(int maxSize) {
         memoryCache = createCache(manager, maxSize);
         memoryCache.setObserver(observer);
         ITransactionManagerInternal tm = manager.getTransactionManager();

@@ -87,7 +87,7 @@ public class JDBCQueuePersistenceController implements IQueuePersistenceControll
         }
     }
 
-    public Collection<EventWithKey> transfer(long maxSize, long currentNodeId, long newNodeId) {
+    public Collection<EventWithKey> transfer(int maxSize, long currentNodeId, long newNodeId) {
         isNull();
         checkLock();
         List<EventWithKey> result;

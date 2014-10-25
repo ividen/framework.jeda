@@ -13,7 +13,7 @@ public class TestPriorityMemoryQueue extends TestPriorityEventQueue {
 
     public void testMaxSize() {
         PriorityMemoryQueue memoryQueue = new PriorityMemoryQueue();
-        assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
+        assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     @Override

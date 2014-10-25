@@ -110,7 +110,7 @@ public class BerkeleyQueuePersistenceController implements IQueuePersistenceCont
         }
     }
 
-    public Collection<EventWithKey> transfer(long count, long currentNodeId, long newNodeId) {
+    public Collection<EventWithKey> transfer(int count, long currentNodeId, long newNodeId) {
         final Collection<EventWithKey> resultCollection = new ArrayList<EventWithKey>();
         Database refusedDatabase = null;
         Database newDatabase = null;

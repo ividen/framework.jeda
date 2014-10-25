@@ -14,10 +14,10 @@ public class PriorityTransactionalMemoryQueue<E extends IPriorityEvent> extends 
     private Map<IPriorityEvent.Priority, Node> tails = new HashMap<IPriorityEvent.Priority, Node>();
 
     public PriorityTransactionalMemoryQueue(IJedaManager manager) {
-        this(manager, ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+        this(manager, ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
     }
 
-    public PriorityTransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, long maxSize) {
+    public PriorityTransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, int maxSize) {
         super(manager, objectCloneType, maxSize);
         for (IPriorityEvent.Priority p : IPriorityEvent.Priority.values()) {
             Node lastNode;

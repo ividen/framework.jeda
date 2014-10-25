@@ -10,8 +10,8 @@ import java.util.*;
  * @author Guzanov Alexander
  */
 public class MockSink implements ISink<IEvent> {
-    private Long maxSize = Long.MAX_VALUE;
-    private long size = 0;
+    private Integer maxSize = Integer.MAX_VALUE;
+    private int size = 0;
     private ArrayList<IEvent> events = new ArrayList<IEvent>();
     private Map<Class, List<IEvent>> eventsByClass = new HashMap<Class, List<IEvent>>();
 
@@ -76,7 +76,7 @@ public class MockSink implements ISink<IEvent> {
     public synchronized void clear() {
         events.clear();
         eventsByClass.clear();
-        maxSize = Long.MAX_VALUE;
+        maxSize = Integer.MAX_VALUE;
         size = 0;
     }
 
@@ -88,15 +88,15 @@ public class MockSink implements ISink<IEvent> {
         return eventsByClass;
     }
 
-    public void setMaxSize(long maxSize) {
+    public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
 
-    public long getMaxSize() {
+    public int getMaxSize() {
         return maxSize;
     }
 
-    public static void setMaxSinkSize(String stageName, long value) {
+    public static void setMaxSinkSize(String stageName, int value) {
         MockJedaManager.getInstance().getStageInternal(stageName).getSink().setMaxSize(value);
     }
 

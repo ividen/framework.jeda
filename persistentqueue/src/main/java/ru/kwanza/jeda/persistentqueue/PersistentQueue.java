@@ -36,12 +36,12 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
     private volatile boolean active = false;
-    private long maxSize;
+    private int maxSize;
     private int repairIterationItemCount = 100;
     private AtomicInteger expectedRepairing = new AtomicInteger(0);
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
-                           long maxSize, IQueuePersistenceController controller) {
+                           int maxSize, IQueuePersistenceController controller) {
         observer = new QueueObserverChain();
         observer.addObserver(this);
         this.manager = manager;
@@ -94,7 +94,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         }
     }
 
-    public long getMaxSize() {
+    public int getMaxSize() {
         return maxSize;
     }
 
@@ -270,7 +270,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         return active;
     }
 
-    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, long maxSize) {
+    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, int maxSize) {
         return new TransactionalMemoryQueue<EventWithKey>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
 

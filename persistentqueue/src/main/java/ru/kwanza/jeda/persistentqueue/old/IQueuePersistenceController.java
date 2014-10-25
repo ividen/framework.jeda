@@ -12,5 +12,5 @@ public interface IQueuePersistenceController {
 
     void persist(Collection<EventWithKey> events, long nodeId);
 
-    Collection<EventWithKey> transfer(long count, long currentNodeId, long newNodeId);
+    Collection<EventWithKey> transfer(int count, long currentNodeId, long newNodeId);
 }

@@ -24,7 +24,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     private static final Logger logger = LoggerFactory.getLogger(AbstractTransactionalMemoryQueue.class);
 
     protected ConcurrentMap<Transaction, Tx> transactions = new ConcurrentHashMap<Transaction, Tx>();
-    protected long maxSize;
+    protected int maxSize;
 
     private IJedaManager manager;
     private ReentrantLock putLock = new ReentrantLock();
@@ -34,7 +34,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     private AtomicInteger txTakes = new AtomicInteger(0);
     private ObjectCloneType objectCloneType;
 
-    public AbstractTransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, long maxSize) {
+    public AbstractTransactionalMemoryQueue(IJedaManager manager, ObjectCloneType objectCloneType, int maxSize) {
         this.objectCloneType = objectCloneType;
         this.maxSize = maxSize;
         this.manager = manager;
@@ -106,7 +106,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         }
     }
 
-    public long getMaxSize() {
+    public int getMaxSize() {
         return maxSize;
     }
 

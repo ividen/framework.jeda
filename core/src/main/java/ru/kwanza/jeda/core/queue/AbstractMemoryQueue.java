@@ -12,12 +12,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Guzanov Alexander
  */
 public abstract class AbstractMemoryQueue<E extends IEvent> extends AbstractObservableMemoryQueue<E> {
-    protected long maxSize;
+    protected int maxSize;
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
     private AtomicInteger size = new AtomicInteger(0);
 
-    public AbstractMemoryQueue(long maxSize) {
+    public AbstractMemoryQueue(int maxSize) {
         this.maxSize = maxSize;
     }
 
@@ -104,7 +104,7 @@ public abstract class AbstractMemoryQueue<E extends IEvent> extends AbstractObse
         return size() > 0;
     }
 
-    public long getMaxSize() {
+    public int getMaxSize() {
         return maxSize;
     }
 

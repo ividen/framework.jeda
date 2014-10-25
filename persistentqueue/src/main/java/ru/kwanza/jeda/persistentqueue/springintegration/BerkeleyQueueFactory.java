@@ -3,19 +3,20 @@ package ru.kwanza.jeda.persistentqueue.springintegration;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.jeda.persistentqueue.old.PersistentQueue;
-import ru.kwanza.jeda.persistentqueue.old.berkeley.BerkeleyQueuePersistenceController;
+
 import org.springframework.beans.factory.SmartFactoryBean;
+import ru.kwanza.jeda.persistentqueue.old.berkeley.BerkeleyQueuePersistenceController;
 
 /**
  * @author Guzanov Alexander
  */
 class BerkeleyQueueFactory implements SmartFactoryBean<PersistentQueue> {
     private String dbName;
-    private long maxSize;
+    private int maxSize;
     private JEConnectionFactory connectionFactory;
     private IJedaManager manager;
 
-    public void setMaxSize(long maxSize) {
+    public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
 

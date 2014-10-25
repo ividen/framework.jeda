@@ -15,10 +15,10 @@ public class PriorityMemoryQueue<E extends IPriorityEvent> extends AbstractMemor
     private Map<Priority, Node> tails = new HashMap<Priority, Node>();
 
     public PriorityMemoryQueue() {
-        this(Long.MAX_VALUE);
+        this(Integer.MAX_VALUE);
     }
 
-    public PriorityMemoryQueue(long maxSize) {
+    public PriorityMemoryQueue(int maxSize) {
         super(maxSize);
         for (Priority p : Priority.values()) {
             Node lastNode;

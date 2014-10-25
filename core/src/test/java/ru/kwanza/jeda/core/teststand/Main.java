@@ -115,7 +115,7 @@ public class Main {
             resourceController.setWaitForFillingTimeout(3000);
             TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
                     systemManager,
-                    ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+                    ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
 
             StageThreadManager testThread = new StageThreadManager("testThread", systemManager);
             Stage testStage = new Stage(systemManager, "TestStage-" + i, new EventProcessor("TestStage-" + i),

@@ -10,12 +10,12 @@ import ru.kwanza.jeda.core.queue.PriorityTransactionalMemoryQueue;
  * @author Guzanov Alexander
  */
 public class PriorityPersistentQueue<E extends IPriorityEvent> extends PersistentQueue<E> {
-    public PriorityPersistentQueue(IJedaManager manager, long maxSize, IQueuePersistenceController controller) {
+    public PriorityPersistentQueue(IJedaManager manager, int maxSize, IQueuePersistenceController controller) {
         super(manager, maxSize, controller);
     }
 
     @Override
-    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, long maxSize) {
+    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, int maxSize) {
         return new PriorityTransactionalMemoryQueue<EventWithKey>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
 }

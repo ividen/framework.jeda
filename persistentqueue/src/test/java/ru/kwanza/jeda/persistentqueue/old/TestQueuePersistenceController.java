@@ -56,7 +56,7 @@ public final class TestQueuePersistenceController implements IQueuePersistenceCo
         dataStore.persist(nodeId, events);
     }
 
-    public Collection<EventWithKey> transfer(long count, long currentNodeId, long newNodeId) {
+    public Collection<EventWithKey> transfer(int count, long currentNodeId, long newNodeId) {
         if (errorONTransfer) {
             throw new RuntimeException("Error on transfer");
         }

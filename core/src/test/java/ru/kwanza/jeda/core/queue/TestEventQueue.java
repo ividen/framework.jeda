@@ -135,17 +135,17 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("Wrong count", 4, queue.take(10).size());
 
 
-        assertEquals("Wrong notify size for 1 put", Long.valueOf(6L), queueSize.get(0));
-        assertEquals("Wrong notify size for 2 put", Long.valueOf(10L), queueSize.get(1));
-        assertEquals("Wrong notify size for 1 take", Long.valueOf(9l), queueSize.get(2));
-        assertEquals("Wrong notify size for 2 take", Long.valueOf(4), queueSize.get(3));
-        assertEquals("Wrong notify size for 3 take", Long.valueOf(0), queueSize.get(4));
+        assertEquals("Wrong notify size for 1 put", Integer.valueOf(6), queueSize.get(0));
+        assertEquals("Wrong notify size for 2 put", Integer.valueOf(10), queueSize.get(1));
+        assertEquals("Wrong notify size for 1 take", Integer.valueOf(9), queueSize.get(2));
+        assertEquals("Wrong notify size for 2 take", Integer.valueOf(4), queueSize.get(3));
+        assertEquals("Wrong notify size for 3 take", Integer.valueOf(0), queueSize.get(4));
 
-        assertEquals("Wrong notify delta for 1 put", Long.valueOf(6L), delta.get(0));
-        assertEquals("Wrong notify delta for 2 put", Long.valueOf(4L), delta.get(1));
-        assertEquals("Wrong notify delta for 1 take", Long.valueOf(-1l), delta.get(2));
-        assertEquals("Wrong notify delta for 2 take", Long.valueOf(-5), delta.get(3));
-        assertEquals("Wrong notify delta for 3 take", Long.valueOf(-4), delta.get(4));
+        assertEquals("Wrong notify delta for 1 put", Integer.valueOf(6), delta.get(0));
+        assertEquals("Wrong notify delta for 2 put", Integer.valueOf(4), delta.get(1));
+        assertEquals("Wrong notify delta for 1 take", Integer.valueOf(-1), delta.get(2));
+        assertEquals("Wrong notify delta for 2 take", Integer.valueOf(-5), delta.get(3));
+        assertEquals("Wrong notify delta for 3 take", Integer.valueOf(-4), delta.get(4));
 
         queue.setObserver(null);
         queueSize.clear();

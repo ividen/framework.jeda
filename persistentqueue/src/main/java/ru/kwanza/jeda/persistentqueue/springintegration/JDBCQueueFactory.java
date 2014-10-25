@@ -11,7 +11,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
  * @author Guzanov Alexander
  */
 class JDBCQueueFactory implements SmartFactoryBean<PersistentQueue> {
-    private long maxSize;
+    private int maxSize;
     private DBTool dbTool;
     private IAutoKey autoKey;
     private String tableName;
@@ -22,7 +22,7 @@ class JDBCQueueFactory implements SmartFactoryBean<PersistentQueue> {
     private String queueName;
     private IJedaManager manager;
 
-    public void setMaxSize(long maxSize) {
+    public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
 

@@ -365,7 +365,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
 
     public void testMaxSize() {
         PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(manager);
-        assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
+        assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     public void testObserver() throws SinkException, SourceException {
@@ -425,17 +425,17 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().commit();
 
 
-        assertEquals("Wrong notify size for 1 put", Long.valueOf(6L), queueSize.get(0));
-        assertEquals("Wrong notify size for 2 put", Long.valueOf(10L), queueSize.get(1));
-        assertEquals("Wrong notify size for 1 take", Long.valueOf(9l), queueSize.get(2));
-        assertEquals("Wrong notify size for 2 take", Long.valueOf(4), queueSize.get(3));
-        assertEquals("Wrong notify size for 3 take", Long.valueOf(0), queueSize.get(4));
+        assertEquals("Wrong notify size for 1 put", Integer.valueOf(6), queueSize.get(0));
+        assertEquals("Wrong notify size for 2 put", Integer.valueOf(10), queueSize.get(1));
+        assertEquals("Wrong notify size for 1 take", Integer.valueOf(9), queueSize.get(2));
+        assertEquals("Wrong notify size for 2 take", Integer.valueOf(4), queueSize.get(3));
+        assertEquals("Wrong notify size for 3 take", Integer.valueOf(0), queueSize.get(4));
 
-        assertEquals("Wrong notify delta for 1 put", Long.valueOf(6L), delta.get(0));
-        assertEquals("Wrong notify delta for 2 put", Long.valueOf(4L), delta.get(1));
-        assertEquals("Wrong notify delta for 1 take", Long.valueOf(-1l), delta.get(2));
-        assertEquals("Wrong notify delta for 2 take", Long.valueOf(-5), delta.get(3));
-        assertEquals("Wrong notify delta for 3 take", Long.valueOf(-4), delta.get(4));
+        assertEquals("Wrong notify delta for 1 put", Integer.valueOf(6), delta.get(0));
+        assertEquals("Wrong notify delta for 2 put", Integer.valueOf(4), delta.get(1));
+        assertEquals("Wrong notify delta for 1 take", Integer.valueOf(-1), delta.get(2));
+        assertEquals("Wrong notify delta for 2 take", Integer.valueOf(-5), delta.get(3));
+        assertEquals("Wrong notify delta for 3 take", Integer.valueOf(-4), delta.get(4));
 
         queue.setObserver(null);
         queueSize.clear();
@@ -1837,7 +1837,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
     }
 
     public void test_Clone_Copy() throws SinkException, SourceException {
-        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
+        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
         manager.getTransactionManager().begin();
         PriorityEvent event = new PriorityEvent("1");
@@ -1859,7 +1859,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
 
 
     public void test_None_Copy() throws SinkException, SourceException {
-        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10l);
+        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10);
 
         manager.getTransactionManager().begin();
         PriorityEvent event = new PriorityEvent("1");
@@ -1880,7 +1880,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
     }
 
     public void test_Non_Clone_Copy() throws SinkException, SourceException {
-        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10l);
+        IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
         manager.getTransactionManager().begin();
         NonSerializablePriorityEvent event = new NonSerializablePriorityEvent("1");
@@ -1955,6 +1955,6 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
     }
 
     protected PriorityTransactionalMemoryQueue createQueue() {
-        return new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.SERIALIZE, 10l);
+        return new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.SERIALIZE, 10);
     }
 }

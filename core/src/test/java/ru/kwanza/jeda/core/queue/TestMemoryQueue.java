@@ -11,7 +11,7 @@ public class TestMemoryQueue extends TestEventQueue {
 
     public void testMaxSize() {
         MemoryQueue memoryQueue = new MemoryQueue();
-        assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
+        assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     @Override

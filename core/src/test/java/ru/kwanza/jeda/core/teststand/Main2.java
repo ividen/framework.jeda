@@ -144,7 +144,7 @@ public class Main2 {
             SmartResourceController resourceController = new SmartResourceController();
             resourceController.setMaxBatchSize(100000);
             TransactionalMemoryQueue queue = new TransactionalMemoryQueue(ctx.getBean("ru.kwanza.jeda.api.IJedaManager", IJedaManager.class),
-                    ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+                    ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
             Stage testStage = new Stage(systemManager, "TestStage-" + i,
                     new EventProcessor("TestStage-" + i), queue, stageThreadManager, null, resourceController,  true);
 
@@ -159,7 +159,7 @@ public class Main2 {
 
             TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
                     systemManager,
-                    ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+                    ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
             Stage testStage = new Stage(systemManager, "TestStage-" + i, new EventProcessor("TestStage-" + i), queue,
                     stageThreadManager, null, resourceController,  true);
 

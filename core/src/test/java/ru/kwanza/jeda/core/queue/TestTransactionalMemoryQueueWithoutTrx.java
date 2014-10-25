@@ -81,11 +81,11 @@ public class TestTransactionalMemoryQueueWithoutTrx extends TestEventQueue {
 
     public void testMaxSize() {
         TransactionalMemoryQueue memoryQueue = new TransactionalMemoryQueue(new NonTransactionalJedaManager());
-        assertEquals("MaxSize wrong", Long.MAX_VALUE, memoryQueue.getMaxSize());
+        assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     @Override
     protected IQueue createQueue() {
-        return new TransactionalMemoryQueue(new NonTransactionalJedaManager(), ObjectCloneType.SERIALIZE, 10l);
+        return new TransactionalMemoryQueue(new NonTransactionalJedaManager(), ObjectCloneType.SERIALIZE, 10);
     }
 }

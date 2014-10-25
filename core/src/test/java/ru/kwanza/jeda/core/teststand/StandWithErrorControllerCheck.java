@@ -128,7 +128,7 @@ public class StandWithErrorControllerCheck {
         resourceController.setMaxBatchSize(50000);
         TransactionalMemoryQueue queue = new TransactionalMemoryQueue(
                 systemManager,
-                ObjectCloneType.SERIALIZE, Long.MAX_VALUE);
+                ObjectCloneType.SERIALIZE, Integer.MAX_VALUE);
         Stage testStage = new Stage(systemManager, "TestStage", new EventProcessor("TestStage"), queue,
                 stageThreadManager, null, resourceController, true);
 
