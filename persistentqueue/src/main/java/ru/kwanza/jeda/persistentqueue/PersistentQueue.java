@@ -25,9 +25,9 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Guzanov Alexander
  */
-public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredModule, IQueueObserver {
-    private AbstractTransactionalMemoryQueue<EventWithKey> memoryCache;
-    private IQueuePersistenceController persistenceController;
+public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, IClusteredModule, IQueueObserver {
+    private AbstractTransactionalMemoryQueue<E> memoryCache;
+    private IQueuePersistenceController<E> persistenceController;
     private IQueueObserver originalObserver;
     private IClusterService clusterService;
     private IJedaManager manager;
@@ -40,7 +40,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
     private AtomicInteger expectedRepairing = new AtomicInteger(0);
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
-                           int maxSize, IQueuePersistenceController controller) {
+                           int maxSize, IQueuePersistenceController<E> controller) {
         observer = new QueueObserverChain();
         observer.addObserver(this);
         this.manager = manager;
@@ -69,7 +69,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
                     expectedRepairing.set(totalCount - maxSize);
                 }
                 if (totalCount > 0) {
-                    Collection<EventWithKey> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
+                    Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
                     if (load != null && !load.isEmpty()) {
                         memoryCache.put(load);
                     }
@@ -131,8 +131,8 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         return "jeda.QueuePersistenceController." + persistenceController.getQueueName();
     }
 
-    private Collection<EventWithKey> repair(final int count) {
-        Collection<EventWithKey> result = persistenceController.load(count, clusterService.getCurrentNode());
+    private Collection<E> repair(final int count) {
+        Collection<E> result = persistenceController.load(count, clusterService.getCurrentNode());
         try {
             manager.getTransactionManager().getTransaction().registerSynchronization(new ExpectedRepairingSync(result.size()));
         } catch (Exception e) {
@@ -199,12 +199,9 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             if (!active) {
                 throw new SinkException.Closed("Sink closed!");
             }
-            ArrayList<EventWithKey> result = new ArrayList<EventWithKey>(events.size());
-            for (E e : events) {
-                result.add(new EventWithKey(e));
-            }
-            memoryCache.put(result);
-            persistenceController.persist(result, clusterService.getCurrentNode());
+
+            memoryCache.put(events);
+            persistenceController.persist(events, clusterService.getCurrentNode());
         } finally {
             putLock.unlock();
         }
@@ -225,16 +222,13 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
                 throw new SinkException.Closed("Sink closed!");
             }
 
-            ArrayList<EventWithKey> result = new ArrayList<EventWithKey>(events.size());
-            for (E e : events) {
-                result.add(new EventWithKey(e));
-            }
-            Collection<EventWithKey> decline = memoryCache.tryPut(result);
+           ArrayList<E> copy = new ArrayList<E>(events);
+            Collection<E> decline = memoryCache.tryPut(copy);
             if (decline != null) {
-                result.removeAll(decline);
+                copy.removeAll(decline);
             }
-            persistenceController.persist(result, clusterService.getCurrentNode());
-            return EventWithKey.extract(decline);
+            persistenceController.persist(copy, clusterService.getCurrentNode());
+            return decline;
         } finally {
             putLock.unlock();
         }
@@ -255,12 +249,12 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
                 return null;
             }
 
-            Collection<EventWithKey> result;
+            Collection<E> result;
             int reparingCount = getExpectedRepairing();
             if (reparingCount > 0) {
                 reparingCount  = calcReparingCount(count, reparingCount);
                 result = repair(reparingCount);
-                Collection<EventWithKey> take = memoryCache.take(count-result.size());
+                Collection<E> take = memoryCache.take(count-result.size());
                 if (take != null) {
                     result.addAll(take);
                 }
@@ -272,7 +266,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             }
             persistenceController.delete(result, clusterService.getCurrentNode());
 
-            return EventWithKey.extract(result);
+            return result;
         } finally {
             takeLock.unlock();
         }
@@ -290,8 +284,8 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         return active;
     }
 
-    protected AbstractTransactionalMemoryQueue<EventWithKey> createCache(IJedaManager manager, int maxSize) {
-        return new TransactionalMemoryQueue<EventWithKey>(manager, ObjectCloneType.SERIALIZE, maxSize);
+    protected AbstractTransactionalMemoryQueue<E> createCache(IJedaManager manager, int maxSize) {
+        return new TransactionalMemoryQueue<E>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
 
 
