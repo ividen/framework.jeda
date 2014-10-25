@@ -65,10 +65,15 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
             ITransactionManagerInternal tm = manager.getTransactionManager();
             tm.begin();
             try {
-                //todo aguzanov нужно учесть, что после repair может быть много событий
-                Collection<EventWithKey> load = persistenceController.load(-1, clusterService.getCurrentNode());
-                if (load != null && !load.isEmpty()) {
-                    memoryCache.push(load);
+                int totalCount = persistenceController.getTotalCount(clusterService.getCurrentNode());
+                if (totalCount > maxSize) {
+                    expectedRepairing.set(totalCount - maxSize);
+                }
+                if (totalCount > 0) {
+                    Collection<EventWithKey> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
+                    if (load != null && !load.isEmpty()) {
+                        memoryCache.push(load);
+                    }
                 }
                 tm.commit();
             } catch (Throwable e) {
