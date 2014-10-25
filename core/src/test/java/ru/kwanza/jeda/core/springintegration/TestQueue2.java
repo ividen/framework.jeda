@@ -47,7 +47,7 @@ public class TestQueue2 implements IQueue {
         return null;
     }
 
-    public long size() {
+    public int size() {
         return 0;
     }
 

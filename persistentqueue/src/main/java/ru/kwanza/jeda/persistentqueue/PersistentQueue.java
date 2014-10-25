@@ -103,6 +103,10 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         return maxSize;
     }
 
+    public void setRepairIterationItemCount(int repairIterationItemCount) {
+        this.repairIterationItemCount = repairIterationItemCount;
+    }
+
     public int getRepairIterationItemCount() {
         return repairIterationItemCount;
     }
@@ -112,10 +116,16 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
     }
 
     public boolean handleRepair(Node reparableNode) {
-        int count = persistenceController.transfer(getRepairIterationItemCount(), clusterService.getCurrentNode(),
-                reparableNode);
-        expectedRepairing.addAndGet(count);
-        return count < getRepairIterationItemCount();
+        int memorySize = memoryCache.size();
+        int count;
+        try {
+            count = persistenceController.transfer(getRepairIterationItemCount(), clusterService.getCurrentNode(),
+                    reparableNode);
+            expectedRepairing.addAndGet(count);
+            return count < getRepairIterationItemCount();
+        } finally {
+            notify(memorySize + count, count);
+        }
     }
 
     public String getName() {
@@ -267,7 +277,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, IClusteredM
         }
     }
 
-    public long size() {
+    public int size() {
         return active ? memoryCache.size() : 0;
     }
 

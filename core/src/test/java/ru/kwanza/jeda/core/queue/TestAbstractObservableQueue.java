@@ -32,7 +32,7 @@ public class TestAbstractObservableQueue extends TestCase {
             return null;
         }
 
-        public long size() {
+        public int size() {
             return 0;
         }
 

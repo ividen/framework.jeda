@@ -96,7 +96,7 @@ public abstract class AbstractMemoryQueue<E extends IEvent> extends AbstractObse
         }
     }
 
-    public long size() {
+    public int size() {
         return size.get();
     }
 

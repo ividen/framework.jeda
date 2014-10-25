@@ -119,7 +119,7 @@ public class SystemQueue<E extends IEvent> implements IQueue<E> {
         return queue.take(count);
     }
 
-    public long size() {
+    public int size() {
         return queue.size();
     }
 

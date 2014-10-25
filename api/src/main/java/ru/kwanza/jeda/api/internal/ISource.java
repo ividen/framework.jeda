@@ -10,5 +10,5 @@ import java.util.Collection;
 public interface ISource<E extends IEvent> {
     public Collection<E> take(int count) throws SourceException;
 
-    public long size();
+    public int size();
 }

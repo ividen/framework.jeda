@@ -81,7 +81,7 @@ public class TestStage implements IStageInternal, IQueue {
         throw new UnsupportedOperationException();
     }
 
-    public long size() {
+    public int size() {
         throw new UnsupportedOperationException();
     }
 }

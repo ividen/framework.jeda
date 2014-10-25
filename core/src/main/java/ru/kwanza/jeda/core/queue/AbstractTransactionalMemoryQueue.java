@@ -74,7 +74,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         }
     }
 
-    public long size() {
+    public int size() {
         return size.get();
     }
 

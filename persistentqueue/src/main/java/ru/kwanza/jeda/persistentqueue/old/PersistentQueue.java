@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -202,7 +201,7 @@ public class PersistentQueue<E extends IEvent> implements IQueue<E>, INodeListen
         }
     }
 
-    public long size() {
+    public int size() {
         return active ? memoryCache.size() : 0;
     }
 
