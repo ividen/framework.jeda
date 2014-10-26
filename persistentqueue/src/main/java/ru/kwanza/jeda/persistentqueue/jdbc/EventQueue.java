@@ -2,9 +2,7 @@ package ru.kwanza.jeda.persistentqueue.jdbc;
 
 import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
-import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
 import ru.kwanza.toolbox.SerializationHelper;
 
 /**
@@ -39,7 +37,15 @@ public class EventQueue<E extends DefaultPersistableEvent> implements IEventReco
         return id;
     }
 
-    public Integer getNodeId() {
+    public int getNodeId() {
         return nodeId;
+    }
+
+    public void setNodeId(int nodeId) {
+        this.nodeId = nodeId;
+    }
+
+    public void setNodeId(Integer nodeId) {
+        this.nodeId = nodeId;
     }
 }

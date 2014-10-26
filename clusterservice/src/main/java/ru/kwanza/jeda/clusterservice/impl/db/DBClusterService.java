@@ -418,10 +418,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                                 break;
                             }
                         }
+                        tm.commit();
                     } catch (Throwable e) {
                         logger.error("Error in repair thread!", e);
-                    } finally {
-                        tm.commit();
+                        tm.rollback();
                     }
 
                     try {

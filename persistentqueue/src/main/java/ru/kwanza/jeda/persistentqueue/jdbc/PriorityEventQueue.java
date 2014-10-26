@@ -14,7 +14,11 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
     @Field("priority")
     private Integer priority;
 
-    public E getEvent() throws Exception {
+    public PriorityEventQueue(Long id, Integer nodeId, byte[] eventData) {
+        super(id, nodeId, eventData);
+    }
+
+    public E getEvent()  {
         E event = super.getEvent();
         event.setPriority(IPriorityEvent.Priority.findByCode(priority));
         return event;

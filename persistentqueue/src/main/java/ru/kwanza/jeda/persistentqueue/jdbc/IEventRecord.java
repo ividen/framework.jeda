@@ -7,9 +7,9 @@ import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
  * @author Alexander Guzanov
  */
 public interface IEventRecord<E extends IPersistableEvent>{
-    Long getId();
+    int getNodeId();
 
-    Integer getNodeId();
+    void setNodeId(int nodeId);
 
     E getEvent();
 }
