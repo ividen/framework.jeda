@@ -24,8 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class JEConnectionFactory {
     static final Logger logger = LoggerFactory.getLogger(JEConnectionFactory.class);
 
-    private final ConcurrentMap<Long, JEConnection> connections =
-            new ConcurrentHashMap<Long, JEConnection>();
+    private final ConcurrentMap<Integer, JEConnection> connections =
+            new ConcurrentHashMap<Integer, JEConnection>();
 
     private EnvironmentConfig environmentConfig = new EnvironmentConfig()
             .setAllowCreate(true).setTransactional(true)
@@ -78,7 +78,7 @@ public class JEConnectionFactory {
         this.transactionConfig = transactionConfig;
     }
 
-    public void closeConnection(Long nodeId) {
+    public void closeConnection(Integer nodeId) {
         JEConnection connection = connections.get(nodeId);
         if (connection != null) {
             lock.lock();
@@ -91,7 +91,7 @@ public class JEConnectionFactory {
         }
     }
 
-    public JEConnection getConnection(Long nodeId) {
+    public JEConnection getConnection(Integer nodeId) {
         if (!active) {
             throw new JEConnectionException("Factory destroyed!");
         }
@@ -100,7 +100,7 @@ public class JEConnectionFactory {
         return connection;
     }
 
-    public JEConnection getTxConnection(Long nodeId) {
+    public JEConnection getTxConnection(Integer nodeId) {
         if (!active) {
             throw new JEConnectionException("Factory destroyed!");
         }
@@ -109,7 +109,7 @@ public class JEConnectionFactory {
         return connection;
     }
 
-    private JEConnection findConnection(Long nodeId) {
+    private JEConnection findConnection(Integer nodeId) {
         JEConnection connection = connections.get(nodeId);
         if (connection == null) {
             lock.lock();
@@ -167,8 +167,8 @@ public class JEConnectionFactory {
             return;
         }
         active = false;
-        HashSet<Long> nodeIds = new HashSet<Long>(this.connections.keySet());
-        for (Long nodeId : nodeIds) {
+        HashSet<Integer> nodeIds = new HashSet<Integer>(this.connections.keySet());
+        for (Integer nodeId : nodeIds) {
             closeConnection(nodeId);
         }
     }

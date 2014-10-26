@@ -1,6 +1,5 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueue;
@@ -116,19 +115,19 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
 
     public boolean handleRepair(Node reparableNode) {
         int memorySize = memoryCache.size();
-        int count;
+        int count = 0;
         try {
             count = persistenceController.transfer(getRepairIterationItemCount(), clusterService.getCurrentNode(),
                     reparableNode);
             expectedRepairing.addAndGet(count);
             return count < getRepairIterationItemCount();
         } finally {
-            notify(memorySize + count, count);
+            getObserver().notifyChange(memorySize + count, count);
         }
     }
 
     public String getName() {
-        return "jeda.QueuePersistenceController." + persistenceController.getQueueName();
+        return "jeda.PersistentQueue." + persistenceController.getQueueName();
     }
 
     private Collection<E> repair(final int count) {
@@ -222,7 +221,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 throw new SinkException.Closed("Sink closed!");
             }
 
-           ArrayList<E> copy = new ArrayList<E>(events);
+            ArrayList<E> copy = new ArrayList<E>(events);
             Collection<E> decline = memoryCache.tryPut(copy);
             if (decline != null) {
                 copy.removeAll(decline);
@@ -252,9 +251,9 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             Collection<E> result;
             int reparingCount = getExpectedRepairing();
             if (reparingCount > 0) {
-                reparingCount  = calcReparingCount(count, reparingCount);
+                reparingCount = calcReparingCount(count, reparingCount);
                 result = repair(reparingCount);
-                Collection<E> take = memoryCache.take(count-result.size());
+                Collection<E> take = memoryCache.take(count - result.size());
                 if (take != null) {
                     result.addAll(take);
                 }

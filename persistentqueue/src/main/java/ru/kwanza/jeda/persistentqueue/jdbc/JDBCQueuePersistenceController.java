@@ -59,7 +59,8 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
     }
 
     public String getQueueName() {
-        return ormClass.getName() + (determinator == null ? "" : determinator.toString());
+        return JDBCQueuePersistenceController.class.getSimpleName() + "."
+                + ormClass.getName() + (determinator == null ? "" : determinator.toString());
     }
 
     public int getTotalCount(Node node) {
@@ -97,7 +98,7 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
             e.setNodeId(currentNode.getId());
         }
         try {
-            em.update(ormClass,list);
+            em.update(ormClass, list);
         } catch (UpdateException e) {
             throw new RuntimeException(e);
         }

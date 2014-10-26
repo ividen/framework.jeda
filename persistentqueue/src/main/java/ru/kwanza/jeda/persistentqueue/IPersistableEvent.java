@@ -9,4 +9,6 @@ import java.io.Serializable;
  */
 public interface IPersistableEvent extends IEvent, Serializable {
     Long getPersistId();
+
+    void setPeristId(Long key);
 }

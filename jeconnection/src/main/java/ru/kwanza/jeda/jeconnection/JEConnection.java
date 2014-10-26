@@ -25,9 +25,9 @@ public class JEConnection {
     private JEConnectionFactory factory;
     private ConcurrentHashMap<Transaction, Transaction> enlistment = new ConcurrentHashMap<Transaction, Transaction>();
     private ConcurrentHashMap<String, Database> databases = new ConcurrentHashMap<String, Database>();
-    private Long nodeId;
+    private Integer nodeId;
 
-    JEConnection(JEConnectionFactory factory, Long nodeId, Lock fileLock, JEEnvironment environment) {
+    JEConnection(JEConnectionFactory factory, Integer nodeId, Lock fileLock, JEEnvironment environment) {
         this.fileLock = fileLock;
         this.environment = environment;
         this.factory = factory;
