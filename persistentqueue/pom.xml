@@ -127,6 +127,11 @@
             <artifactId>je</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+        </dependency>
+
     </dependencies>
 
 

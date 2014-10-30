@@ -12,7 +12,7 @@ import ru.kwanza.jeda.clusterservice.Node;
 @Entity(table = "jeda_cluster_service",  name="jeda.clusterservice.NodeEntity")
 public class NodeEntity extends Node {
     public NodeEntity(Integer id, Long lastActivity) {
-        this.id = id;
+        super(id);
         this.lastActivity = lastActivity;
     }
 

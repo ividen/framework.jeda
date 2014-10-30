@@ -44,11 +44,15 @@ public class TestSpringContextForQueue extends AbstractJUnit4SpringContextTests 
     @Test
     public void testTables() throws UpdateException {
         em.create(new EventQueue.Builder().build(new DefaultPersistableEvent(1l), 1));
+        Assert.assertEquals(1l,em.readByKey(EventQueue.class,1l).getId().longValue());
         em.create(new EventQueueWithQueueName.Builder("test_queue").build(new DefaultPersistableEvent(1l), 1));
+        Assert.assertEquals(1l,em.readByKey(EventQueueWithQueueName.class,1l).getId().longValue());
         em.create(new PriorityEventQueue.Builder()
                 .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
+        Assert.assertEquals(1l,em.readByKey(PriorityEventQueue.class,1l).getId().longValue());
         em.create(new PriorityEventQueueWithQueueName.Builder("test_queue")
                 .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
+        Assert.assertEquals(1l,em.readByKey(PriorityEventQueueWithQueueName.class,1l).getId().longValue());
 
     }
 

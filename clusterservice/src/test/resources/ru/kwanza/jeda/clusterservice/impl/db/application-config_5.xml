@@ -63,11 +63,10 @@
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:test_4.properties</value>
+                <value>classpath:test_5.properties</value>
             </list>
         </property>
     </bean>
-
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <constructor-arg name="targetDataSource">

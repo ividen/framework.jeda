@@ -129,57 +129,9 @@ public class TestDBClusterService_4 extends AbstractDBClusterService {
         Assert.assertEquals(1, service.getPassiveNodes().size());
         Assert.assertEquals(1, service2.getPassiveNodes().size());
         Assert.assertEquals(1, service3.getPassiveNodes().size());
+
+        service.destroy();
+        Thread.sleep(5000);
     }
-
-    @Test
-    public void testCritical_1() throws InvocationTargetException, InterruptedException {
-        final boolean noLock = service.criticalSection(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                ModuleEntity moduleEntity = em.readByKey(ModuleEntity.class, "1_repairable_module");
-                final LockResult<ModuleEntity> lock = em.lock(LockType.SKIP_LOCKED, moduleEntity);
-
-                return lock.getLocked().isEmpty();
-            }
-        });
-
-        Assert.assertEquals(true, noLock);
-    }
-
-
-    @Test
-    public void testCritical_2() throws InvocationTargetException, InterruptedException, TimeoutException {
-        final boolean noLock = service.criticalSection(new Callable<Boolean>() {
-            public Boolean call() throws Exception {
-                ModuleEntity moduleEntity = em.readByKey(ModuleEntity.class, "1_repairable_module");
-                final LockResult<ModuleEntity> lock = em.lock(LockType.SKIP_LOCKED, moduleEntity);
-
-                return lock.getLocked().isEmpty();
-            }
-        }, 1000l, TimeUnit.MILLISECONDS);
-
-        Assert.assertEquals(true, noLock);
-    }
-
-    @Test(expected = TimeoutException.class)
-    public void testCritical_3() throws InvocationTargetException, InterruptedException, TimeoutException {
-        ModuleEntity moduleEntity = em.readByKey(ModuleEntity.class, "1_repairable_module");
-        tm.begin();
-
-        final LockResult<ModuleEntity> lock = em.lock(LockType.WAIT, moduleEntity);
-        try {
-            final boolean noLock = service.criticalSection(new Callable<Boolean>() {
-                public Boolean call() throws Exception {
-                    ModuleEntity moduleEntity = em.readByKey(ModuleEntity.class, "1_repairable_module");
-                    final LockResult<ModuleEntity> lock = em.lock(LockType.SKIP_LOCKED, moduleEntity);
-
-                    return lock.getLocked().isEmpty();
-                }
-            }, 1000l, TimeUnit.MILLISECONDS);
-
-        } finally {
-            tm.commit();
-        }
-    }
-
 
 }

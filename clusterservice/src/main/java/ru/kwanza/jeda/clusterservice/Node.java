@@ -7,6 +7,13 @@ public class Node {
     protected Integer id;
     protected volatile Long lastActivity;
 
+    public Node(int id){
+        this.id = id;
+    }
+
+    protected Node(){
+    }
+
     public Integer getId() {
         return id;
     }
