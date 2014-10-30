@@ -39,7 +39,7 @@ public abstract class TestBerkleyController extends TestController {
     }
 
     @Override
-    protected Collection<TimerItem> transfer(long count, long oldNodeId) throws Exception {
+    protected Collection<TimerItem> transfer(long count, int oldNodeId) throws Exception {
         manager.getTransactionManager().begin();
         Collection<TimerItem> transfer = getController().transfer(count, oldNodeId);
         manager.getTransactionManager().commit();

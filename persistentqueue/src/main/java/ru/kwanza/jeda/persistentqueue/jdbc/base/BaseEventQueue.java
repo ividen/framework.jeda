@@ -1,22 +1,23 @@
-package ru.kwanza.jeda.persistentqueue.jdbc;
+package ru.kwanza.jeda.persistentqueue.jdbc.base;
 
 import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
+import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
+import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecord;
 import ru.kwanza.toolbox.SerializationHelper;
 
 /**
  * @author Alexander Guzanov
  */
-public class EventQueue<E extends DefaultPersistableEvent> implements IEventRecord {
+public class BaseEventQueue<E extends IPersistableEvent> implements IEventRecord {
     @IdField("id")
-    private Long id;
+    protected Long id;
     @Field("node_id")
-    private Integer nodeId;
+    protected Integer nodeId;
     @Field("data")
-    private byte[] eventData;
+    protected byte[] eventData;
 
-    public EventQueue(Long id, Integer nodeId, byte[] eventData) {
+    public BaseEventQueue(Long id, Integer nodeId, byte[] eventData) {
         this.id = id;
         this.nodeId = nodeId;
         this.eventData = eventData;
@@ -42,10 +43,6 @@ public class EventQueue<E extends DefaultPersistableEvent> implements IEventReco
     }
 
     public void setNodeId(int nodeId) {
-        this.nodeId = nodeId;
-    }
-
-    public void setNodeId(Integer nodeId) {
         this.nodeId = nodeId;
     }
 }

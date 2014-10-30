@@ -31,12 +31,12 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
-        Database db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        Database db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -44,7 +44,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().commit();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -53,7 +53,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(10l, SerializationHelper.bytesToLong(key.getData()));
         assertEquals("Test", SerializationHelper.bytesToObject(value.getData()));
 
-        db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Cursor cursor1 = db1.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key1 = new DatabaseEntry();
@@ -130,12 +130,12 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getTxConnection(0l).openDatabase("test",
+        Database db = factoryJE.getTxConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
-        Database db1 = factoryJE.getTxConnection(0l).openDatabase("test_1",
+        Database db1 = factoryJE.getTxConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -147,7 +147,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         lock0.release();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getTxConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getTxConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -156,7 +156,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(10l, SerializationHelper.bytesToLong(key.getData()));
         assertEquals("Test", SerializationHelper.bytesToObject(value.getData()));
 
-        db1 = factoryJE.getTxConnection(0l).openDatabase("test_1",
+        db1 = factoryJE.getTxConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Cursor cursor1 = db1.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key1 = new DatabaseEntry();
@@ -178,9 +178,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
-        Database db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        Database db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
 
         sm.getTransactionManager().begin();
@@ -195,7 +195,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().commit();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -204,7 +204,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(10l, SerializationHelper.bytesToLong(key.getData()));
         assertEquals("Test", SerializationHelper.bytesToObject(value.getData()));
 
-        db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Cursor cursor1 = db1.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key1 = new DatabaseEntry();
@@ -216,8 +216,8 @@ public abstract class TestJEConnectionFactory extends TestCase {
         cursor1.close();
         sm.getTransactionManager().commit();
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
         ctx.close();
     }
 
@@ -228,12 +228,12 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
-        Database db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        Database db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -241,14 +241,14 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().rollback();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
         DatabaseEntry value = new DatabaseEntry();
         assertEquals(OperationStatus.NOTFOUND, cursor.getNext(key, value, LockMode.DEFAULT));
 
-        db1 = factoryJE.getConnection(0l).openDatabase("test_1",
+        db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Cursor cursor1 = db1.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key1 = new DatabaseEntry();
@@ -258,8 +258,8 @@ public abstract class TestJEConnectionFactory extends TestCase {
         cursor1.close();
         sm.getTransactionManager().commit();
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
         ctx.close();
     }
 
@@ -269,7 +269,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
@@ -277,7 +277,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         {
             sm.getTransactionManager().begin();
-            Database db1 = factoryJE.getConnection(0l).openDatabase("test",
+            Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -288,7 +288,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().commit();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -305,8 +305,8 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         sm.getTransactionManager().commit();
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
         ctx.close();
     }
 
@@ -316,7 +316,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
@@ -324,7 +324,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         {
             sm.getTransactionManager().begin();
-            Database db1 = factoryJE.getConnection(0l).openDatabase("test",
+            Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -335,7 +335,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().commit();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -348,8 +348,8 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         sm.getTransactionManager().commit();
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
         ctx.close();
     }
 
@@ -359,7 +359,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         sm.getTransactionManager().begin();
-        Database db = factoryJE.getConnection(0l).openDatabase("test",
+        Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
@@ -367,7 +367,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         {
             sm.getTransactionManager().begin();
-            Database db1 = factoryJE.getConnection(0l).openDatabase("test",
+            Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
@@ -378,7 +378,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         sm.getTransactionManager().rollback();
 
         sm.getTransactionManager().begin();
-        db = factoryJE.getConnection(0l).openDatabase("test", new DatabaseConfig()
+        db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
         DatabaseEntry key = new DatabaseEntry();
@@ -391,8 +391,8 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         sm.getTransactionManager().commit();
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
         ctx.close();
     }
 
@@ -408,11 +408,11 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertTrue(factoryJE.getEnvironmentConfig().getAllowCreate());
         assertEquals(factoryJE.getTransactionConfig().getDurability(), Durability.COMMIT_SYNC);
 
-        factoryJE.getConnection(1l);
-        factoryJE2.getConnection(0l);
+        factoryJE.getConnection(1);
+        factoryJE2.getConnection(0);
 
         try {
-            factoryJE.getConnection(0l);
+            factoryJE.getConnection(0);
             fail("Extected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
 
@@ -423,10 +423,10 @@ public abstract class TestJEConnectionFactory extends TestCase {
         factoryJE.setTransactionConfig(new TransactionConfig().setDurability(Durability.READ_ONLY_TXN));
         assertEquals(factoryJE.getTransactionConfig().getDurability(), Durability.READ_ONLY_TXN);
 
-        factoryJE.closeConnection(0l);
-        factoryJE2.closeConnection(0l);
-        factoryJE.closeConnection(1l);
-        factoryJE2.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE2.closeConnection(0);
+        factoryJE.closeConnection(1);
+        factoryJE2.closeConnection(1);
         ctx.close();
     }
 
@@ -436,13 +436,13 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
         factoryJE.destroy();
         try {
-            factoryJE.getConnection(0l);
+            factoryJE.getConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
         sm.getTransactionManager().begin();
         try {
-            factoryJE.getTxConnection(0l);
+            factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
@@ -456,7 +456,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         try {
-            factoryJE.getTxConnection(0l);
+            factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }

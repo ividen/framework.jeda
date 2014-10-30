@@ -42,7 +42,7 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
         }
 
         MockClusterServiceImpl.getInstance().generateCurrentNodeLost();
-        factoryJE.closeConnection(0l);
+        factoryJE.closeConnection(0);
 
         queue = new PersistentQueue(systemManager, 1000, (IQueuePersistenceController) ctx.getBean("bpqController"));
 
@@ -67,8 +67,8 @@ public abstract class TestBerkeleyPersistentQueue extends TestCase {
             throw e;
         }
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(01l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(01);
         ctx.destroy();
 
     }

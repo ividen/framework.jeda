@@ -231,7 +231,7 @@ public class BerkeleyBlobContextController implements IContextController<String,
     }
 
     private Database getDatabase() {
-        long nodeId = getNodeId();
+        int nodeId = (int) getNodeId();
         return connectionFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
     }
 

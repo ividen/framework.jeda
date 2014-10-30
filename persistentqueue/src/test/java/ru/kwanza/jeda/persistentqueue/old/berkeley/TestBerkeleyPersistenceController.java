@@ -103,8 +103,8 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         systemManager.getTransactionManager().commit();
         assertEquals(0, load7.size());
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
 
         systemManager.getTransactionManager().begin();
         Collection<EventWithKey> load8 = controller.load(1);
@@ -120,8 +120,8 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         systemManager.getTransactionManager().commit();
         assertEquals(0, load7.size());
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
     }
 
     protected abstract String getContextName();
@@ -143,8 +143,8 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
             systemManager.getTransactionManager().rollback();
         }
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
     }
 
     public void testFailPersist_1() throws ResourceException, SystemException, RollbackException {
@@ -152,7 +152,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
-        factoryJE2.getConnection(0l);
+        factoryJE2.getConnection(0);
         systemManager.getTransactionManager().begin();
         ArrayList<EventWithKey> list0 = new ArrayList<EventWithKey>();
         for (int i = 0; i < 1000; i++) {
@@ -166,10 +166,10 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
             systemManager.getTransactionManager().rollback();
         }
 
-        factoryJE.closeConnection(0l);
-        factoryJE2.closeConnection(0l);
-        factoryJE.closeConnection(1l);
-        factoryJE2.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE2.closeConnection(0);
+        factoryJE.closeConnection(1);
+        factoryJE2.closeConnection(1);
     }
 
     public void testFailLoad() throws ResourceException, SystemException, RollbackException {
@@ -177,7 +177,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
-        Database database = factoryJE.getConnection(0l)
+        Database database = factoryJE.getConnection(0)
                 .openDatabase("test_db", new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         database.put(null, new DatabaseEntry(SerializationHelper.longToBytes(11111)),
                 new DatabaseEntry(SerializationHelper.longToBytes(11111)));
@@ -192,15 +192,15 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
             systemManager.getTransactionManager().rollback();
         }
 
-        factoryJE.closeConnection(0l);
-        factoryJE.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE.closeConnection(1);
     }
 
     public void testFailLoad_1() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        factoryJE2.getConnection(0l);
+        factoryJE2.getConnection(0);
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
@@ -211,17 +211,17 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         } finally {
             systemManager.getTransactionManager().rollback();
         }
-        factoryJE.closeConnection(0l);
-        factoryJE2.closeConnection(0l);
-        factoryJE.closeConnection(1l);
-        factoryJE2.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE2.closeConnection(0);
+        factoryJE.closeConnection(1);
+        factoryJE2.closeConnection(1);
     }
 
     public void testFailDelete() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        factoryJE2.getConnection(0l);
+        factoryJE2.getConnection(0);
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
@@ -232,17 +232,17 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         } finally {
             systemManager.getTransactionManager().rollback();
         }
-        factoryJE.closeConnection(0l);
-        factoryJE2.closeConnection(0l);
-        factoryJE.closeConnection(1l);
-        factoryJE2.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE2.closeConnection(0);
+        factoryJE.closeConnection(1);
+        factoryJE2.closeConnection(1);
     }
 
     public void testFailTransfer() throws ResourceException, SystemException, RollbackException {
         IQueuePersistenceController controller = (IQueuePersistenceController) ctx.getBean("bpqController");
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        factoryJE2.getConnection(0l);
+        factoryJE2.getConnection(0);
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         systemManager.getTransactionManager().begin();
 
@@ -253,10 +253,10 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         } finally {
             systemManager.getTransactionManager().rollback();
         }
-        factoryJE.closeConnection(0l);
-        factoryJE2.closeConnection(0l);
-        factoryJE.closeConnection(1l);
-        factoryJE2.closeConnection(1l);
+        factoryJE.closeConnection(0);
+        factoryJE2.closeConnection(0);
+        factoryJE.closeConnection(1);
+        factoryJE2.closeConnection(1);
     }
 
     public void testJEConnectionFail() {
@@ -264,7 +264,7 @@ public abstract class TestBerkeleyPersistenceController extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager systemManager = ctx.getBean(IJedaManager.class);
         try {
-            factoryJE.getTxConnection(0l);
+            factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }

@@ -16,5 +16,5 @@ public interface ITimerPersistentController {
 
     void persist(Collection<TimerItem> events);
 
-    Collection<TimerItem> transfer(long count, long oldNodeId);
+    Collection<TimerItem> transfer(long count, int oldNodeId);
 }

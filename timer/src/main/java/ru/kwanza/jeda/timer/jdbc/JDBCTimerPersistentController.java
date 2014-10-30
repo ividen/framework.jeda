@@ -163,7 +163,7 @@ public class JDBCTimerPersistentController implements ITimerPersistentController
 
     public long getSize() {
         checkLock();
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         try {
             PreparedStatement preparedStatement =
                     dbTool.getDataSource().getConnection().prepareStatement(getCountSQL());
@@ -188,7 +188,7 @@ public class JDBCTimerPersistentController implements ITimerPersistentController
         }
     }
 
-    public Collection<TimerItem> transfer(long count, long oldNodeId) {
+    public Collection<TimerItem> transfer(long count, int oldNodeId) {
         checkLock();
         List<TimerItem> result;
         lock.lock();

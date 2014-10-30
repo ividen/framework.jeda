@@ -36,7 +36,7 @@ public class BerkeleyQueuePersistenceController implements IQueuePersistenceCont
         this.jeFactory = jeFactory;
     }
 
-    public void delete(Collection<EventWithKey> events, long nodeId) {
+    public void delete(Collection<EventWithKey> events, int nodeId) {
         Database database = null;
         try {
             database = getDatabase(nodeId);
@@ -49,11 +49,27 @@ public class BerkeleyQueuePersistenceController implements IQueuePersistenceCont
         }
     }
 
-    private Database getDatabase(long nodeId) {
-        return jeFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
+    public void delete(Collection<EventWithKey> result, long nodeId) {
+
     }
 
     public Collection<EventWithKey> load(long nodeId) {
+        return null;
+    }
+
+    public void persist(Collection<EventWithKey> events, long nodeId) {
+
+    }
+
+    public Collection<EventWithKey> transfer(int count, long currentNodeId, long newNodeId) {
+        return null;
+    }
+
+    private Database getDatabase(int nodeId) {
+        return jeFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
+    }
+
+    public Collection<EventWithKey> load(int nodeId) {
         final Collection<EventWithKey> resultCollection = new ArrayList<EventWithKey>();
         Cursor cursor = null;
         Database database = null;
@@ -94,7 +110,7 @@ public class BerkeleyQueuePersistenceController implements IQueuePersistenceCont
         }
     }
 
-    public void persist(Collection<EventWithKey> events, long nodeId) {
+    public void persist(Collection<EventWithKey> events, int nodeId) {
         Database database = null;
         try {
             database = getDatabase(nodeId);
@@ -110,7 +126,7 @@ public class BerkeleyQueuePersistenceController implements IQueuePersistenceCont
         }
     }
 
-    public Collection<EventWithKey> transfer(int count, long currentNodeId, long newNodeId) {
+    public Collection<EventWithKey> transfer(int count, int currentNodeId, int newNodeId) {
         final Collection<EventWithKey> resultCollection = new ArrayList<EventWithKey>();
         Database refusedDatabase = null;
         Database newDatabase = null;

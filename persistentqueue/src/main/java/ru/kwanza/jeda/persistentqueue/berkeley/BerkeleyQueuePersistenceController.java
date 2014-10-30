@@ -73,7 +73,7 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
             while (cursor.getNext(keyEntry, valueEntry, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
                 final Long key = SerializationHelper.bytesToLong(keyEntry.getData());
                 final E value = (E) SerializationHelper.bytesToObject(valueEntry.getData());
-                value.setPeristId(key);
+                value.setPersistId(key);
                 resultCollection.add(value);
                 if (i++ > count) {
                     break;

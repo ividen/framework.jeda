@@ -23,8 +23,7 @@ public abstract class TestJDBCController extends TestController {
         return getController().load(size, fromMillis);
     }
 
-    @Override
-    protected Collection<TimerItem> transfer(long count, long oldNodeId) throws Exception {
+    protected Collection<TimerItem> transfer(long count, int oldNodeId) throws Exception {
         return getController().transfer(count, oldNodeId);
     }
 

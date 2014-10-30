@@ -1,0 +1,61 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <property dbms="oracle" name="long.type" value="NUMBER(19,0)"/>
+    <property dbms="mysql" name="long.type" value="bigint"/>
+    <property dbms="mssql" name="long.type" value="bigint"/>
+    <property dbms="postgresql" name="long.type" value="bigint"/>
+    <property dbms="h2" name="long.type" value="bigint"/>
+
+    <property dbms="mssql" name="blob.type" value="image"/>
+    <property dbms="mysql" name="blob.type" value="BLOB"/>
+    <property dbms="oracle" name="blob.type" value="BLOB"/>
+    <property dbms="postgresql" name="blob.type" value="bytea"/>
+    <property dbms="h2" name="blob.type" value="BLOB"/>
+
+    <changeSet author="aguzanov" id="1">
+        <createTable tableName="jeda_jdbc_event_queue">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id"  type="${long.type}"/>
+            <column name="data" type="${blob.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="2">
+        <createTable tableName="jeda_jdbc_event_nqueue">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id"  type="${long.type}"/>
+            <column name="data" defaultValue="0" type="${blob.type}"/>
+            <column name="queue_name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="3">
+        <createTable tableName="jeda_jdbc_event_pqueue">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id"  type="${long.type}"/>
+            <column name="priority"  type="${long.type}"/>
+            <column name="data" type="${blob.type}"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="aguzanov" id="4">
+        <createTable tableName="jeda_jdbc_event_pnqueue">
+            <column name="id" type="${long.type}">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="node_id"  type="${long.type}"/>
+            <column name="priority"  type="${long.type}"/>
+            <column name="queue_name" type="VARCHAR(255)"/>
+            <column name="data" type="${blob.type}"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

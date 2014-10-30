@@ -26,7 +26,7 @@ public abstract class TestController extends TestCase {
 
     protected abstract Collection<TimerItem> load(long size, long fromMillis) throws Exception;
 
-    protected abstract Collection<TimerItem> transfer(long count, long oldNodeId) throws Exception;
+    protected abstract Collection<TimerItem> transfer(long count, int oldNodeId) throws Exception;
 
     protected abstract long size() throws Exception;
 

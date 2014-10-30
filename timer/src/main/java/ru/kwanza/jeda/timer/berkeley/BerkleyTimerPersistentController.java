@@ -71,12 +71,12 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
     public BerkleyTimerPersistentController(String databaseName, JEConnectionFactory jeFactory) {
         this.jeFactory = jeFactory;
         this.databaseName = databaseName;
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         long maxID = definedMaxId(nodeId);
         counter = new AtomicLong(maxID);
     }
 
-    private long definedMaxId(long nodeId) {
+    private long definedMaxId(int nodeId) {
         Database database = getDatabase(nodeId);
         Cursor cursor = null;
         try {
@@ -100,7 +100,7 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
 
     public void delete(Collection<TimerItem> result) {
         Database database;
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         try {
             database = getDatabase(nodeId);
             for (TimerItem event : result) {
@@ -114,7 +114,7 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
 
     public Collection<TimerItem> load(long size, long fromMillis) {
         final ArrayList<TimerItem> resultCollection = new ArrayList<TimerItem>();
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         Database database = getDatabase(nodeId);
         loadAndDelete(size, resultCollection, database, fromMillis, false);
         return resultCollection;
@@ -160,7 +160,7 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
 
     public long getSize() {
         Database database;
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         try {
             database = getDatabase(nodeId);
             return database.count();
@@ -171,7 +171,7 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
 
     public void persist(Collection<TimerItem> events) {
         Database database;
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         try {
             database = getDatabase(nodeId);
             for (TimerItem item : events) {
@@ -186,7 +186,7 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
         }
     }
 
-    public Collection<TimerItem> transfer(long count, long oldNodeId) {
+    public Collection<TimerItem> transfer(long count, int oldNodeId) {
         try {
             final ArrayList<TimerItem> result = new ArrayList<TimerItem>();
             Database database = getTxDatabase(oldNodeId);
@@ -200,12 +200,12 @@ public class BerkleyTimerPersistentController implements ITimerPersistentControl
         }
     }
 
-    private Database getDatabase(long nodeId) {
+    private Database getDatabase(int nodeId) {
         return jeFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
     }
 
 
-    private Database getTxDatabase(long nodeId) {
+    private Database getTxDatabase(int nodeId) {
         return jeFactory.getTxConnection(nodeId).openDatabase(databaseName, databaseConfig);
     }
 

@@ -41,7 +41,8 @@ class BerkeleyQueueFactory implements SmartFactoryBean<PersistentQueue> {
     }
 
     public PersistentQueue getObject() throws Exception {
-        return new PersistentQueue(manager, maxSize, new BerkeleyQueuePersistenceController(dbName, connectionFactory));
+//        return new PersistentQueue(manager, maxSize, new BerkeleyQueuePersistenceController(dbName, connectionFactory));
+        return null;
     }
 
     public Class<?> getObjectType() {

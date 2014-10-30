@@ -102,7 +102,7 @@ public class BerkeleyDictionaryDbInteractor implements DictionaryDbInteractor {
     }
 
     private Database getDatabase(String databaseName) {
-        long nodeId = ClusterService.getNodeId();
+        int nodeId = (int) ClusterService.getNodeId();
         return jeFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
     }
 

@@ -23,7 +23,6 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
             return o.getPersistId();
         }
     };
-    private FieldHelper.Field<E, R> buildField;
 
     private final IEntityManager em;
     private final Class<R> ormClass;
@@ -51,16 +50,11 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
 
     private void initFields() {
         this.eventField = FieldHelper.construct(ormClass, "event");
-        this.buildField = new FieldHelper.Field<E, R>() {
-            public R value(E event) {
-                return builder.build(event);
-            }
-        };
     }
 
     public String getQueueName() {
         return JDBCQueuePersistenceController.class.getSimpleName() + "."
-                + ormClass.getName() + (determinator == null ? "" : determinator.toString());
+                + ormClass.getName() + (determinator == null ? "" : ":" + determinator.toString());
     }
 
     public int getTotalCount(Node node) {
@@ -83,9 +77,13 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
         }
     }
 
-    public void persist(Collection<E> events, Node node) {
+    public void persist(Collection<E> events, final Node node) {
         try {
-            em.create(ormClass, FieldHelper.getFieldCollection(events, buildField));
+            em.create(ormClass, FieldHelper.getFieldCollection(events, new FieldHelper.Field<E, R>() {
+                public R value(E event) {
+                    return builder.build(event, node.getId());
+                }
+            }));
         } catch (UpdateException e) {
             e.printStackTrace();
         }
