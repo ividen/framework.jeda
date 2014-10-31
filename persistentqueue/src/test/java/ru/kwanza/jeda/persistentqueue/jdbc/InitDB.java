@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.persistentqueue.jdbc.queue;
+package ru.kwanza.jeda.persistentqueue.jdbc;
 
 import org.dbunit.IDatabaseTester;
 import org.dbunit.dataset.IDataSet;

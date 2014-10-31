@@ -49,10 +49,11 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
     }
 
     private void initFields() {
-        this.eventField = FieldHelper.construct(ormClass, "event");
+        this.eventField = FieldHelper.construct(ormClass, "eventData");
     }
 
     public String getQueueName() {
+
         return JDBCQueuePersistenceController.class.getSimpleName() + "."
                 + ormClass.getName() + (determinator == null ? "" : ":" + determinator.toString());
     }

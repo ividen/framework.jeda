@@ -15,8 +15,6 @@
     <jeda_jdbc_event_queue id="18" node_id="2"/>
     <jeda_jdbc_event_queue id="19" node_id="2"/>
     <jeda_jdbc_event_queue id="20" node_id="2"/>
-
-    <jeda_jdbc_event_nqueue/>
-    <jeda_jdbc_event_pqueue/>
-    <jeda_jdbc_event_pnqueue/>
+    <jeda_jdbc_event_queue id="1" node_id="1"/>
+    <jeda_jdbc_event_queue id="2" node_id="2"/>
 </dataset>

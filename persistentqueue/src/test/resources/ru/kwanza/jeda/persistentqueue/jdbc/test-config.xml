@@ -8,17 +8,6 @@
     <import resource="classpath:dbtool-orm-config.xml"/>
     <import resource="classpath:jeda-persistentqueue-default-jdbc-queue-config.xml"/>
 
-
-    <bean id="defaultQueueController" class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController"
-          scope="singleton" >
-       <constructor-arg index="0" ref="dbtool.IEntityManager"/>
-        <constructor-arg index="1" value="ru.kwanza.jeda.persistentqueue.jdbc.queue.EventQueue"/>
-        <constructor-arg index="2" value="ru.kwanza.jeda.persistentqueue.jdbc.queue.EventQueue.Builder"/>
-        <constructor-arg index="3" value="null"/>
-        <constructor-arg index="4" value="id"/>
-        <constructor-arg index="5" value="nodeId"/>
-    </bean>
-
     <bean id="propertyPlaceholderConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
@@ -33,5 +22,36 @@
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.persistentqueue.jdbc.InitDB" >
+        <constructor-arg index="0" value="init_data_set.xml"/>
+    </bean>
+
+    <bean id="defaultQueueController" class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController"
+          scope="singleton">
+        <constructor-arg index="0" ref="dbtool.IEntityManager"/>
+        <constructor-arg index="1" value="ru.kwanza.jeda.persistentqueue.jdbc.queue.EventQueue"/>
+        <constructor-arg index="2">
+            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.EventQueue$Builder"/>
+        </constructor-arg>
+        <constructor-arg index="3">
+            <null/>
+        </constructor-arg>
+        <constructor-arg index="4" value="id"/>
+        <constructor-arg index="5" value="nodeId"/>
+    </bean>
+
+
+    <bean id="dbTester" class="org.dbunit.JdbcDatabaseTester">
+        <constructor-arg index="0" value="${jdbc.driverClass}"/>
+        <constructor-arg index="1" value="${jdbc.connectionUrl}"/>
+        <constructor-arg index="2" value="${jdbc.username}"/>
+        <constructor-arg index="3" value="${jdbc.password}"/>
     </bean>
 </beans>
