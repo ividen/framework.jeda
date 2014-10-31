@@ -1,6 +1,8 @@
 package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 
+import junit.framework.Assert;
 import org.junit.Test;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
 import ru.kwanza.jeda.persistentqueue.DefaultPriorityPersistableEvent;
 import ru.kwanza.jeda.persistentqueue.jdbc.base.BasePriorityEventQueueWithQueueName;
@@ -36,8 +38,11 @@ public class TestQueue {
 
     @Test
     public void testEventQueue() throws Exception {
+        EventQueue.Builder builder = new EventQueue.Builder();
+        Assert.assertEquals(null, builder.condition());
+        Assert.assertEquals(null, builder.getConditionAsString());
         EventQueue<DefaultPersistableEvent> o =
-                new EventQueue.Builder().build(new DefaultPersistableEvent(10l), 1);
+                builder.build(new DefaultPersistableEvent(10l), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
@@ -61,9 +66,14 @@ public class TestQueue {
 
     @Test
     public void testEventQueueWithName() throws Exception {
+        NamedEventQueue.Builder builder = new NamedEventQueue.Builder("test_queue");
+        Assert.assertNotNull(builder.condition());
+        Assert.assertEquals(If.Type.IS_EQUAL, builder.condition().getType());
+        Assert.assertEquals("queueName", builder.condition().getPropertyName());
+        Assert.assertEquals("test_queue", builder.condition().getValue());
+        Assert.assertEquals("queueName=test_queue", builder.getConditionAsString());
         NamedEventQueue<DefaultPersistableEvent> o =
-                new NamedEventQueue.Builder("test_queue")
-                        .build(new DefaultPersistableEvent(10l), 1);
+                builder.build(new DefaultPersistableEvent(10l), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
@@ -84,8 +94,11 @@ public class TestQueue {
 
     @Test
     public void testBasePriorityEventQueue() throws Exception {
+        PriorityEventQueue.Builder builder = new PriorityEventQueue.Builder();
+        Assert.assertEquals(null, builder.condition());
+        Assert.assertEquals(null, builder.getConditionAsString());
         PriorityEventQueue<DefaultPriorityPersistableEvent> o
-                = new PriorityEventQueue.Builder().build(
+                = builder.build(
                 new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
@@ -108,9 +121,14 @@ public class TestQueue {
 
     @Test
     public void testBasePriorityEventQueueWithName() throws Exception {
+        NamedPriorityEventQueue.Builder builder = new NamedPriorityEventQueue.Builder("test_queue");
+        Assert.assertNotNull(builder.condition());
+        Assert.assertEquals(If.Type.IS_EQUAL, builder.condition().getType());
+        Assert.assertEquals("queueName", builder.condition().getPropertyName());
+        Assert.assertEquals("test_queue", builder.condition().getValue());
+        Assert.assertEquals("queueName=test_queue", builder.getConditionAsString());
         BasePriorityEventQueueWithQueueName<DefaultPriorityPersistableEvent> o
-                = new NamedPriorityEventQueue.Builder("test_queue")
-                .build(new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
+                = builder.build(new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
