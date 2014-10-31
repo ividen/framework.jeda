@@ -27,32 +27,32 @@ public class TestSpringContextForQueue extends AbstractJUnit4SpringContextTests 
     @Test
     public void testEntities() {
         Assert.assertTrue(registry.isRegisteredEntityClass(EventQueue.class));
-        Assert.assertTrue(registry.isRegisteredEntityClass(EventQueueWithQueueName.class));
+        Assert.assertTrue(registry.isRegisteredEntityClass(NamedEventQueue.class));
         Assert.assertTrue(registry.isRegisteredEntityClass(PriorityEventQueue.class));
-        Assert.assertTrue(registry.isRegisteredEntityClass(PriorityEventQueueWithQueueName.class));
+        Assert.assertTrue(registry.isRegisteredEntityClass(NamedPriorityEventQueue.class));
 
         Assert.assertEquals("jeda_jdbc_event_queue", registry.getEntityType(EventQueue.class).getTableName());
         Assert.assertEquals("jeda.persistentqueue.jdbc.EventQueue", registry.getEntityType(EventQueue.class).getName());
-        Assert.assertEquals("jeda_jdbc_event_nqueue", registry.getEntityType(EventQueueWithQueueName.class).getTableName());
-        Assert.assertEquals("jeda.persistentqueue.jdbc.EventQueueWithQueueName", registry.getEntityType(EventQueueWithQueueName.class).getName());
+        Assert.assertEquals("jeda_jdbc_event_nqueue", registry.getEntityType(NamedEventQueue.class).getTableName());
+        Assert.assertEquals("jeda.persistentqueue.jdbc.EventQueueWithQueueName", registry.getEntityType(NamedEventQueue.class).getName());
         Assert.assertEquals("jeda_jdbc_event_pqueue", registry.getEntityType(PriorityEventQueue.class).getTableName());
         Assert.assertEquals("jeda.persistentqueue.jdbc.PriorityEventQueue", registry.getEntityType(PriorityEventQueue.class).getName());
-        Assert.assertEquals("jeda_jdbc_event_pnqueue", registry.getEntityType(PriorityEventQueueWithQueueName.class).getTableName());
-        Assert.assertEquals("jeda.persistentqueue.jdbc.PriorityEventQueueWithQueueName", registry.getEntityType(PriorityEventQueueWithQueueName.class).getName());
+        Assert.assertEquals("jeda_jdbc_event_pnqueue", registry.getEntityType(NamedPriorityEventQueue.class).getTableName());
+        Assert.assertEquals("jeda.persistentqueue.jdbc.PriorityEventQueueWithQueueName", registry.getEntityType(NamedPriorityEventQueue.class).getName());
     }
 
     @Test
     public void testTables() throws UpdateException {
         em.create(new EventQueue.Builder().build(new DefaultPersistableEvent(1l), 1));
         Assert.assertEquals(1l,em.readByKey(EventQueue.class,1l).getId().longValue());
-        em.create(new EventQueueWithQueueName.Builder("test_queue").build(new DefaultPersistableEvent(1l), 1));
-        Assert.assertEquals(1l,em.readByKey(EventQueueWithQueueName.class,1l).getId().longValue());
+        em.create(new NamedEventQueue.Builder("test_queue").build(new DefaultPersistableEvent(1l), 1));
+        Assert.assertEquals(1l,em.readByKey(NamedEventQueue.class,1l).getId().longValue());
         em.create(new PriorityEventQueue.Builder()
                 .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
         Assert.assertEquals(1l,em.readByKey(PriorityEventQueue.class,1l).getId().longValue());
-        em.create(new PriorityEventQueueWithQueueName.Builder("test_queue")
+        em.create(new NamedPriorityEventQueue.Builder("test_queue")
                 .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
-        Assert.assertEquals(1l,em.readByKey(PriorityEventQueueWithQueueName.class,1l).getId().longValue());
+        Assert.assertEquals(1l,em.readByKey(NamedPriorityEventQueue.class,1l).getId().longValue());
 
     }
 

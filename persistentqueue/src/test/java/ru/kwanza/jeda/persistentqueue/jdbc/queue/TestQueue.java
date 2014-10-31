@@ -61,8 +61,8 @@ public class TestQueue {
 
     @Test
     public void testEventQueueWithName() throws Exception {
-        EventQueueWithQueueName<DefaultPersistableEvent> o =
-                new EventQueueWithQueueName.Builder("test_queue")
+        NamedEventQueue<DefaultPersistableEvent> o =
+                new NamedEventQueue.Builder("test_queue")
                         .build(new DefaultPersistableEvent(10l), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
@@ -74,8 +74,8 @@ public class TestQueue {
     @Test
     public void testEventQueueWithName_fail() throws Exception {
         try {
-            EventQueueWithQueueName<DefaultPersistableEvent> o =
-                    new EventQueueWithQueueName.Builder("test_queue")
+            NamedEventQueue<DefaultPersistableEvent> o =
+                    new NamedEventQueue.Builder("test_queue")
                             .build(new NonPersistantEvent(10l, System.out), 1);
             fail("Expected RuntimeException!");
         } catch (RuntimeException e) {
@@ -109,7 +109,7 @@ public class TestQueue {
     @Test
     public void testBasePriorityEventQueueWithName() throws Exception {
         BasePriorityEventQueueWithQueueName<DefaultPriorityPersistableEvent> o
-                = new PriorityEventQueueWithQueueName.Builder("test_queue")
+                = new NamedPriorityEventQueue.Builder("test_queue")
                 .build(new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
@@ -124,7 +124,7 @@ public class TestQueue {
     public void testBasePriorityEventQueueWithName_fail() throws Exception {
         try {
             BasePriorityEventQueueWithQueueName<DefaultPriorityPersistableEvent> o
-                    = new PriorityEventQueueWithQueueName.Builder("test_queue")
+                    = new NamedPriorityEventQueue.Builder("test_queue")
                     .build(new NonPersistantPriorityEvent(10l, CRITICAL, System.out), 1);
         } catch (RuntimeException e) {
         }

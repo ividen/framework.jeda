@@ -39,7 +39,7 @@ public class TestBaseQueue {
 
     @Test
     public void testBaseEventQueueWithName() throws Exception {
-        BaseEventQueueWithQueueName<DefaultPersistableEvent> o = new BaseEventQueueWithQueueName<DefaultPersistableEvent>(10l, 1,
+        BaseNamedEventQueue<DefaultPersistableEvent> o = new BaseNamedEventQueue<DefaultPersistableEvent>(10l, 1,
                 SerializationHelper.objectToBytes(new DefaultPersistableEvent(1l)), "test_queue");
 
         assertEquals(o.getId(), Long.valueOf(10l));

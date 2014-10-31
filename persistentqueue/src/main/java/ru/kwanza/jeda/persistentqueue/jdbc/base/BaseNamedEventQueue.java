@@ -7,11 +7,11 @@ import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
 /**
  * @author Alexander Guzanov
  */
-public class BaseEventQueueWithQueueName<E extends DefaultPersistableEvent> extends BaseEventQueue<E> {
+public class BaseNamedEventQueue<E extends DefaultPersistableEvent> extends BaseEventQueue<E> {
     @Field("queue_name")
     private String queueName;
 
-    public BaseEventQueueWithQueueName(Long id, Integer nodeId, byte[] eventData, String queueName) {
+    public BaseNamedEventQueue(Long id, Integer nodeId, byte[] eventData, String queueName) {
         super(id, nodeId, eventData);
         this.queueName = queueName;
     }

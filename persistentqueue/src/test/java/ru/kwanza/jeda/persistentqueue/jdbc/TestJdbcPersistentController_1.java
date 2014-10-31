@@ -22,8 +22,8 @@ import java.util.Collection;
 /**
  * @author Alexander Guzanov
  */
-@ContextConfiguration("test-config.xml")
-public class TestJdbcPersistentController extends AbstractTransactionalJUnit4SpringContextTests {
+@ContextConfiguration("test-config_1.xml")
+public class TestJdbcPersistentController_1 extends AbstractTransactionalJUnit4SpringContextTests {
     @Resource(name = "defaultQueueController")
     private IQueuePersistenceController<DefaultPersistableEvent> controller;
     private Node node1 = new Node(1);

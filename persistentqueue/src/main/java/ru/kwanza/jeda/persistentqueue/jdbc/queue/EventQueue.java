@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
 import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordBuilder;
 import ru.kwanza.jeda.persistentqueue.jdbc.base.BaseEventQueue;
@@ -23,6 +24,14 @@ public class EventQueue<E extends DefaultPersistableEvent> extends BaseEventQueu
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        public If condition() {
+            return null;
+        }
+
+        public String getConditionAsString() {
+            return null;
         }
     }
 

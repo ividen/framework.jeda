@@ -2,6 +2,7 @@ package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
+import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.api.IPriorityEvent;
 import ru.kwanza.jeda.persistentqueue.DefaultPriorityPersistableEvent;
 import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordBuilder;
@@ -25,6 +26,14 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        public If condition() {
+            return null;
+        }
+
+        public String getConditionAsString() {
+            return null;
         }
     }
 }

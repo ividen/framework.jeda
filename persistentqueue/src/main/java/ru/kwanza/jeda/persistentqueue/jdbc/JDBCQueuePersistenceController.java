@@ -34,16 +34,15 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
     public JDBCQueuePersistenceController(IEntityManager em,
                                           Class<R> ormClass,
                                           IEventRecordBuilder<R, E> builder,
-                                          If determinator,
                                           String idField,
                                           String nodeIdField) {
         this.ormClass = ormClass;
         this.builder = builder;
-        this.determinator = determinator;
         this.em = em;
         initFields();
 
         IQueryBuilder queryBuilder = em.queryBuilder(ormClass);
+        this.determinator = builder.condition();
         If condition = determinator == null ? If.isEqual(nodeIdField) : If.and(If.isEqual(nodeIdField), determinator);
         loadQuery = queryBuilder.where(condition).orderBy(idField).create();
     }
@@ -55,7 +54,8 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
     public String getQueueName() {
 
         return JDBCQueuePersistenceController.class.getSimpleName() + "."
-                + ormClass.getName() + (determinator == null ? "" : ":" + determinator.toString());
+                + ormClass.getName() + (builder.getConditionAsString() == null ?
+                "" : ":" + builder.getConditionAsString());
     }
 
     public int getTotalCount(Node node) {

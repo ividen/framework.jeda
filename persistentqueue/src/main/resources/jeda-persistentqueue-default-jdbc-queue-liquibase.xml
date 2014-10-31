@@ -30,7 +30,7 @@
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="node_id"  type="${long.type}"/>
-            <column name="data" defaultValue="0" type="${blob.type}"/>
+            <column name="data" type="${blob.type}"/>
             <column name="queue_name" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
