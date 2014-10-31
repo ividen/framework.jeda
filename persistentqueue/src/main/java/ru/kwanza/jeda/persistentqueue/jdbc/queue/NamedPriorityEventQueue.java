@@ -3,7 +3,7 @@ package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.persistentqueue.DefaultPriorityPersistableEvent;
-import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordBuilder;
+import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordHelper;
 import ru.kwanza.jeda.persistentqueue.jdbc.base.BasePriorityEventQueueWithQueueName;
 import ru.kwanza.toolbox.SerializationHelper;
 
@@ -16,14 +16,18 @@ public class NamedPriorityEventQueue<E extends DefaultPriorityPersistableEvent> 
         super(id, nodeId, eventData, priority, queueName);
     }
 
-    public static class Builder implements IEventRecordBuilder<NamedPriorityEventQueue, DefaultPriorityPersistableEvent> {
+    public static class Helper implements IEventRecordHelper<NamedPriorityEventQueue, DefaultPriorityPersistableEvent> {
         private String queueName;
 
-        public Builder(String queueName) {
+        public Helper(String queueName) {
             this.queueName = queueName;
         }
 
-        public NamedPriorityEventQueue build(DefaultPriorityPersistableEvent event, int nodeId) {
+        public Class<NamedPriorityEventQueue> getORMClass() {
+            return NamedPriorityEventQueue.class;
+        }
+
+        public NamedPriorityEventQueue buildRecord(DefaultPriorityPersistableEvent event, int nodeId) {
             try {
                 return new NamedPriorityEventQueue(event.getPersistId(), nodeId,
                         SerializationHelper.objectToBytes(event), event.getPriority().getCode(), queueName);
@@ -32,7 +36,7 @@ public class NamedPriorityEventQueue<E extends DefaultPriorityPersistableEvent> 
             }
         }
 
-        public If condition() {
+        public If getCondition() {
             return If.isEqual("queueName",If.valueOf(queueName));
         }
 

@@ -38,11 +38,11 @@ public class TestQueue {
 
     @Test
     public void testEventQueue() throws Exception {
-        EventQueue.Builder builder = new EventQueue.Builder();
-        Assert.assertEquals(null, builder.condition());
+        EventQueue.Helper builder = new EventQueue.Helper();
+        Assert.assertEquals(null, builder.getCondition());
         Assert.assertEquals(null, builder.getConditionAsString());
         EventQueue<DefaultPersistableEvent> o =
-                builder.build(new DefaultPersistableEvent(10l), 1);
+                builder.buildRecord(new DefaultPersistableEvent(10l), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
@@ -57,7 +57,7 @@ public class TestQueue {
     public void testEventQueue_fail() throws Exception {
         try {
             EventQueue<DefaultPersistableEvent> o =
-                    new EventQueue.Builder().build(new NonPersistantEvent(10l, System.out), 1);
+                    new EventQueue.Helper().buildRecord(new NonPersistantEvent(10l, System.out), 1);
             fail("Expected RuntimeException!");
         } catch (RuntimeException e) {
 
@@ -66,14 +66,14 @@ public class TestQueue {
 
     @Test
     public void testEventQueueWithName() throws Exception {
-        NamedEventQueue.Builder builder = new NamedEventQueue.Builder("test_queue");
-        Assert.assertNotNull(builder.condition());
-        Assert.assertEquals(If.Type.IS_EQUAL, builder.condition().getType());
-        Assert.assertEquals("queueName", builder.condition().getPropertyName());
-        Assert.assertEquals("test_queue", builder.condition().getValue());
+        NamedEventQueue.Helper builder = new NamedEventQueue.Helper("test_queue");
+        Assert.assertNotNull(builder.getCondition());
+        Assert.assertEquals(If.Type.IS_EQUAL, builder.getCondition().getType());
+        Assert.assertEquals("queueName", builder.getCondition().getPropertyName());
+        Assert.assertEquals("test_queue", builder.getCondition().getValue());
         Assert.assertEquals("queueName=test_queue", builder.getConditionAsString());
         NamedEventQueue<DefaultPersistableEvent> o =
-                builder.build(new DefaultPersistableEvent(10l), 1);
+                builder.buildRecord(new DefaultPersistableEvent(10l), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
@@ -85,8 +85,8 @@ public class TestQueue {
     public void testEventQueueWithName_fail() throws Exception {
         try {
             NamedEventQueue<DefaultPersistableEvent> o =
-                    new NamedEventQueue.Builder("test_queue")
-                            .build(new NonPersistantEvent(10l, System.out), 1);
+                    new NamedEventQueue.Helper("test_queue")
+                            .buildRecord(new NonPersistantEvent(10l, System.out), 1);
             fail("Expected RuntimeException!");
         } catch (RuntimeException e) {
         }
@@ -94,11 +94,11 @@ public class TestQueue {
 
     @Test
     public void testBasePriorityEventQueue() throws Exception {
-        PriorityEventQueue.Builder builder = new PriorityEventQueue.Builder();
-        Assert.assertEquals(null, builder.condition());
+        PriorityEventQueue.Helper builder = new PriorityEventQueue.Helper();
+        Assert.assertEquals(null, builder.getCondition());
         Assert.assertEquals(null, builder.getConditionAsString());
         PriorityEventQueue<DefaultPriorityPersistableEvent> o
-                = builder.build(
+                = builder.buildRecord(
                 new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
@@ -112,7 +112,7 @@ public class TestQueue {
     public void testBasePriorityEventQueue_fail() throws Exception {
         try {
             PriorityEventQueue<DefaultPriorityPersistableEvent> o
-                    = new PriorityEventQueue.Builder().build(
+                    = new PriorityEventQueue.Helper().buildRecord(
                     new NonPersistantPriorityEvent(10l, CRITICAL, System.out), 1);
 
         } catch (RuntimeException e) {
@@ -121,14 +121,14 @@ public class TestQueue {
 
     @Test
     public void testBasePriorityEventQueueWithName() throws Exception {
-        NamedPriorityEventQueue.Builder builder = new NamedPriorityEventQueue.Builder("test_queue");
-        Assert.assertNotNull(builder.condition());
-        Assert.assertEquals(If.Type.IS_EQUAL, builder.condition().getType());
-        Assert.assertEquals("queueName", builder.condition().getPropertyName());
-        Assert.assertEquals("test_queue", builder.condition().getValue());
+        NamedPriorityEventQueue.Helper builder = new NamedPriorityEventQueue.Helper("test_queue");
+        Assert.assertNotNull(builder.getCondition());
+        Assert.assertEquals(If.Type.IS_EQUAL, builder.getCondition().getType());
+        Assert.assertEquals("queueName", builder.getCondition().getPropertyName());
+        Assert.assertEquals("test_queue", builder.getCondition().getValue());
         Assert.assertEquals("queueName=test_queue", builder.getConditionAsString());
         BasePriorityEventQueueWithQueueName<DefaultPriorityPersistableEvent> o
-                = builder.build(new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
+                = builder.buildRecord(new DefaultPriorityPersistableEvent(10l, CRITICAL), 1);
 
         assertEquals(o.getId(), Long.valueOf(10l));
         assertEquals(o.getNodeId(), 1);
@@ -142,8 +142,8 @@ public class TestQueue {
     public void testBasePriorityEventQueueWithName_fail() throws Exception {
         try {
             BasePriorityEventQueueWithQueueName<DefaultPriorityPersistableEvent> o
-                    = new NamedPriorityEventQueue.Builder("test_queue")
-                    .build(new NonPersistantPriorityEvent(10l, CRITICAL, System.out), 1);
+                    = new NamedPriorityEventQueue.Helper("test_queue")
+                    .buildRecord(new NonPersistantPriorityEvent(10l, CRITICAL, System.out), 1);
         } catch (RuntimeException e) {
         }
     }

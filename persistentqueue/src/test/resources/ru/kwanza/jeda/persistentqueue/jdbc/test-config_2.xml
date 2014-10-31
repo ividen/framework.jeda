@@ -29,34 +29,32 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean class="ru.kwanza.jeda.persistentqueue.jdbc.InitDB" >
+    <bean class="ru.kwanza.jeda.persistentqueue.jdbc.InitDB">
         <constructor-arg index="0" value="init_data_set_2.xml"/>
     </bean>
 
     <bean id="defaultQueueController1" class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController"
           scope="singleton">
         <constructor-arg index="0" ref="dbtool.IEntityManager"/>
-        <constructor-arg index="1" value="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue"/>
-        <constructor-arg index="2">
-            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue$Builder">
+        <constructor-arg index="1">
+            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue$Helper">
                 <constructor-arg index="0" value="queue1"/>
             </bean>
         </constructor-arg>
-        <constructor-arg index="3" value="id"/>
-        <constructor-arg index="4" value="nodeId"/>
+        <constructor-arg index="2" value="id"/>
+        <constructor-arg index="3" value="nodeId"/>
     </bean>
 
     <bean id="defaultQueueController2" class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController"
           scope="singleton">
         <constructor-arg index="0" ref="dbtool.IEntityManager"/>
-        <constructor-arg index="1" value="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue"/>
-        <constructor-arg index="2">
-            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue$Builder">
+        <constructor-arg index="1">
+            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.NamedEventQueue$Helper">
                 <constructor-arg index="0" value="queue2"/>
             </bean>
         </constructor-arg>
-        <constructor-arg index="3" value="id"/>
-        <constructor-arg index="4" value="nodeId"/>
+        <constructor-arg index="2" value="id"/>
+        <constructor-arg index="3" value="nodeId"/>
     </bean>
 
 

@@ -25,36 +25,33 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
     };
 
     private final IEntityManager em;
-    private final Class<R> ormClass;
-    private final IEventRecordBuilder<R, E> builder;
+    private final IEventRecordHelper<R, E> builder;
     private final If determinator;
     private final IQuery loadQuery;
 
 
     public JDBCQueuePersistenceController(IEntityManager em,
-                                          Class<R> ormClass,
-                                          IEventRecordBuilder<R, E> builder,
+                                          IEventRecordHelper<R, E> builder,
                                           String idField,
                                           String nodeIdField) {
-        this.ormClass = ormClass;
         this.builder = builder;
         this.em = em;
         initFields();
 
-        IQueryBuilder queryBuilder = em.queryBuilder(ormClass);
-        this.determinator = builder.condition();
+        IQueryBuilder queryBuilder = em.queryBuilder(builder.getORMClass());
+        this.determinator = builder.getCondition();
         If condition = determinator == null ? If.isEqual(nodeIdField) : If.and(If.isEqual(nodeIdField), determinator);
         loadQuery = queryBuilder.where(condition).orderBy(idField).create();
     }
 
     private void initFields() {
-        this.eventField = FieldHelper.construct(ormClass, "eventData");
+        this.eventField = FieldHelper.construct(builder.getORMClass(), "eventData");
     }
 
     public String getQueueName() {
 
         return JDBCQueuePersistenceController.class.getSimpleName() + "."
-                + ormClass.getName() + (builder.getConditionAsString() == null ?
+                + builder.getORMClass().getName() + (builder.getConditionAsString() == null ?
                 "" : ":" + builder.getConditionAsString());
     }
 
@@ -72,7 +69,7 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
 
     public void delete(Collection<E> result, Node node) {
         try {
-            em.deleteByKeys(ormClass, FieldHelper.getFieldCollection(result, persistIdField));
+            em.deleteByKeys(builder.getORMClass(), FieldHelper.getFieldCollection(result, persistIdField));
         } catch (UpdateException e) {
             throw new RuntimeException(e);
         }
@@ -80,9 +77,9 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
 
     public void persist(Collection<E> events, final Node node) {
         try {
-            em.create(ormClass, FieldHelper.getFieldCollection(events, new FieldHelper.Field<E, R>() {
+            em.create(builder.getORMClass(), FieldHelper.getFieldCollection(events, new FieldHelper.Field<E, R>() {
                 public R value(E event) {
-                    return builder.build(event, node.getId());
+                    return builder.buildRecord(event, node.getId());
                 }
             }));
         } catch (UpdateException e) {
@@ -97,7 +94,7 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
             e.setNodeId(currentNode.getId());
         }
         try {
-            em.update(ormClass, list);
+            em.update(builder.getORMClass(), list);
         } catch (UpdateException e) {
             throw new RuntimeException(e);
         }

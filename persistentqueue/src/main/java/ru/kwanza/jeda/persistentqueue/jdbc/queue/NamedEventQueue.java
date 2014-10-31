@@ -3,7 +3,7 @@ package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
-import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordBuilder;
+import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordHelper;
 import ru.kwanza.jeda.persistentqueue.jdbc.base.BaseNamedEventQueue;
 import ru.kwanza.toolbox.SerializationHelper;
 
@@ -18,14 +18,18 @@ public class NamedEventQueue<E extends DefaultPersistableEvent> extends BaseName
         super(id, nodeId, eventData, queueName);
     }
 
-    public static class Builder implements IEventRecordBuilder<NamedEventQueue, DefaultPersistableEvent> {
+    public static class Helper implements IEventRecordHelper<NamedEventQueue, DefaultPersistableEvent> {
         private String queueName;
 
-        public Builder(String queueName) {
+        public Helper(String queueName) {
             this.queueName = queueName;
         }
 
-        public NamedEventQueue build(DefaultPersistableEvent event, int nodeId) {
+        public Class<NamedEventQueue> getORMClass() {
+            return NamedEventQueue.class;
+        }
+
+        public NamedEventQueue buildRecord(DefaultPersistableEvent event, int nodeId) {
             try {
                 return new NamedEventQueue(event.getPersistId(), nodeId, SerializationHelper.objectToBytes(event), queueName);
             } catch (Exception e) {
@@ -33,7 +37,7 @@ public class NamedEventQueue<E extends DefaultPersistableEvent> extends BaseName
             }
         }
 
-        public If condition() {
+        public If getCondition() {
             return If.isEqual("queueName", If.valueOf(queueName));
         }
 

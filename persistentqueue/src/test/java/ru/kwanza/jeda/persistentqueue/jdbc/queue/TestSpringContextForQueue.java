@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
@@ -44,15 +43,15 @@ public class TestSpringContextForQueue extends AbstractTransactionalJUnit4Spring
 
     @Test
     public void testTables() throws UpdateException {
-        em.create(new EventQueue.Builder().build(new DefaultPersistableEvent(1l), 1));
+        em.create(new EventQueue.Helper().buildRecord(new DefaultPersistableEvent(1l), 1));
         Assert.assertEquals(1l,em.readByKey(EventQueue.class,1l).getId().longValue());
-        em.create(new NamedEventQueue.Builder("test_queue").build(new DefaultPersistableEvent(1l), 1));
+        em.create(new NamedEventQueue.Helper("test_queue").buildRecord(new DefaultPersistableEvent(1l), 1));
         Assert.assertEquals(1l,em.readByKey(NamedEventQueue.class,1l).getId().longValue());
-        em.create(new PriorityEventQueue.Builder()
-                .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
+        em.create(new PriorityEventQueue.Helper()
+                .buildRecord(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
         Assert.assertEquals(1l,em.readByKey(PriorityEventQueue.class,1l).getId().longValue());
-        em.create(new NamedPriorityEventQueue.Builder("test_queue")
-                .build(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
+        em.create(new NamedPriorityEventQueue.Helper("test_queue")
+                .buildRecord(new DefaultPriorityPersistableEvent(1l, IPriorityEvent.Priority.CRITICAL), 1));
         Assert.assertEquals(1l,em.readByKey(NamedPriorityEventQueue.class,1l).getId().longValue());
 
     }

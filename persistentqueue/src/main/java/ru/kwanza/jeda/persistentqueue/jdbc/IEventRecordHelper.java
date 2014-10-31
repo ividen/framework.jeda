@@ -6,10 +6,13 @@ import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
 /**
  * @author Alexander Guzanov
  */
-public interface IEventRecordBuilder<R extends IEventRecord, E extends IPersistableEvent> {
-    R build(E event, int nodeId);
+public interface IEventRecordHelper<R extends IEventRecord, E extends IPersistableEvent> {
 
-    If condition();
+    Class<R> getORMClass();
+
+    R buildRecord(E event, int nodeId);
+
+    If getCondition();
 
     String getConditionAsString();
 }

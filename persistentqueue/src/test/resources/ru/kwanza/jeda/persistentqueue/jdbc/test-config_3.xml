@@ -29,15 +29,15 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
-    <bean class="ru.kwanza.jeda.persistentqueue.jdbc.InitDB" >
-        <constructor-arg index="0" value="init_data_set_1.xml"/>
+    <bean class="ru.kwanza.jeda.persistentqueue.jdbc.InitDB">
+        <constructor-arg index="0" value="init_data_set_3.xml"/>
     </bean>
 
     <bean id="defaultQueueController" class="ru.kwanza.jeda.persistentqueue.jdbc.JDBCQueuePersistenceController"
           scope="singleton">
         <constructor-arg index="0" ref="dbtool.IEntityManager"/>
         <constructor-arg index="1">
-            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.EventQueue$Helper"/>
+            <bean class="ru.kwanza.jeda.persistentqueue.jdbc.queue.PriorityEventQueue$Helper"/>
         </constructor-arg>
         <constructor-arg index="2" value="id"/>
         <constructor-arg index="3" value="nodeId"/>

@@ -1,11 +1,9 @@
 package ru.kwanza.jeda.persistentqueue.jdbc.queue;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.api.If;
-import ru.kwanza.jeda.api.IPriorityEvent;
 import ru.kwanza.jeda.persistentqueue.DefaultPriorityPersistableEvent;
-import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordBuilder;
+import ru.kwanza.jeda.persistentqueue.jdbc.IEventRecordHelper;
 import ru.kwanza.jeda.persistentqueue.jdbc.base.BasePriorityEventQueue;
 import ru.kwanza.toolbox.SerializationHelper;
 
@@ -18,8 +16,12 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
         super(id, nodeId, eventData, priority);
     }
 
-    public static class Builder implements IEventRecordBuilder<PriorityEventQueue, DefaultPriorityPersistableEvent> {
-        public PriorityEventQueue build(DefaultPriorityPersistableEvent event, int nodeId) {
+    public static class Helper implements IEventRecordHelper<PriorityEventQueue, DefaultPriorityPersistableEvent> {
+        public Class<PriorityEventQueue> getORMClass() {
+            return PriorityEventQueue.class;
+        }
+
+        public PriorityEventQueue buildRecord(DefaultPriorityPersistableEvent event, int nodeId) {
             try {
                 return new PriorityEventQueue(event.getPersistId(), nodeId,
                         SerializationHelper.objectToBytes(event), event.getPriority().getCode());
@@ -28,7 +30,7 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
             }
         }
 
-        public If condition() {
+        public If getCondition() {
             return null;
         }
 
