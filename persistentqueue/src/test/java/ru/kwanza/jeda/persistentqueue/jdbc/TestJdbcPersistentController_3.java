@@ -79,18 +79,24 @@ public class TestJdbcPersistentController_3 extends AbstractTransactionalJUnit4S
     }
 
     @Test
-    public void testTransfer_1() {
+    public void testTransfer_1() throws Exception {
         Assert.assertEquals(1, controller.transfer(1, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_3_3.xml"),
+                getActualDataSet("jeda_jdbc_event_pqueue"), "jeda_jdbc_event_pqueue", new String[]{"data"});
     }
 
     @Test
-    public void testTransfer_2() {
+    public void testTransfer_2() throws Exception {
         Assert.assertEquals(8, controller.transfer(8, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_3_4.xml"),
+                getActualDataSet("jeda_jdbc_event_pqueue"), "jeda_jdbc_event_pqueue", new String[]{"data"});
     }
 
     @Test
-    public void testTransfer_3() {
+    public void testTransfer_3() throws Exception {
         Assert.assertEquals(8, controller.transfer(100, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_3_5.xml"),
+                getActualDataSet("jeda_jdbc_event_pqueue"), "jeda_jdbc_event_pqueue", new String[]{"data"});
     }
 }
 

@@ -52,7 +52,7 @@ public class TestJdbcPersistentController_1 extends AbstractTransactionalJUnit4S
         controller.persist(Arrays.asList(new DefaultPersistableEvent(1l)), node1);
         controller.persist(Arrays.asList(new DefaultPersistableEvent(2l)), node2);
 
-        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1.xml"),
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1_1.xml"),
                 getActualDataSet("jeda_jdbc_event_queue"), "jeda_jdbc_event_queue", new String[]{"data"});
     }
 
@@ -60,7 +60,7 @@ public class TestJdbcPersistentController_1 extends AbstractTransactionalJUnit4S
     public void testDelete() throws Exception {
         controller.delete(Arrays.asList(new DefaultPersistableEvent(3l)), node1);
         controller.delete(Arrays.asList(new DefaultPersistableEvent(13l)), node2);
-        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2.xml"),
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1_2.xml"),
                 getActualDataSet("jeda_jdbc_event_queue"), "jeda_jdbc_event_queue", new String[]{"data"});
     }
 
@@ -76,18 +76,24 @@ public class TestJdbcPersistentController_1 extends AbstractTransactionalJUnit4S
         Assert.assertEquals(8, load.size());
     }
     @Test
-    public void testTransfer_1() {
+    public void testTransfer_1() throws Exception {
         Assert.assertEquals(1, controller.transfer(1, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1_3.xml"),
+                getActualDataSet("jeda_jdbc_event_queue"), "jeda_jdbc_event_queue", new String[]{"data"});
     }
 
     @Test
-    public void testTransfer_2() {
+    public void testTransfer_2() throws Exception {
         Assert.assertEquals(8, controller.transfer(8, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1_4.xml"),
+                getActualDataSet("jeda_jdbc_event_queue"), "jeda_jdbc_event_queue", new String[]{"data"});
     }
 
     @Test
-    public void testTransfer_3() {
+    public void testTransfer_3() throws Exception {
         Assert.assertEquals(8, controller.transfer(100, node1, node2));
+        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_1_5.xml"),
+                getActualDataSet("jeda_jdbc_event_queue"), "jeda_jdbc_event_queue", new String[]{"data"});
     }
 }
 
