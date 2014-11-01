@@ -55,12 +55,6 @@ public class JDBCQueuePersistenceController<E extends IPersistableEvent, R exten
                 "" : ":" + builder.getConditionAsString());
     }
 
-    public int getTotalCount(Node node) {
-        //todo aguzanov: not very good;
-        List list = loadQuery.prepare().setParameter(1, node.getId()).selectList();
-        return list.size();
-    }
-
     public Collection<E> load(int count, Node node) {
         return FieldHelper
                 .getFieldCollection(loadQuery.prepare()

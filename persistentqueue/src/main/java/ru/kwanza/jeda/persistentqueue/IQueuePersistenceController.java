@@ -12,8 +12,6 @@ public interface IQueuePersistenceController<E extends IPersistableEvent> {
 
     String getQueueName();
 
-    int getTotalCount(Node node);
-
     Collection<E> load(int count, Node node);
 
     void delete(Collection<E> result, Node node);

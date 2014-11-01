@@ -14,11 +14,8 @@ import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.QueueObserverChain;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -34,9 +31,9 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
     private volatile boolean active = false;
+    private volatile boolean tryLoad = false;
     private int maxSize;
     private int repairIterationItemCount = 100;
-    private AtomicInteger expectedRepairing = new AtomicInteger(0);
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
                            int maxSize, IQueuePersistenceController<E> controller) {
@@ -63,14 +60,12 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             ITransactionManagerInternal tm = manager.getTransactionManager();
             tm.begin();
             try {
-                int totalCount = persistenceController.getTotalCount(clusterService.getCurrentNode());
-                if (totalCount > maxSize) {
-                    expectedRepairing.set(totalCount - maxSize);
-                }
-                if (totalCount > 0) {
-                    Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
-                    if (load != null && !load.isEmpty()) {
-                        memoryCache.put(load);
+
+                Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
+                if (load != null && !load.isEmpty()) {
+                    memoryCache.put(load);
+                    if (load.size() >= maxSize) {
+                        tryLoad = true;
                     }
                 }
                 tm.commit();
@@ -109,9 +104,6 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         return repairIterationItemCount;
     }
 
-    public int getExpectedRepairing() {
-        return expectedRepairing.get();
-    }
 
     public boolean handleRepair(Node reparableNode) {
         int memorySize = memoryCache.size();
@@ -119,7 +111,12 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         try {
             count = persistenceController.transfer(getRepairIterationItemCount(), clusterService.getCurrentNode(),
                     reparableNode);
-            expectedRepairing.addAndGet(count);
+            takeLock.lock();
+            try {
+                tryLoad = true;
+            } finally {
+                takeLock.unlock();
+            }
             return count < getRepairIterationItemCount();
         } finally {
             getObserver().notifyChange(memorySize + count, count);
@@ -128,36 +125,6 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
 
     public String getName() {
         return "jeda.PersistentQueue." + persistenceController.getQueueName();
-    }
-
-    private Collection<E> repair(final int count) {
-        Collection<E> result = persistenceController.load(count, clusterService.getCurrentNode());
-        try {
-            manager.getTransactionManager().getTransaction().registerSynchronization(new ExpectedRepairingSync(result.size()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return result;
-    }
-
-
-    private class ExpectedRepairingSync implements Synchronization {
-        private final int size;
-
-        public ExpectedRepairingSync(int size) {
-            this.size = size;
-        }
-
-        public void beforeCompletion() {
-
-        }
-
-        public void afterCompletion(int i) {
-            if (i == Status.STATUS_COMMITTED) {
-                expectedRepairing.addAndGet(size);
-            }
-        }
     }
 
     public void setObserver(IQueueObserver observer) {
@@ -174,7 +141,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public int getEstimatedCount() {
-        return active ? (memoryCache.getEstimatedCount() + getExpectedRepairing()) : 0;
+        return active ? memoryCache.getEstimatedCount() : 0;
     }
 
     public boolean isReady() {
@@ -249,30 +216,31 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             }
 
             Collection<E> result;
-            int reparingCount = getExpectedRepairing();
-            if (reparingCount > 0) {
-                reparingCount = calcReparingCount(count, reparingCount);
-                result = repair(reparingCount);
-                Collection<E> take = memoryCache.take(count - result.size());
-                if (take != null) {
+            if (tryLoad) {
+                result = new ArrayList<E>(count);
+                Collection<E> take = memoryCache.take(Math.max(count / 2, 1));
+                int c = 0;
+                if (take != null && !take.isEmpty()) {
                     result.addAll(take);
+                    c = take.size();
                 }
+                Collection<E> load = persistenceController.load(count - c, clusterService.getCurrentNode());
+                if (load == null || load.isEmpty()) {
+                    tryLoad = false;
+                } else {
+                    result.addAll(load);
+                }
+
             } else {
                 result = memoryCache.take(count);
             }
-            if (result == null) {
-                return null;
-            }
+
             persistenceController.delete(result, clusterService.getCurrentNode());
 
             return result;
         } finally {
             takeLock.unlock();
         }
-    }
-
-    private int calcReparingCount(int takeCount, int expectingReparingCount) {
-        return Math.min(expectingReparingCount, Math.max(takeCount / 2, 1));
     }
 
     public int size() {

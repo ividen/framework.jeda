@@ -56,10 +56,6 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
         return BerkeleyQueuePersistenceController.class.getSimpleName() + databaseName;
     }
 
-    public int getTotalCount(Node node) {
-        return 0;
-    }
-
     public Collection<E> load(int count, Node node) {
         final Collection<E> resultCollection = new ArrayList<E>();
         Cursor cursor = null;

@@ -95,44 +95,24 @@ public class TestJdbcPersistentController_2 extends AbstractTransactionalJUnit4S
     }
 
     @Test
-    public void testGetCount() {
-        Assert.assertEquals(4, controller1.getTotalCount(node1));
-        Assert.assertEquals(4, controller1.getTotalCount(node2));
-        Assert.assertEquals(4, controller2.getTotalCount(node1));
-        Assert.assertEquals(4, controller2.getTotalCount(node2));
-    }
-
-    @Test
     public void testTransfer_1() {
         Assert.assertEquals(1, controller1.transfer(1, node1, node2));
-        Assert.assertEquals(5, controller1.getTotalCount(node1));
-        Assert.assertEquals(3, controller1.getTotalCount(node2));
 
         Assert.assertEquals(2, controller2.transfer(2, node1, node2));
-        Assert.assertEquals(6, controller2.getTotalCount(node1));
-        Assert.assertEquals(2, controller2.getTotalCount(node2));
     }
 
     @Test
     public void testTransfer_2() {
         Assert.assertEquals(4, controller1.transfer(4, node1, node2));
-        Assert.assertEquals(8, controller1.getTotalCount(node1));
-        Assert.assertEquals(0, controller1.getTotalCount(node2));
 
         Assert.assertEquals(4, controller2.transfer(4, node1, node2));
-        Assert.assertEquals(8, controller2.getTotalCount(node1));
-        Assert.assertEquals(0, controller2.getTotalCount(node2));
     }
 
     @Test
     public void testTransfer_3() {
         Assert.assertEquals(4, controller1.transfer(100, node1, node2));
-        Assert.assertEquals(0, controller1.getTotalCount(node2));
-        Assert.assertEquals(8, controller1.getTotalCount(node1));
 
         Assert.assertEquals(4, controller2.transfer(100, node1, node2));
-        Assert.assertEquals(0, controller2.getTotalCount(node2));
-        Assert.assertEquals(8, controller2.getTotalCount(node1));
     }
 }
 
