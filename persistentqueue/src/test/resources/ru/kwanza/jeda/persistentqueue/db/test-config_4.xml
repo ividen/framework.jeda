@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:dbtool-orm-config.xml"/>
+    <import resource="classpath:jeda-persistentqueue-default-db-queue-config.xml"/>
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db_h2.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.connectionUrl}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.persistentqueue.db.InitDB">
+        <constructor-arg index="0" value="init_data_set_4.xml"/>
+    </bean>
+
+    <bean id="defaultQueueController1" class="ru.kwanza.jeda.persistentqueue.db.DBQueuePersistenceController"
+          scope="singleton">
+        <constructor-arg index="0" ref="dbtool.IEntityManager"/>
+        <constructor-arg index="1">
+            <bean class="ru.kwanza.jeda.persistentqueue.db.queue.NamedPriorityEventQueue$Helper">
+                <constructor-arg index="0" value="queue1"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg index="2" value="id"/>
+        <constructor-arg index="3" value="nodeId"/>
+    </bean>
+
+    <bean id="defaultQueueController2" class="ru.kwanza.jeda.persistentqueue.db.DBQueuePersistenceController"
+          scope="singleton">
+        <constructor-arg index="0" ref="dbtool.IEntityManager"/>
+        <constructor-arg index="1">
+            <bean class="ru.kwanza.jeda.persistentqueue.db.queue.NamedPriorityEventQueue$Helper">
+                <constructor-arg index="0" value="queue2"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg index="2" value="id"/>
+        <constructor-arg index="3" value="nodeId"/>
+    </bean>
+
+
+    <bean id="dbTester" class="org.dbunit.JdbcDatabaseTester">
+        <constructor-arg index="0" value="${jdbc.driverClass}"/>
+        <constructor-arg index="1" value="${jdbc.connectionUrl}"/>
+        <constructor-arg index="2" value="${jdbc.username}"/>
+        <constructor-arg index="3" value="${jdbc.password}"/>
+    </bean>
+</beans>
