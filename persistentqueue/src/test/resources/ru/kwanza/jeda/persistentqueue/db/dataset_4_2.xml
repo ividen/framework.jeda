@@ -1,14 +1,14 @@
 <dataset>
-    <jeda_jdbc_event_pnqueue id="4" node_id="1" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="5" node_id="1" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="6" node_id="1" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="8" node_id="1" queue_name="queue2" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="9" node_id="1" queue_name="queue2" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="10" node_id="1" queue_name="queue2" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="14" node_id="2" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="15" node_id="2" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="16" node_id="2" queue_name="queue1" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="18" node_id="2" queue_name="queue2" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="19" node_id="2" queue_name="queue2" priority="1"/>
-    <jeda_jdbc_event_pnqueue id="20" node_id="2" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="4" node_id="1" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="5" node_id="1" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="6" node_id="1" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="8" node_id="1" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="9" node_id="1" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="10" node_id="1" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="14" node_id="2" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="15" node_id="2" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="16" node_id="2" queue_name="queue1" priority="1"/>
+    <jeda_event_pnqueue id="18" node_id="2" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="19" node_id="2" queue_name="queue2" priority="1"/>
+    <jeda_event_pnqueue id="20" node_id="2" queue_name="queue2" priority="1"/>
 </dataset>

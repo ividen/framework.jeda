@@ -10,7 +10,7 @@ import ru.kwanza.toolbox.SerializationHelper;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "jeda.persistentqueue.db.EventQueue", table = "jeda_jdbc_event_queue")
+@Entity(name = "jeda.persistentqueue.db.EventQueue", table = "jeda_event_queue")
 public class EventQueue<E extends DefaultPersistableEvent> extends BaseEventQueue<E> {
 
     public EventQueue(Long id, Integer nodeId, byte[] eventData) {

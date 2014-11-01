@@ -61,7 +61,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         controller2.persist(Arrays.asList(new DefaultPersistableEvent(22l)), node2);
 
         Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_1.xml"),
-                getActualDataSet("jeda_jdbc_event_nqueue"), "jeda_jdbc_event_nqueue", new String[]{"data"});
+                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
     }
 
     @Test
@@ -71,7 +71,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         controller1.delete(Arrays.asList(new DefaultPersistableEvent(13l)), node2);
         controller2.delete(Arrays.asList(new DefaultPersistableEvent(17l)), node2);
         Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_2.xml"),
-                getActualDataSet("jeda_jdbc_event_nqueue"), "jeda_jdbc_event_nqueue", new String[]{"data"});
+                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
     }
 
     @Test
@@ -99,7 +99,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         Assert.assertEquals(1, controller1.transfer(1, node1, node2));
         Assert.assertEquals(2, controller2.transfer(2, node1, node2));
         Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_3.xml"),
-                getActualDataSet("jeda_jdbc_event_nqueue"), "jeda_jdbc_event_nqueue", new String[]{"data"});
+                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
     }
 
     @Test
@@ -107,7 +107,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         Assert.assertEquals(4, controller1.transfer(4, node1, node2));
         Assert.assertEquals(4, controller2.transfer(4, node1, node2));
         Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_4.xml"),
-                getActualDataSet("jeda_jdbc_event_nqueue"), "jeda_jdbc_event_nqueue", new String[]{"data"});
+                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
     }
 
     @Test
@@ -115,7 +115,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         Assert.assertEquals(4, controller1.transfer(100, node1, node2));
         Assert.assertEquals(4, controller2.transfer(100, node1, node2));
         Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_5.xml"),
-                getActualDataSet("jeda_jdbc_event_nqueue"), "jeda_jdbc_event_nqueue", new String[]{"data"});
+                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
     }
 }
 

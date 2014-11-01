@@ -1,18 +1,18 @@
 <dataset>
-    <jeda_jdbc_event_nqueue id="3" node_id="1" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="4" node_id="1" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="5" node_id="1" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="6" node_id="1" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="7" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="8" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="9" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="10" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="13" node_id="1" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="14" node_id="2" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="15" node_id="2" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="16" node_id="2" queue_name="queue1"/>
-    <jeda_jdbc_event_nqueue id="17" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="18" node_id="1" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="19" node_id="2" queue_name="queue2"/>
-    <jeda_jdbc_event_nqueue id="20" node_id="2" queue_name="queue2"/>
+    <jeda_event_nqueue id="3" node_id="1" queue_name="queue1"/>
+    <jeda_event_nqueue id="4" node_id="1" queue_name="queue1"/>
+    <jeda_event_nqueue id="5" node_id="1" queue_name="queue1"/>
+    <jeda_event_nqueue id="6" node_id="1" queue_name="queue1"/>
+    <jeda_event_nqueue id="7" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="8" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="9" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="10" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="13" node_id="1" queue_name="queue1"/>
+    <jeda_event_nqueue id="14" node_id="2" queue_name="queue1"/>
+    <jeda_event_nqueue id="15" node_id="2" queue_name="queue1"/>
+    <jeda_event_nqueue id="16" node_id="2" queue_name="queue1"/>
+    <jeda_event_nqueue id="17" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="18" node_id="1" queue_name="queue2"/>
+    <jeda_event_nqueue id="19" node_id="2" queue_name="queue2"/>
+    <jeda_event_nqueue id="20" node_id="2" queue_name="queue2"/>
 </dataset>

@@ -10,7 +10,7 @@ import ru.kwanza.toolbox.SerializationHelper;
 /**
  * @author Alexander Guzanov
  */
-@Entity(name = "jeda.persistentqueue.db.NamedPriorityEventQueue", table = "jeda_jdbc_event_pnqueue")
+@Entity(name = "jeda.persistentqueue.db.NamedPriorityEventQueue", table = "jeda_event_pnqueue")
 public class NamedPriorityEventQueue<E extends DefaultPriorityPersistableEvent> extends BasePriorityEventQueueWithQueueName<E> {
     public NamedPriorityEventQueue(Long id, Integer nodeId, byte[] eventData, Integer priority, String queueName) {
         super(id, nodeId, eventData, priority, queueName);

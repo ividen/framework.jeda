@@ -15,7 +15,7 @@
     <property dbms="h2" name="blob.type" value="BLOB"/>
 
     <changeSet author="aguzanov" id="1">
-        <createTable tableName="jeda_jdbc_event_queue">
+        <createTable tableName="jeda_event_queue">
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -25,7 +25,7 @@
     </changeSet>
 
     <changeSet author="aguzanov" id="2">
-        <createTable tableName="jeda_jdbc_event_nqueue">
+        <createTable tableName="jeda_event_nqueue">
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -36,7 +36,7 @@
     </changeSet>
 
     <changeSet author="aguzanov" id="3">
-        <createTable tableName="jeda_jdbc_event_pqueue">
+        <createTable tableName="jeda_event_pqueue">
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
@@ -47,7 +47,7 @@
     </changeSet>
 
     <changeSet author="aguzanov" id="4">
-        <createTable tableName="jeda_jdbc_event_pnqueue">
+        <createTable tableName="jeda_event_pnqueue">
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
