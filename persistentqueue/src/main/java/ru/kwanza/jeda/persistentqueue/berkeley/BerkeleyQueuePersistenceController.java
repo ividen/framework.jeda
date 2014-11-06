@@ -36,7 +36,7 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
     }
 
     public void delete(Collection<E> events, Node node) {
-        Database database = null;
+        Database database;
         try {
             database = getDatabase(node.getId());
             for (E e : events) {
