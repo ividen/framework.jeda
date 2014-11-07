@@ -10,13 +10,13 @@ public class TestModuleEntity {
 
     @Test
     public void testEntity(){
-        ModuleEntity test = new ModuleEntity(10, "test");
+        ClusteredComponent test = new ClusteredComponent(10, "test");
         Assert.assertEquals("10_test",test.getId());
         Assert.assertEquals("test",test.getName());
         Assert.assertEquals(10,test.getNodeId().intValue());
         long ts = System.currentTimeMillis();
-        test.setLastRepaired(ts);
-        Assert.assertEquals(ts,test.getLastRepaired().longValue());
+        test.setLastActivity(ts);
+        Assert.assertEquals(ts,test.getLastActivity().longValue());
 
     }
 

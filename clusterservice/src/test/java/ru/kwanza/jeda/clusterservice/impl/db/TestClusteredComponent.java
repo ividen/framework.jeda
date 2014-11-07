@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import ru.kwanza.jeda.clusterservice.IClusterService;
-import ru.kwanza.jeda.clusterservice.IClusteredModule;
+import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 
 import javax.annotation.PostConstruct;
@@ -10,7 +10,7 @@ import javax.annotation.Resource;
 /**
  * @author Alexander Guzanov
  */
-public class TestClusteredModule implements IClusteredModule {
+public class TestClusteredComponent implements IClusteredComponent {
     int counter = 10;
 
     @Resource(name="jeda.clusterservice.DBClusterService")
@@ -18,7 +18,7 @@ public class TestClusteredModule implements IClusteredModule {
 
     @PostConstruct
     public void init() {
-        dbService.registerModule(this);
+        dbService.registerComponent(this);
     }
 
     public String getName() {
@@ -33,8 +33,12 @@ public class TestClusteredModule implements IClusteredModule {
         System.out.println("Stopped ");
     }
 
-    public boolean handleRepair(Node node) {
+    public boolean handleStartRepair(Node node) {
         System.out.println("Repair " + counter + " of node " + node);
         return counter-- <= 0;
+    }
+
+    public void handleStopRepair(Node node) {
+
     }
 }

@@ -1,9 +1,8 @@
 package ru.kwanza.jeda.clusterservice;
 
-import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -13,7 +12,7 @@ import java.util.concurrent.TimeoutException;
  */
 public interface IClusterService {
 
-    List<? extends NodeEntity> getActiveNodes();
+    List<? extends Node> getActiveNodes();
 
     List<? extends Node> getPassiveNodes();
 
@@ -21,9 +20,15 @@ public interface IClusterService {
 
     Node getCurrentNode();
 
+    Map<String, IClusteredComponent> getComponents();
+
+    Map<String, IClusteredComponent> getStartedComponents();
+
+    Map<String, IClusteredComponent> getStoppedComponents();
+
     <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException;
 
-    <R> R criticalSection(Callable<R> callable,long waiteTimeout, TimeUnit unit) throws InterruptedException, InvocationTargetException, TimeoutException;
+    <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit) throws InterruptedException, InvocationTargetException, TimeoutException;
 
-    void registerModule(IClusteredModule module);
+    void registerComponent(IClusteredComponent module);
 }

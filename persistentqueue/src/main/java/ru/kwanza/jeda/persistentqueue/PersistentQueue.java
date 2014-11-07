@@ -7,7 +7,7 @@ import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
-import ru.kwanza.jeda.clusterservice.IClusteredModule;
+import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Guzanov Alexander
  */
-public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, IClusteredModule, IQueueObserver {
+public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, IClusteredComponent, IQueueObserver {
     private AbstractTransactionalMemoryQueue<E> memoryCache;
     private IQueuePersistenceController<E> persistenceController;
     private IQueueObserver originalObserver;
@@ -44,7 +44,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         this.clusterService = clusterService;
         this.maxSize = maxSize;
 
-        clusterService.registerModule(this);
+        clusterService.registerComponent(this);
     }
 
     public IJedaManager getManager() {
@@ -105,7 +105,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
 
-    public boolean handleRepair(Node reparableNode) {
+    public boolean handleStartRepair(Node reparableNode) {
         int memorySize = memoryCache.size();
         int count = 0;
         try {
@@ -121,6 +121,10 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         } finally {
             getObserver().notifyChange(memorySize + count, count);
         }
+    }
+
+    public void handleStopRepair(Node node) {
+
     }
 
     public String getName() {

@@ -5,13 +5,15 @@ package ru.kwanza.jeda.clusterservice;
  */
 public class Node {
     protected Integer id;
-    protected volatile Long lastActivity;
+    protected Long lastActivity;
+    protected String pid;
+    protected String ipAddress;
 
-    public Node(int id){
+    public Node(int id) {
         this.id = id;
     }
 
-    protected Node(){
+    protected Node() {
     }
 
     public Integer getId() {
@@ -22,5 +24,11 @@ public class Node {
         return lastActivity;
     }
 
+    public String getPid() {
+        return pid;
+    }
 
+    public String getIpAddress() {
+        return ipAddress;
+    }
 }

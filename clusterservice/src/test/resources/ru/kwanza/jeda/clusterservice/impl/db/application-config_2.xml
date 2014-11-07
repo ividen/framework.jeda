@@ -40,15 +40,15 @@
         </constructor-arg>
     </bean>
 
-    <bean id="module_1" class="ru.kwanza.jeda.clusterservice.impl.db.TestModule">
+    <bean id="module_1" class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
         <constructor-arg index="0" value="module_1"/>
     </bean>
 
-    <bean id="module_2" class="ru.kwanza.jeda.clusterservice.impl.db.TestModule">
+    <bean id="module_2" class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
         <constructor-arg index="0" value="module_2"/>
     </bean>
 
-    <bean id="module_3" class="ru.kwanza.jeda.clusterservice.impl.db.TestModule">
+    <bean id="module_3" class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
         <constructor-arg index="0" value="module_3"/>
     </bean>
 

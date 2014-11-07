@@ -4,19 +4,13 @@ import junit.framework.Assert;
 import org.dbunit.Assertion;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
-import ru.kwanza.dbtool.orm.api.LockResult;
-import ru.kwanza.dbtool.orm.api.LockType;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ModuleEntity;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.Resource;
-import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Alexander Guzanov
@@ -24,11 +18,11 @@ import java.util.concurrent.TimeoutException;
 @ContextConfiguration(locations = "application-config_4.xml")
 public class TestDBClusterService_4 extends AbstractDBClusterService {
     @Resource(name = "repair_module_1")
-    private RepairableTestModule m1;
+    private RepairableTestComponent m1;
     @Resource(name = "repair_module_2")
-    private RepairableTestModule m2;
+    private RepairableTestComponent m2;
     @Resource(name = "repair_module_3")
-    private RepairableTestModule m3;
+    private RepairableTestComponent m3;
     @Resource(name = "jeda.clusterservice.DBClusterService")
     private DBClusterService service;
     @Resource(name = "jeda.clusterservice.DBClusterService2")
@@ -38,7 +32,7 @@ public class TestDBClusterService_4 extends AbstractDBClusterService {
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
 
-    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ModuleEntity>>>
+    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ClusteredComponent>>>
             repairingNodes = FieldHelper.construct(DBClusterService.class, "supervisor.repairingNodes");
 
 
@@ -92,12 +86,12 @@ public class TestDBClusterService_4 extends AbstractDBClusterService {
         Assert.assertEquals(false, m3.isRepaired());
         Assert.assertEquals(false, m3.isStopped());
 
-        NodeEntity nodeEntity = em.readByKey(NodeEntity.class, 1l);
-        ModuleEntity moduleEntity = em.readByKey(ModuleEntity.class, "1_repairable_module");
-        nodeEntity.setLastActivity(moduleEntity.getLastRepaired());
+        ClusterNode clusterNode = em.readByKey(ClusterNode.class, 1l);
+        ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
+        clusterNode.setLastActivity(clusteredComponent.getLastActivity());
         m2.setRepaired(false);
         m3.setRepaired(false);
-        em.update(nodeEntity);
+        em.update(clusterNode);
 
 
         Thread.sleep(1000);

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import ru.kwanza.jeda.clusterservice.IClusterService;
-import ru.kwanza.jeda.clusterservice.IClusteredModule;
+import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 
 import javax.annotation.PostConstruct;
@@ -9,7 +9,7 @@ import javax.annotation.PostConstruct;
 /**
  * @author Alexander Guzanov
  */
-public class RepairableTestModule implements IClusteredModule {
+public class RepairableTestComponent implements IClusteredComponent {
     private volatile boolean started;
     private volatile boolean stopped;
     private volatile boolean repairing = false;
@@ -17,13 +17,13 @@ public class RepairableTestModule implements IClusteredModule {
 
     private IClusterService service;
 
-    public RepairableTestModule(IClusterService service) {
+    public RepairableTestComponent(IClusterService service) {
         this.service = service;
     }
 
     @PostConstruct
     public void init() {
-        service.registerModule(this);
+        service.registerComponent(this);
     }
 
     public String getName() {
@@ -60,9 +60,13 @@ public class RepairableTestModule implements IClusteredModule {
         this.repaired = repaired;
     }
 
-    public boolean handleRepair(Node node) {
+    public boolean handleStartRepair(Node node) {
         repairing = true;
         return repaired;
+
+    }
+
+    public void handleStopRepair(Node node) {
 
     }
 }

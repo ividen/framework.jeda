@@ -4,7 +4,7 @@ import junit.framework.Assert;
 import org.dbunit.Assertion;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.Resource;
@@ -17,11 +17,11 @@ public class TestDBClusterService_2 extends AbstractDBClusterService {
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
     @Resource(name = "module_1")
-    private TestModule m1;
+    private TestComponent m1;
     @Resource(name = "module_2")
-    private TestModule m2;
+    private TestComponent m2;
     @Resource(name = "module_3")
-    private TestModule m3;
+    private TestComponent m3;
 
     @Test
     public void testCreateExistedNodeEntityAndModules() throws Exception {
@@ -35,11 +35,11 @@ public class TestDBClusterService_2 extends AbstractDBClusterService {
 
     @Test
     public void testLostNodeActivity() throws Exception {
-        NodeEntity nodeEntity = em.readByKey(NodeEntity.class, 1l);
+        ClusterNode clusterNode = em.readByKey(ClusterNode.class, 1l);
 
         while (true) {
-            nodeEntity = em.readByKey(NodeEntity.class, 1l);
-            if (nodeEntity.getLastActivity() > System.currentTimeMillis()) break;
+            clusterNode = em.readByKey(ClusterNode.class, 1l);
+            if (clusterNode.getLastActivity() > System.currentTimeMillis()) break;
         }
 
         Thread.sleep(1000);
@@ -63,8 +63,8 @@ public class TestDBClusterService_2 extends AbstractDBClusterService {
 
         dbTool.getJdbcTemplate().execute("ALTER TABLE jeda_cluster_service_1 RENAME TO jeda_cluster_service");
         while (true) {
-            nodeEntity = em.readByKey(NodeEntity.class, 1l);
-            if (nodeEntity.getLastActivity() > System.currentTimeMillis()) break;
+            clusterNode = em.readByKey(ClusterNode.class, 1l);
+            if (clusterNode.getLastActivity() > System.currentTimeMillis()) break;
         }
 
         Thread.sleep(1000);
@@ -79,11 +79,11 @@ public class TestDBClusterService_2 extends AbstractDBClusterService {
 
     @Test
     public void testModuleLockException() throws Exception {
-        NodeEntity nodeEntity = em.readByKey(NodeEntity.class, 1l);
+        ClusterNode clusterNode = em.readByKey(ClusterNode.class, 1l);
 
         while (true) {
-            nodeEntity = em.readByKey(NodeEntity.class, 1l);
-            if (nodeEntity.getLastActivity() > System.currentTimeMillis()) break;
+            clusterNode = em.readByKey(ClusterNode.class, 1l);
+            if (clusterNode.getLastActivity() > System.currentTimeMillis()) break;
         }
 
         Thread.sleep(1000);
@@ -107,8 +107,8 @@ public class TestDBClusterService_2 extends AbstractDBClusterService {
 
         dbTool.getJdbcTemplate().execute("ALTER TABLE jeda_clustered_module_1 RENAME TO jeda_clustered_module");
         while (true) {
-            nodeEntity = em.readByKey(NodeEntity.class, 1l);
-            if (nodeEntity.getLastActivity() > System.currentTimeMillis()) break;
+            clusterNode = em.readByKey(ClusterNode.class, 1l);
+            if (clusterNode.getLastActivity() > System.currentTimeMillis()) break;
         }
 
         Thread.sleep(1000);

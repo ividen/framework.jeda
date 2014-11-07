@@ -14,9 +14,8 @@ public class TestDBClusterService_1 extends AbstractDBClusterService {
     @Test
     public void testPropertySet() throws Exception {
         Assert.assertEquals(1,service.getCurrentNodeId().intValue());
-        Assert.assertEquals(60000,service.getFailoverTimeout());
-        Assert.assertEquals(100,service.getLockTimeout());
-        Assert.assertEquals(100,service.getRepairInterval());
+        Assert.assertEquals(60000,service.getFailoverInterval());
+        Assert.assertEquals(100,service.getActivityInterval());
         Assert.assertEquals(1,service.getRepairThreadCount());
     }
 
@@ -32,7 +31,7 @@ public class TestDBClusterService_1 extends AbstractDBClusterService {
     @Test
     public void testRegisterAfterCreate() throws Exception {
         try {
-            service.registerModule(new TestModule("module_4"));
+            service.registerComponent(new TestComponent("module_4"));
             Assert.fail("Expected " + IllegalStateException.class);
         } catch (IllegalStateException e) {
 

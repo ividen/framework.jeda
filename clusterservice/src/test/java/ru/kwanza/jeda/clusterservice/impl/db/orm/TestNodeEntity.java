@@ -11,7 +11,7 @@ public class TestNodeEntity {
     @Test
     public void testEntity(){
         long lastActivity = System.currentTimeMillis();
-        NodeEntity test = new NodeEntity(10, lastActivity);
+        ClusterNode test = new ClusterNode(10, lastActivity);
 
         Assert.assertEquals(10,test.getId().intValue());
         Assert.assertEquals(lastActivity,test.getLastActivity().longValue());

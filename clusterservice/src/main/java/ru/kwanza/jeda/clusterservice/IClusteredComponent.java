@@ -3,12 +3,14 @@ package ru.kwanza.jeda.clusterservice;
 /**
  * @author Alexander Guzanov
  */
-public interface IClusteredModule {
+public interface IClusteredComponent {
     String getName();
 
     void handleStart();
 
     void handleStop();
 
-    boolean handleRepair(Node node);
+    boolean handleStartRepair(Node node);
+
+    void handleStopRepair(Node node);
 }
