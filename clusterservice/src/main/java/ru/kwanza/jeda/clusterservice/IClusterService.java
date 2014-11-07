@@ -20,7 +20,7 @@ public interface IClusterService {
 
     Node getCurrentNode();
 
-    Map<String, IClusteredComponent> getComponents();
+    Map<String, IClusteredComponent> getRepository();
 
     Map<String, IClusteredComponent> getStartedComponents();
 

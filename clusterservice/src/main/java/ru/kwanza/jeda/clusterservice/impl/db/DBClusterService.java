@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
@@ -22,7 +21,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -31,12 +33,10 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class DBClusterService implements IClusterService, ApplicationListener<ContextRefreshedEvent> {
     public static final String SUPERVISOR_NAME = "DBClusterService-Supervisor";
-    public static final String REPAIR_WORKER = "DBClusterService-RepairWorker";
+    public static final String WORKER_NAME = "DBClusterService-Worker";
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Resource(name = "dbtool.DBTool")
-    private DBTool dbTool;
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
 
@@ -60,9 +60,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private AtomicLong counter = new AtomicLong(0);
     private volatile boolean started = false;
     private Supervisor supervisor;
-    private ConcurrentMap<String, IClusteredComponent> components = new ConcurrentHashMap<String, IClusteredComponent>();
-    private Map<String, ClusteredComponent> activeComponents = new ConcurrentHashMap<String, ClusteredComponent>();
-    private Map<String, ClusteredComponent> waitForReturnComponents = new ConcurrentHashMap<String, ClusteredComponent>();
+    private ComponentRepository repository = new ComponentRepository();
 
 
     @PostConstruct
@@ -143,7 +141,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         repairExecutor = new ThreadPoolExecutor(repairThreadCount, repairThreadCount, activityInterval, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
             public Thread newThread(Runnable r) {
-                return new Thread(r, REPAIR_WORKER + "-" + counter.incrementAndGet());
+                return new Thread(r, WORKER_NAME + "-" + counter.incrementAndGet());
             }
         });
     }
@@ -164,16 +162,16 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return currentNode;
     }
 
-    public Map<String, IClusteredComponent> getComponents() {
-        return Collections.unmodifiableMap(components);
+    public Map<String, IClusteredComponent> getRepository() {
+        return repository.getComponents();
     }
 
     public Map<String, IClusteredComponent> getStartedComponents() {
-        return null;
+        return repository.getStartedComponents();
     }
 
     public Map<String, IClusteredComponent> getStoppedComponents() {
-        return null;
+        return repository.getStoppedComponents();
     }
 
     public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
@@ -199,7 +197,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
         }
 
-        components.put(module.getName(), module);
+        repository.registerComponent(module);
     }
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -209,11 +207,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     public class Supervisor extends Thread {
-        private boolean isAlive = false;
-        private List<ClusteredComponent> moduleEntities;
-        private ConcurrentMap<Integer, ConcurrentMap<RepairWorker, ClusteredComponent>> repairingNodes
-                = new ConcurrentHashMap<Integer, ConcurrentMap<RepairWorker, ClusteredComponent>>();
-
         public Supervisor() {
             super(SUPERVISOR_NAME);
             setDaemon(true);
@@ -261,9 +254,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void startActiveComponents() {
-            for (ClusteredComponent item : activeComponents.values()) {
+            for (IClusteredComponent item : getStartedComponents().values()) {
                 //todo aguzanov вынести в пул потоков
-                components.get(item.getName()).handleStart();
+                item.handleStart();
             }
         }
 
@@ -273,12 +266,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 if (item.getHoldNodeId() != null) {
                     if (item.getLastActivity() <= ts) {
                         item.clearMarkers();
-                        activeComponents.put(item.getName(), item);
+                        repository.addActiveComponent(item);
                     } else {
-                        waitForReturnComponents.put(item.getName(), item);
+                        repository.addPassiveComponent(item);
                     }
                 } else {
-                    activeComponents.put(item.getName(), item);
+                    repository.addActiveComponent(item);
                 }
             }
         }
@@ -286,23 +279,23 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         private List<ClusteredComponent> selectAllComponents() {
             return queryForComponents.prepare()
                     .setParameter(1, currentNodeId)
-                    .setParameter(2, components.keySet())
+                    .setParameter(2, repository.getComponents().keySet())
                     .selectList();
         }
 
         private void leaseActivity() {
             try {
-                updateActivity(activeComponents.values());
+                updateActivity(repository.getActiveComponents());
             } catch (UpdateException e) {
                 for (ClusteredComponent o : e.<ClusteredComponent>getConstrainted()) {
-                    activeComponents.remove(o.getName());
-                    waitForReturnComponents.put(o.getName(), o);
-                    components.get(o.getName()).handleStop();
+                    repository.removeActiveComponent(o.getName());
+                    repository.addPassiveComponent(o);
+                    repository.getComponent(o.getName()).handleStop();
                 }
                 for (ClusteredComponent o : e.<ClusteredComponent>getOptimistic()) {
-                    activeComponents.remove(o.getName());
-                    waitForReturnComponents.put(o.getName(), o);
-                    components.get(o.getName()).handleStop();
+                    repository.removeActiveComponent(o.getName());
+                    repository.addPassiveComponent(o);
+                    repository.getComponent(o.getName()).handleStop();
                 }
             }
         }
@@ -315,10 +308,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
 
             for (ClusteredComponent item : activateCandidates) {
-                activeComponents.put(item.getName(), item);
-                waitForReturnComponents.remove(item.getName());
+                repository.addActiveComponent(item);
+                repository.removePassiveComponent(item.getName());
                 //todo aguzanov do in worker
-                components.get(item.getName()).handleStart();
+                repository.getComponent(item.getName()).handleStart();
             }
         }
 
@@ -341,7 +334,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         private void markWaitForReturn() {
             try {
-                em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(waitForReturnComponents.values(),
+                em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveComponents(),
                         FieldHelper.<ClusteredComponent, WaitForReturnComponent>construct(ClusteredComponent.class, "waitEntity")));
             } catch (UpdateException e) {
                 //todo aguzanov log error;
@@ -399,7 +392,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private Collection<ClusteredComponent> selectWaitForReturn() {
         return em.readByKeys(ClusteredComponent.class,
-                FieldHelper.getFieldCollection(waitForReturnComponents.values(),
+                FieldHelper.getFieldCollection(repository.getPassiveComponents(),
                         FieldHelper.construct(ClusteredComponent.class, "id")));
     }
 
