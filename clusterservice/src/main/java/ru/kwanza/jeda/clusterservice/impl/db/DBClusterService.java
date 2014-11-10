@@ -96,7 +96,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                         If.and(
                                 If.notEqual("nodeId"),
                                 If.in("name"),
-                                If.isLessOrEqual("lastActivity")
+                                If.isLessOrEqual("lastActivity"),
+                                If.isEqual("repaired",If.valueOf(false))
                         )).create();
     }
 
@@ -193,6 +194,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return null;
     }
 
+    public void markReparied(IClusteredComponent component, Node node) {
+
+    }
+
     public void registerComponent(IClusteredComponent module) {
         if (started) {
             throw new IllegalStateException("Can't regiter module " + module.getName() +
@@ -243,10 +248,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                         tm.begin();
                         leaseActivity();
                         checkPassiveComponents();
-
                         handleAlienComponents();
-
-
                     } finally {
                         tm.commit();
                     }
@@ -268,8 +270,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void leaseAlienComponents() {
-            if (!repository.getAlienComponets().isEmpty()) {
-                Collection<ClusteredComponent> items = em.readByKeys(ClusteredComponent.class, repository.getAlienComponets().keySet());
+            if (!repository.getAlienComponents().isEmpty()) {
+                Collection<ClusteredComponent> items = em.readByKeys(ClusteredComponent.class, repository.getAlienComponents().keySet());
                 em.fetchLazy(ClusteredComponent.class,items);
                 List<ClusteredComponent> stopRepair = new ArrayList<ClusteredComponent>();
                 for (ClusteredComponent item : items) {
@@ -295,7 +297,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
 
                 try {
-                    em.update(ClusteredComponent.class, repository.getAlienComponets().values());
+                    em.update(ClusteredComponent.class, repository.getAlienComponents().values());
                 } catch (UpdateException e) {
                 }
 

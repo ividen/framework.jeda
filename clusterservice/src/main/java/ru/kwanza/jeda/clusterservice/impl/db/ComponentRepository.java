@@ -45,7 +45,7 @@ public class ComponentRepository {
         return FieldHelper.getFieldCollection(passiveCoomponents.values(), ComponentEntry.entityField);
     }
 
-    public Map<String,ClusteredComponent> getAlienComponets(){
+    public Map<String,ClusteredComponent> getAlienComponents(){
         return Collections.unmodifiableMap(alienComponent);
     }
 
