@@ -18,6 +18,7 @@ public class ComponentRepository {
     private ConcurrentMap<String, ComponentEntry> activeComponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntry> passiveCoomponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntity> alienComponent = new ConcurrentHashMap<String, ComponentEntity>();
+    private ConcurrentMap<String,Object> monitors = new ConcurrentHashMap<String, Object>();
 
     public Map<String, IClusteredComponent> getComponents() {
         return Collections.unmodifiableMap(components);
@@ -27,6 +28,7 @@ public class ComponentRepository {
         if (components.putIfAbsent(component.getName(), component) != null) {
             throw new IllegalStateException("Component " + component.getName() + " already exists! Can't register!");
         }
+        monitors.put(component.getName(), new Object());
     }
 
     public Map<String, IClusteredComponent> getActiveComponents() {
@@ -79,5 +81,9 @@ public class ComponentRepository {
 
     public IClusteredComponent getComponent(String name) {
         return components.get(name);
+    }
+
+    public Object getMonitor(IClusteredComponent component){
+        return monitors.get(component.getName());
     }
 }

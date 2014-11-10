@@ -456,7 +456,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             int attemptCount = getWorkerAttemptCount();
             while (attemptCount > 0 && !success) {
                 try {
-                    work(component);
+                    synchronized (repository.getMonitor(component)) {
+                        work(component);
+                    }
                     success = true;
                 } catch (Throwable ex) {
                     attemptCount--;
