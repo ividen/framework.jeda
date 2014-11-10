@@ -8,8 +8,12 @@ import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.worker.StartRepairWorker;
+import ru.kwanza.jeda.clusterservice.impl.db.worker.StartWorker;
+import ru.kwanza.jeda.clusterservice.impl.db.worker.StopRepairWorker;
+import ru.kwanza.jeda.clusterservice.impl.db.worker.StopWorker;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -328,8 +332,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         private void startActiveComponents() {
             for (IClusteredComponent item : getActiveComponents().values()) {
-                //todo aguzanov вынести в пул потоков
-                item.handleStart();
+                startComponent(item);
             }
         }
 
@@ -356,13 +359,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        repository.getComponent(o.getName()).handleStop();
+                        stopComponent(repository.getComponent(o.getName()));
                     }
                 }
                 for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        repository.getComponent(o.getName()).handleStop();
+                        stopComponent(repository.getComponent(o.getName()));
                     }
                 }
             }
@@ -378,9 +381,24 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             for (ComponentEntity item : activateCandidates) {
                 repository.addActiveComponent(item);
                 repository.removePassiveComponent(item.getName());
-                //todo aguzanov do in worker
-                repository.getComponent(item.getName()).handleStart();
+                startComponent(repository.getComponent(item.getName()));
             }
+        }
+
+        private void startComponent(IClusteredComponent component){
+            workerExecutor.execute(new StartWorker(component));
+        }
+
+        private void stopComponent(IClusteredComponent component){
+            workerExecutor.execute(new StopWorker(component));
+        }
+
+        private void startRepair(IClusteredComponent component, Node node){
+            workerExecutor.execute(new StartRepairWorker(component, node));
+        }
+
+        private void stopRepair(IClusteredComponent component,Node node){
+            workerExecutor.execute(new StopRepairWorker(component, node));
         }
 
         private void updateActivity(Collection<ComponentEntity> items) throws UpdateException {
@@ -409,71 +427,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
             }
             return activateCandidates;
-        }
-    }
-
-
-
-    private class StartWorker implements Runnable {
-        private IClusteredComponent component;
-
-        public void run() {
-            while (true) {
-                try {
-                    component.handleStart();
-                    break;
-                } catch (Throwable e) {
-
-                }
-            }
-        }
-    }
-
-
-    private class StopWorker implements Runnable {
-        private IClusteredComponent component;
-
-        public void run() {
-            while (true) {
-                try {
-                    component.handleStop();
-                    break;
-                } catch (Throwable e) {
-
-                }
-            }
-        }
-    }
-
-    private class StartRepairWorker implements Runnable {
-        private IClusteredComponent component;
-        private Node node;
-
-        public void run() {
-            while (true) {
-                try {
-                    component.handleStartRepair(node);
-                    break;
-                } catch (Throwable e) {
-
-                }
-            }
-        }
-    }
-
-    private class StopRepairWorker implements Runnable {
-        private IClusteredComponent component;
-        private Node node;
-
-        public void run() {
-            while (true) {
-                try {
-                    component.handleStopRepair(node);
-                    break;
-                } catch (Throwable e) {
-
-                }
-            }
         }
     }
 }
