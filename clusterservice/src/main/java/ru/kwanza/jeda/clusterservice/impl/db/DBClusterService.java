@@ -5,16 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.dbtool.orm.api.IEntityManager;
-import ru.kwanza.dbtool.orm.api.IQuery;
-import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
-import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -35,17 +30,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public static final String SUPERVISOR_NAME = "DBClusterService-Supervisor";
     public static final String WORKER_NAME = "DBClusterService-Worker";
 
-    @Resource(name = "dbtool.IEntityManager")
-    private IEntityManager em;
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
-
-    private IQuery<ClusterNode> queryActive;
-    private IQuery<ClusterNode> queryPassive;
-    private IQuery<ClusterNode> queryAll;
-
-    private IQuery<ClusteredComponent> queryForComponents;
-    private IQuery<ClusteredComponent> queryForAlienStale;
+    @Resource
+    private DBClusterServiceDao dao;
+    @Resource
+    private ComponentRepository repository;
 
     private ClusterNode currentNode;
     private Integer currentNodeId;
@@ -61,12 +51,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private AtomicLong counter = new AtomicLong(0);
     private volatile boolean started = false;
     private Supervisor supervisor;
-    private ComponentRepository repository = new ComponentRepository();
 
 
     @PostConstruct
     public void init() {
-        initQuery();
         initCurrentNode();
         initSupervisors();
     }
@@ -83,36 +71,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     }
 
-    private void initQuery() {
-        queryActive = em.queryBuilder(ClusterNode.class).where(If.isGreater("lastActivity")).create();
-        queryPassive = em.queryBuilder(ClusterNode.class).where(If.isLessOrEqual("lastActivity")).create();
-        queryAll = em.queryBuilder(ClusterNode.class).create();
-        queryForComponents = em.queryBuilder(ClusteredComponent.class)
-                .where(If.and(If.isEqual("nodeId"), If.in("name"))).create();
-
-        queryForAlienStale = em.queryBuilder(ClusteredComponent.class)
-                .lazy()
-                .where(
-                        If.and(
-                                If.notEqual("nodeId"),
-                                If.in("name"),
-                                If.isLessOrEqual("lastActivity"),
-                                If.isEqual("repaired",If.valueOf(false))
-                        )).create();
-    }
-
     private void initCurrentNode() {
-        currentNode = new ClusterNode(currentNodeId, System.currentTimeMillis());
-
-        if (em.readByKey(ClusterNode.class, currentNode.getId()) == null) {
-            try {
-                em.create(currentNode);
-            } catch (UpdateException e) {
-                if (em.readByKey(ClusterNode.class, currentNode.getId()) == null) {
-                    throw new IllegalStateException("Can't register node in database!");
-                }
-            }
-        }
+        currentNode = dao.findOrCreateNode(new ClusterNode(currentNodeId, System.currentTimeMillis()));
     }
 
     public Integer getCurrentNodeId() {
@@ -158,15 +118,15 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     public List<? extends ClusterNode> getActiveNodes() {
-        return queryActive.prepare().setParameter(1, System.currentTimeMillis()).selectList();
+        return dao.selectActiveNodes();
     }
 
     public List<? extends Node> getPassiveNodes() {
-        return queryPassive.prepare().setParameter(1, System.currentTimeMillis()).selectList();
+        return dao.selectPassiveNodes();
     }
 
     public List<? extends Node> getNodes() {
-        return queryAll.prepare().setParameter(1, System.currentTimeMillis()).selectList();
+        return dao.selectNodes();
     }
 
     public Node getCurrentNode() {
@@ -198,21 +158,14 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     }
 
-    public void registerComponent(IClusteredComponent module) {
+    public void registerComponent(IClusteredComponent component) {
         if (started) {
-            throw new IllegalStateException("Can't regiter module " + module.getName() +
+            throw new IllegalStateException("Can't regiter component " + component.getName() +
                     "! Supervisor " + SUPERVISOR_NAME + "is already started!");
         }
 
-        if (em.readByKey(ClusteredComponent.class, ClusteredComponent.createId(currentNode.getId(), module.getName())) == null) {
-            try {
-                em.create(new ClusteredComponent(currentNode.getId(), module.getName()));
-            } catch (UpdateException e) {
-                logger.debug("Module {} already registered in database for node {}", module.getName(), currentNode.getId());
-            }
-        }
-
-        repository.registerComponent(module);
+        dao.findOrCreateComponent(currentNode, component);
+        repository.registerComponent(component);
     }
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -271,22 +224,21 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         private void leaseAlienComponents() {
             if (!repository.getAlienComponents().isEmpty()) {
-                Collection<ClusteredComponent> items = em.readByKeys(ClusteredComponent.class, repository.getAlienComponents().keySet());
-                em.fetchLazy(ClusteredComponent.class,items);
+                Collection<ClusteredComponent> items = dao.loadComponentsByKey(repository.getAlienComponents().keySet());
                 List<ClusteredComponent> stopRepair = new ArrayList<ClusteredComponent>();
                 for (ClusteredComponent item : items) {
-                    if(item.getWaitForReturn()) {
+                    if (item.getWaitForReturn()) {
                         item.clearMarkers();
                         item.setRepaired(true);
                         stopRepair.add(item);
-                    }else{
+                    } else {
                         repository.removeAlienComponent(item.getId());
                     }
                 }
 
 
                 try {
-                    em.update(ClusteredComponent.class, stopRepair);
+                    dao.updateComponents(stopRepair);
                 } catch (UpdateException e) {
                     stopRepair = e.getUpdated();
                 }
@@ -297,7 +249,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
 
                 try {
-                    em.update(ClusteredComponent.class, repository.getAlienComponents().values());
+                    dao.updateComponents(repository.getAlienComponents().values());
                 } catch (UpdateException e) {
                 }
 
@@ -305,7 +257,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void findAlienStaleComponents() {
-            List<ClusteredComponent> items = selectAlienStaleComponents();
+            List<ClusteredComponent> items = dao.selectAlienStaleComponents(currentNode);
 
             for (ClusteredComponent component : items) {
                 component.clearMarkers();
@@ -313,7 +265,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
 
             try {
-                em.update(ClusteredComponent.class, items);
+                dao.updateComponents(items);
             } catch (UpdateException e) {
                 items = e.getUpdated();
             }
@@ -327,20 +279,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
 
-        private List<ClusteredComponent> selectAlienStaleComponents() {
-            return queryForAlienStale.prepare()
-                    .setParameter(1, currentNodeId)
-                    .setParameter(2, repository.getStartedComponents().keySet())
-                    .setParameter(3, System.currentTimeMillis())
-                    .selectList();
-        }
-
         private void calcLastActivity() {
             lastActivityTs = System.currentTimeMillis() + failoverInterval;
         }
 
         private void processInitialState() {
-            List<ClusteredComponent> items = selectAllComponents();
+            List<ClusteredComponent> items = dao.selectAllComponents(currentNode);
             filterComponentByState(items);
             leaseActivity();
             startActiveComponents();
@@ -367,13 +311,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     repository.addActiveComponent(item);
                 }
             }
-        }
-
-        private List<ClusteredComponent> selectAllComponents() {
-            return queryForComponents.prepare()
-                    .setParameter(1, currentNodeId)
-                    .setParameter(2, repository.getComponents().keySet())
-                    .selectList();
         }
 
         private void leaseActivity() {
@@ -416,25 +353,15 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 component.clearMarkers();
             }
 
-            em.update(items);
+            dao.updateComponents(items);
         }
 
         private void checkPassiveComponents() {
             if (!repository.getPassiveComponents().isEmpty()) {
-                Collection<ClusteredComponent> items = selectWaitForReturn();
+                Collection<ClusteredComponent> items = dao.selectWaitForReturn();
                 List<ClusteredComponent> activateCandidates = findCandidateForActivation(items);
                 activateCandidates(activateCandidates);
-                markWaitForReturn();
-            }
-        }
-
-
-        private void markWaitForReturn() {
-            try {
-                em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveComponents(),
-                        FieldHelper.<ClusteredComponent, WaitForReturnComponent>construct(ClusteredComponent.class, "waitEntity")));
-            } catch (UpdateException e) {
-                //todo aguzanov log error;
+                dao.markWaitForReturn();
             }
         }
 
@@ -447,50 +374,5 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
             return activateCandidates;
         }
-
-
-        public final class RepairWorker implements Runnable {
-            private volatile boolean alive = true;
-            private ClusterNode node;
-            private IClusteredComponent module;
-            private ClusteredComponent clusteredComponent;
-
-            public RepairWorker(ClusterNode node, IClusteredComponent module, ClusteredComponent clusteredComponent) {
-                this.node = node;
-                this.module = module;
-                this.clusteredComponent = clusteredComponent;
-            }
-
-            public void run() {
-                while (!Thread.currentThread().isInterrupted() && alive) {
-                    tm.begin();
-                    try {
-
-                        tm.commit();
-                    } catch (Throwable e) {
-                        logger.error("Error in repair thread!", e);
-                        tm.rollback();
-                    }
-
-                    try {
-                        Thread.currentThread().sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                }
-            }
-
-            public void stopWorker() {
-                alive = false;
-            }
-        }
-
     }
-
-    private Collection<ClusteredComponent> selectWaitForReturn() {
-        return em.readByKeys(ClusteredComponent.class,
-                FieldHelper.getFieldCollection(repository.getPassiveComponents(),
-                        FieldHelper.construct(ClusteredComponent.class, "id")));
-    }
-
 }
