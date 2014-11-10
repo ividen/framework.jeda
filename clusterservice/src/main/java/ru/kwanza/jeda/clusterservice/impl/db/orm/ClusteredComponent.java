@@ -1,9 +1,6 @@
 package ru.kwanza.jeda.clusterservice.impl.db.orm;
 
-import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.annotations.Field;
-import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
+import ru.kwanza.dbtool.orm.annotations.*;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -31,6 +28,12 @@ public class ClusteredComponent {
     private Long lastActivity;
     @VersionField("version")
     private Long version;
+
+    @ManyToOne(property = "noteId")
+    private ClusterNode node;
+
+    @ManyToOne(property = "holdNodeId")
+    private ClusterNode holdNode;
 
     public ClusteredComponent(Integer nodeId, String name) {
         this.id = createId(nodeId, name);
@@ -89,6 +92,14 @@ public class ClusteredComponent {
         this.repaired = repaired;
     }
 
+    public ClusterNode getNode() {
+        return node;
+    }
+
+    public ClusterNode getHoldNode() {
+        return holdNode;
+    }
+
     public static Collection<String> getIds(final int nodeId, Collection<IClusteredComponent> modules) {
         return FieldHelper.getFieldCollection(modules, new FieldHelper.Field<IClusteredComponent, String>() {
             public String value(IClusteredComponent cm) {
@@ -105,5 +116,22 @@ public class ClusteredComponent {
         this.holdNodeId = null;
         this.waitForReturn = false;
         this.repaired = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ClusteredComponent component = (ClusteredComponent) o;
+
+        if (id != null ? !id.equals(component.id) : component.id != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

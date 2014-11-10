@@ -42,7 +42,7 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
 
     @Test
     public void testCritical_1() throws InvocationTargetException, InterruptedException {
-        final boolean noLock = service.criticalSection(new Callable<Boolean>() {
+        final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
                 final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);
@@ -57,7 +57,7 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
 
     @Test
     public void testCritical_2() throws InvocationTargetException, InterruptedException, TimeoutException {
-        final boolean noLock = service.criticalSection(new Callable<Boolean>() {
+        final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
                 final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);
@@ -76,7 +76,7 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
 
         final LockResult<ClusteredComponent> lock = em.lock(LockType.WAIT, clusteredComponent);
         try {
-            final boolean noLock = service.criticalSection(new Callable<Boolean>() {
+            final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
                 public Boolean call() throws Exception {
                     ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
                     final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);

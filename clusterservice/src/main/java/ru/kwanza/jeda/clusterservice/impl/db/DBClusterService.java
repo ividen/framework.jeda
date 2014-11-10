@@ -45,6 +45,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private IQuery<ClusterNode> queryAll;
 
     private IQuery<ClusteredComponent> queryForComponents;
+    private IQuery<ClusteredComponent> queryForAlienStale;
 
     private ClusterNode currentNode;
     private Integer currentNodeId;
@@ -88,6 +89,15 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         queryAll = em.queryBuilder(ClusterNode.class).create();
         queryForComponents = em.queryBuilder(ClusteredComponent.class)
                 .where(If.and(If.isEqual("nodeId"), If.in("name"))).create();
+
+        queryForAlienStale = em.queryBuilder(ClusteredComponent.class)
+                .lazy()
+                .where(
+                        If.and(
+                                If.notEqual("nodeId"),
+                                If.in("name"),
+                                If.isLessOrEqual("lastActivity")
+                        )).create();
     }
 
     private void initCurrentNode() {
@@ -174,11 +184,11 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return repository.getStoppedComponents();
     }
 
-    public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
+    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable) throws InterruptedException, InvocationTargetException {
         return null;
     }
 
-    public <R> R criticalSection(Callable<R> callable, long waitTimeout, TimeUnit unit)
+    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable, long waitTimeout, TimeUnit unit)
             throws InterruptedException, InvocationTargetException, TimeoutException {
         return null;
     }
@@ -216,8 +226,15 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         public void run() {
             logger.info("Started {}", SUPERVISOR_NAME);
 
-            calcLastActivity();
-            processInitialState();
+            while (true) {
+                try {
+                    calcLastActivity();
+                    processInitialState();
+                    break;
+                } catch (Throwable ex) {
+                    continue;
+                }
+            }
 
             while (started && !isInterrupted()) {
                 calcLastActivity();
@@ -225,7 +242,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                     try {
                         tm.begin();
                         leaseActivity();
-                        checkWaitings();
+                        checkPassiveComponents();
+
+                        handleAlienComponents();
+
 
                     } finally {
                         tm.commit();
@@ -240,6 +260,77 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
 
             logger.info("Stopped {}", SUPERVISOR_NAME);
+        }
+
+        private void handleAlienComponents() {
+            leaseAlienComponents();
+            findAlienStaleComponents();
+        }
+
+        private void leaseAlienComponents() {
+            if (!repository.getAlienComponets().isEmpty()) {
+                Collection<ClusteredComponent> items = em.readByKeys(ClusteredComponent.class, repository.getAlienComponets().keySet());
+                em.fetchLazy(ClusteredComponent.class,items);
+                List<ClusteredComponent> stopRepair = new ArrayList<ClusteredComponent>();
+                for (ClusteredComponent item : items) {
+                    if(item.getWaitForReturn()) {
+                        item.clearMarkers();
+                        item.setRepaired(true);
+                        stopRepair.add(item);
+                    }else{
+                        repository.removeAlienComponent(item.getId());
+                    }
+                }
+
+
+                try {
+                    em.update(ClusteredComponent.class, stopRepair);
+                } catch (UpdateException e) {
+                    stopRepair = e.getUpdated();
+                }
+
+                for (ClusteredComponent component : stopRepair) {
+                    //todo aguzanov move to worker
+                    repository.getComponent(component.getName()).handleStopRepair(component.getNode());
+                }
+
+                try {
+                    em.update(ClusteredComponent.class, repository.getAlienComponets().values());
+                } catch (UpdateException e) {
+                }
+
+            }
+        }
+
+        private void findAlienStaleComponents() {
+            List<ClusteredComponent> items = selectAlienStaleComponents();
+
+            for (ClusteredComponent component : items) {
+                component.clearMarkers();
+                component.setHoldNodeId(currentNodeId);
+            }
+
+            try {
+                em.update(ClusteredComponent.class, items);
+            } catch (UpdateException e) {
+                items = e.getUpdated();
+            }
+
+            for (ClusteredComponent component : items) {
+                repository.addAlientComponent(component);
+                IClusteredComponent cc = repository.getComponent(component.getName());
+                //todo aguzanov перенести в workers
+                cc.handleStartRepair(component.getNode());
+            }
+        }
+
+
+        private List<ClusteredComponent> selectAlienStaleComponents() {
+            return queryForAlienStale.prepare()
+                    .setParameter(1, currentNodeId)
+                    .setParameter(2, repository.getStartedComponents().keySet())
+                    .setParameter(3, System.currentTimeMillis())
+                    .selectList();
         }
 
         private void calcLastActivity() {
@@ -288,14 +379,16 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 updateActivity(repository.getActiveComponents());
             } catch (UpdateException e) {
                 for (ClusteredComponent o : e.<ClusteredComponent>getConstrainted()) {
-                    repository.removeActiveComponent(o.getName());
                     repository.addPassiveComponent(o);
-                    repository.getComponent(o.getName()).handleStop();
+                    if (repository.removeActiveComponent(o.getName())) {
+                        repository.getComponent(o.getName()).handleStop();
+                    }
                 }
                 for (ClusteredComponent o : e.<ClusteredComponent>getOptimistic()) {
-                    repository.removeActiveComponent(o.getName());
                     repository.addPassiveComponent(o);
-                    repository.getComponent(o.getName()).handleStop();
+                    if (repository.removeActiveComponent(o.getName())) {
+                        repository.getComponent(o.getName()).handleStop();
+                    }
                 }
             }
         }
@@ -324,11 +417,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             em.update(items);
         }
 
-        private void checkWaitings() {
-            Collection<ClusteredComponent> items = selectWaitForReturn();
-            List<ClusteredComponent> activateCandidates = findCandidateForActivation(items);
-            activateCandidates(activateCandidates);
-            markWaitForReturn();
+        private void checkPassiveComponents() {
+            if (!repository.getPassiveComponents().isEmpty()) {
+                Collection<ClusteredComponent> items = selectWaitForReturn();
+                List<ClusteredComponent> activateCandidates = findCandidateForActivation(items);
+                activateCandidates(activateCandidates);
+                markWaitForReturn();
+            }
         }
 
 

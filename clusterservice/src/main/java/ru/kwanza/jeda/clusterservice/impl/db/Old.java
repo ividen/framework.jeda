@@ -171,11 +171,11 @@ public class Old implements IClusterService, ApplicationListener<ContextRefreshe
         return currentNode;
     }
 
-    public <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException {
+    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable) throws InterruptedException, InvocationTargetException {
         return criticalSection.execute(callable);
     }
 
-    public <R> R criticalSection(Callable<R> callable, long waitTimeout, TimeUnit unit)
+    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable, long waitTimeout, TimeUnit unit)
             throws InterruptedException, InvocationTargetException, TimeoutException {
         return criticalSection.execute(callable, waitTimeout, unit);
     }

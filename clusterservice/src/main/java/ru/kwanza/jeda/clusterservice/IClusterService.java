@@ -26,9 +26,13 @@ public interface IClusterService {
 
     Map<String, IClusteredComponent> getStoppedComponents();
 
-    <R> R criticalSection(Callable<R> callable) throws InterruptedException, InvocationTargetException;
+    <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
+            throws InterruptedException, InvocationTargetException;
 
-    <R> R criticalSection(Callable<R> callable, long waiteTimeout, TimeUnit unit) throws InterruptedException, InvocationTargetException, TimeoutException;
+    <R> R criticalSection(IClusteredComponent component, Callable<R> callable, long waiteTimeout, TimeUnit unit)
+            throws InterruptedException, InvocationTargetException, TimeoutException;
+
+    void markReparied(IClusteredComponent component, Node node);
 
     void registerComponent(IClusteredComponent module);
 }
