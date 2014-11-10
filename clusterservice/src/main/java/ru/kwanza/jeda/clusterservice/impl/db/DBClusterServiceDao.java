@@ -8,8 +8,8 @@ import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -29,25 +29,25 @@ public class DBClusterServiceDao {
     @Resource
     private ComponentRepository repository;
 
-    private IQuery<ClusterNode> queryActive;
-    private IQuery<ClusterNode> queryPassive;
-    private IQuery<ClusterNode> queryAll;
-    private IQuery<ClusteredComponent> queryForComponents;
-    private IQuery<ClusteredComponent> queryForAlienStale;
+    private IQuery<NodeEntity> queryActive;
+    private IQuery<NodeEntity> queryPassive;
+    private IQuery<NodeEntity> queryAll;
+    private IQuery<ComponentEntity> queryForComponents;
+    private IQuery<ComponentEntity> queryForAlienStale;
 
     @PostConstruct
     public void init() {
-        queryActive = em.queryBuilder(ClusterNode.class).where(If.isGreater("lastActivity")).create();
-        queryPassive = em.queryBuilder(ClusterNode.class).where(If.isLessOrEqual("lastActivity")).create();
-        queryAll = em.queryBuilder(ClusterNode.class).create();
-        queryForComponents = em.queryBuilder(ClusteredComponent.class)
+        queryActive = em.queryBuilder(NodeEntity.class).where(If.isGreater("lastActivity")).create();
+        queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
+        queryAll = em.queryBuilder(NodeEntity.class).create();
+        queryForComponents = em.queryBuilder(ComponentEntity.class)
                 .where(
                         If.and(
                                 If.isEqual("nodeId"),
                                 If.in("name"))
                 ).create();
 
-        queryForAlienStale = em.queryBuilder(ClusteredComponent.class)
+        queryForAlienStale = em.queryBuilder(ComponentEntity.class)
                 .lazy()
                 .where(
                         If.and(
@@ -59,12 +59,12 @@ public class DBClusterServiceDao {
     }
 
 
-    public ClusterNode findOrCreateNode(ClusterNode node) {
-        if (em.readByKey(ClusterNode.class, node.getId()) == null) {
+    public NodeEntity findOrCreateNode(NodeEntity node) {
+        if (em.readByKey(NodeEntity.class, node.getId()) == null) {
             try {
                 em.create(node);
             } catch (UpdateException e) {
-                if (em.readByKey(ClusterNode.class, node.getId()) == null) {
+                if (em.readByKey(NodeEntity.class, node.getId()) == null) {
                     throw new IllegalStateException("Can't register node in database!");
                 }
             }
@@ -73,12 +73,12 @@ public class DBClusterServiceDao {
         return node;
     }
 
-    public ClusteredComponent findOrCreateComponent(ClusterNode node, IClusteredComponent component) {
-        ClusteredComponent result;
+    public ComponentEntity findOrCreateComponent(NodeEntity node, IClusteredComponent component) {
+        ComponentEntity result;
 
-        if ((result = em.readByKey(ClusteredComponent.class, ClusteredComponent.createId(node.getId(), component.getName()))) == null) {
+        if ((result = em.readByKey(ComponentEntity.class, ComponentEntity.createId(node.getId(), component.getName()))) == null) {
             try {
-                result = em.create(new ClusteredComponent(node.getId(), component.getName()));
+                result = em.create(new ComponentEntity(node.getId(), component.getName()));
             } catch (UpdateException e) {
                 logger.debug("Module {} already registered in database for node {}", component.getName(), node.getId());
             }
@@ -87,19 +87,19 @@ public class DBClusterServiceDao {
         return result;
     }
 
-    public Collection<ClusteredComponent> loadComponentsByKey(Collection<String> keys) {
-        Collection<ClusteredComponent> items = em.readByKeys(ClusteredComponent.class, keys);
-        em.fetchLazy(ClusteredComponent.class, items);
+    public Collection<ComponentEntity> loadComponentsByKey(Collection<String> keys) {
+        Collection<ComponentEntity> items = em.readByKeys(ComponentEntity.class, keys);
+        em.fetchLazy(ComponentEntity.class, items);
 
         return items;
     }
 
 
-    public void updateComponents(Collection<ClusteredComponent> items) throws UpdateException {
-        em.update(ClusteredComponent.class, items);
+    public void updateComponents(Collection<ComponentEntity> items) throws UpdateException {
+        em.update(ComponentEntity.class, items);
     }
 
-    public List<? extends ClusterNode> selectActiveNodes() {
+    public List<? extends NodeEntity> selectActiveNodes() {
         return queryActive.prepare().setParameter(1, System.currentTimeMillis()).selectList();
     }
 
@@ -112,7 +112,7 @@ public class DBClusterServiceDao {
     }
 
 
-    public List<ClusteredComponent> selectAlienStaleComponents(Node node) {
+    public List<ComponentEntity> selectAlienStaleComponents(Node node) {
         return queryForAlienStale.prepare()
                 .setParameter(1, node.getId())
                 .setParameter(2, repository.getStartedComponents().keySet())
@@ -120,24 +120,24 @@ public class DBClusterServiceDao {
                 .selectList();
     }
 
-    public List<ClusteredComponent> selectAllComponents(Node node) {
+    public List<ComponentEntity> selectAllComponents(Node node) {
         return queryForComponents.prepare()
                 .setParameter(1, node.getId())
                 .setParameter(2, repository.getComponents().keySet())
                 .selectList();
     }
 
-    public Collection<ClusteredComponent> selectWaitForReturn() {
-        return em.readByKeys(ClusteredComponent.class,
+    public Collection<ComponentEntity> selectWaitForReturn() {
+        return em.readByKeys(ComponentEntity.class,
                 FieldHelper.getFieldCollection(repository.getPassiveComponents(),
-                        FieldHelper.construct(ClusteredComponent.class, "id")));
+                        FieldHelper.construct(ComponentEntity.class, "id")));
     }
 
 
     public void markWaitForReturn() {
         try {
             em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveComponents(),
-                    FieldHelper.<ClusteredComponent, WaitForReturnComponent>construct(ClusteredComponent.class, "waitEntity")));
+                    FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitEntity")));
         } catch (UpdateException e) {
             //todo aguzanov log error;
         }

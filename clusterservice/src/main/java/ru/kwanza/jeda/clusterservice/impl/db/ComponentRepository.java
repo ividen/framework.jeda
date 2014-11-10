@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.Collection;
@@ -17,7 +17,7 @@ public class ComponentRepository {
     private ConcurrentMap<String, IClusteredComponent> components = new ConcurrentHashMap<String, IClusteredComponent>();
     private ConcurrentMap<String, ComponentEntry> activeComponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntry> passiveCoomponents = new ConcurrentHashMap<String, ComponentEntry>();
-    private ConcurrentMap<String, ClusteredComponent> alienComponent = new ConcurrentHashMap<String, ClusteredComponent>();
+    private ConcurrentMap<String, ComponentEntity> alienComponent = new ConcurrentHashMap<String, ComponentEntity>();
 
     public Map<String, IClusteredComponent> getComponents() {
         return Collections.unmodifiableMap(components);
@@ -41,27 +41,27 @@ public class ComponentRepository {
         return FieldHelper.getValueFieldMap(passiveCoomponents, ComponentEntry.componentField);
     }
 
-    public Collection<ClusteredComponent> getActiveComponents() {
+    public Collection<ComponentEntity> getActiveComponents() {
         return FieldHelper.getFieldCollection(activeComponents.values(), ComponentEntry.entityField);
     }
 
-    public Collection<ClusteredComponent> getPassiveComponents() {
+    public Collection<ComponentEntity> getPassiveComponents() {
         return FieldHelper.getFieldCollection(passiveCoomponents.values(), ComponentEntry.entityField);
     }
 
-    public Map<String, ClusteredComponent> getAlienComponents() {
+    public Map<String, ComponentEntity> getAlienComponents() {
         return Collections.unmodifiableMap(alienComponent);
     }
 
-    public void addActiveComponent(ClusteredComponent componentEntity) {
+    public void addActiveComponent(ComponentEntity componentEntity) {
         activeComponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
 
-    public void addPassiveComponent(ClusteredComponent componentEntity) {
+    public void addPassiveComponent(ComponentEntity componentEntity) {
         passiveCoomponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
 
-    public void addAlientComponent(ClusteredComponent componentEntity) {
+    public void addAlientComponent(ComponentEntity componentEntity) {
         alienComponent.put(componentEntity.getId(), componentEntity);
     }
 

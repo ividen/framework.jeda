@@ -4,8 +4,8 @@ import junit.framework.Assert;
 import org.dbunit.Assertion;
 import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
@@ -32,7 +32,7 @@ public class TestDBClusterService_4 extends AbstractDBClusterService {
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
 
-    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ClusteredComponent>>>
+    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ComponentEntity>>>
             repairingNodes = FieldHelper.construct(DBClusterService.class, "supervisor.repairingNodes");
 
 
@@ -86,12 +86,12 @@ public class TestDBClusterService_4 extends AbstractDBClusterService {
         Assert.assertEquals(false, m3.isRepaired());
         Assert.assertEquals(false, m3.isStopped());
 
-        ClusterNode clusterNode = em.readByKey(ClusterNode.class, 1l);
-        ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
-        clusterNode.setLastActivity(clusteredComponent.getLastActivity());
+        NodeEntity nodeEntity = em.readByKey(NodeEntity.class, 1l);
+        ComponentEntity componentEntity = em.readByKey(ComponentEntity.class, "1_repairable_module");
+        nodeEntity.setLastActivity(componentEntity.getLastActivity());
         m2.setRepaired(false);
         m3.setRepaired(false);
-        em.update(clusterNode);
+        em.update(nodeEntity);
 
 
         Thread.sleep(1000);

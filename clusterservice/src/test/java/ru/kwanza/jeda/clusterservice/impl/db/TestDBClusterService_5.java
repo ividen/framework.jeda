@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.springframework.test.context.ContextConfiguration;
 import ru.kwanza.dbtool.orm.api.LockResult;
 import ru.kwanza.dbtool.orm.api.LockType;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
@@ -36,7 +36,7 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
 
-    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ClusteredComponent>>>
+    private static FieldHelper.Field<DBClusterService, ConcurrentMap<Integer, ConcurrentMap<DBClusterService.Supervisor.RepairWorker, ComponentEntity>>>
             repairingNodes = FieldHelper.construct(DBClusterService.class, "supervisor.repairingNodes");
 
 
@@ -44,8 +44,8 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
     public void testCritical_1() throws InvocationTargetException, InterruptedException {
         final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
-                final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);
+                ComponentEntity componentEntity = em.readByKey(ComponentEntity.class, "1_repairable_module");
+                final LockResult<ComponentEntity> lock = em.lock(LockType.SKIP_LOCKED, componentEntity);
 
                 return lock.getLocked().isEmpty();
             }
@@ -59,8 +59,8 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
     public void testCritical_2() throws InvocationTargetException, InterruptedException, TimeoutException {
         final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
             public Boolean call() throws Exception {
-                ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
-                final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);
+                ComponentEntity componentEntity = em.readByKey(ComponentEntity.class, "1_repairable_module");
+                final LockResult<ComponentEntity> lock = em.lock(LockType.SKIP_LOCKED, componentEntity);
 
                 return lock.getLocked().isEmpty();
             }
@@ -71,15 +71,15 @@ public class TestDBClusterService_5 extends AbstractDBClusterService {
 
     @Test(expected = TimeoutException.class)
     public void testCritical_3() throws InvocationTargetException, InterruptedException, TimeoutException {
-        ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
+        ComponentEntity componentEntity = em.readByKey(ComponentEntity.class, "1_repairable_module");
         tm.begin();
 
-        final LockResult<ClusteredComponent> lock = em.lock(LockType.WAIT, clusteredComponent);
+        final LockResult<ComponentEntity> lock = em.lock(LockType.WAIT, componentEntity);
         try {
             final boolean noLock = service.criticalSection(, new Callable<Boolean>() {
                 public Boolean call() throws Exception {
-                    ClusteredComponent clusteredComponent = em.readByKey(ClusteredComponent.class, "1_repairable_module");
-                    final LockResult<ClusteredComponent> lock = em.lock(LockType.SKIP_LOCKED, clusteredComponent);
+                    ComponentEntity componentEntity = em.readByKey(ComponentEntity.class, "1_repairable_module");
+                    final LockResult<ComponentEntity> lock = em.lock(LockType.SKIP_LOCKED, componentEntity);
 
                     return lock.getLocked().isEmpty();
                 }

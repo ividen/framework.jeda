@@ -10,8 +10,8 @@ import java.util.Collection;
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "jeda_clustered_component", name = "jeda.clusterservice.ClusteredComponent")
-public class ClusteredComponent {
+@Entity(table = "jeda_clustered_component", name = "jeda.clusterservice.ComponentEntity")
+public class ComponentEntity {
     @IdField(value = "id", type = Types.VARCHAR)
     private String id;
     @Field("name")
@@ -30,12 +30,12 @@ public class ClusteredComponent {
     private Long version;
 
     @ManyToOne(property = "noteId")
-    private ClusterNode node;
+    private NodeEntity node;
 
     @ManyToOne(property = "holdNodeId")
-    private ClusterNode holdNode;
+    private NodeEntity holdNode;
 
-    public ClusteredComponent(Integer nodeId, String name) {
+    public ComponentEntity(Integer nodeId, String name) {
         this.id = createId(nodeId, name);
         this.nodeId = nodeId;
         this.name = name;
@@ -92,11 +92,11 @@ public class ClusteredComponent {
         this.repaired = repaired;
     }
 
-    public ClusterNode getNode() {
+    public NodeEntity getNode() {
         return node;
     }
 
-    public ClusterNode getHoldNode() {
+    public NodeEntity getHoldNode() {
         return holdNode;
     }
 
@@ -123,7 +123,7 @@ public class ClusteredComponent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ClusteredComponent component = (ClusteredComponent) o;
+        ComponentEntity component = (ComponentEntity) o;
 
         if (id != null ? !id.equals(component.id) : component.id != null) return false;
 

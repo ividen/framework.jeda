@@ -24,9 +24,9 @@ public interface IClusterService {
 
     Map<String, IClusteredComponent> getRepository();
 
-    Map<String, IClusteredComponent> getStartedComponents();
+    Map<String, IClusteredComponent> getActiveComponents();
 
-    Map<String, IClusteredComponent> getStoppedComponents();
+    Map<String, IClusteredComponent> getPassiveComponents();
 
     <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
             throws InvocationTargetException, ComponentInActiveExcetion;

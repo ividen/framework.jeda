@@ -10,7 +10,7 @@ public class TestModuleEntity {
 
     @Test
     public void testEntity(){
-        ClusteredComponent test = new ClusteredComponent(10, "test");
+        ComponentEntity test = new ComponentEntity(10, "test");
         Assert.assertEquals("10_test",test.getId());
         Assert.assertEquals("test",test.getName());
         Assert.assertEquals(10,test.getNodeId().intValue());

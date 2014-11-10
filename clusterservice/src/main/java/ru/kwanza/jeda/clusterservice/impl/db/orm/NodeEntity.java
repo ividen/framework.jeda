@@ -8,9 +8,9 @@ import ru.kwanza.jeda.clusterservice.Node;
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "jeda_cluster_node", name = "jeda.clusterservice.ClusterNode")
-public class ClusterNode extends Node {
-    public ClusterNode(Integer id, Long lastActivity) {
+@Entity(table = "jeda_cluster_node", name = "jeda.clusterservice.NodeEntity")
+public class NodeEntity extends Node {
+    public NodeEntity(Integer id, Long lastActivity) {
         super(id);
         this.lastActivity = lastActivity;
     }
