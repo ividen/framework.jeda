@@ -16,12 +16,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Alexander Guzanov
@@ -51,6 +50,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private AtomicLong counter = new AtomicLong(0);
     private volatile boolean started = false;
     private Supervisor supervisor;
+
+    private Lock repairLock = new ReentrantLock();
 
 
     @PostConstruct
@@ -154,8 +155,27 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return null;
     }
 
-    public void markReparied(IClusteredComponent component, Node node) {
-
+    public boolean markReparied(IClusteredComponent component, Node node) {
+        repairLock.lock();
+        try {
+            ClusteredComponent componentEntity = repository.getAlienComponents().get(ClusteredComponent.createId(node.getId(), component.getName()));
+            if (componentEntity != null) {
+                componentEntity.clearMarkers();
+                componentEntity.setRepaired(true);
+                componentEntity.setLastActivity(0l);
+                try {
+                    dao.updateComponents(Collections.singleton(componentEntity));
+                    repository.removeAlienComponent(componentEntity.getId());
+                    component.handleStopRepair(node);
+                } catch (UpdateException e) {
+                    //todo aguzanov log error
+                    return false;
+                }
+            }
+        } finally {
+            repairLock.unlock();
+        }
+        return true;
     }
 
     public void registerComponent(IClusteredComponent component) {
@@ -218,8 +238,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void handleAlienComponents() {
-            leaseAlienComponents();
-            findAlienStaleComponents();
+            repairLock.lock();
+            try {
+                leaseAlienComponents();
+                findAlienStaleComponents();
+            } finally {
+                repairLock.unlock();
+            }
         }
 
         private void leaseAlienComponents() {

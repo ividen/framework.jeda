@@ -27,11 +27,8 @@ public class DBClusterServiceDao {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Resource(name = "txn.ITransactionManager")
-    private ITransactionManager tm;
     @Resource
     private ComponentRepository repository;
-
 
     private IQuery<ClusterNode> queryActive;
     private IQuery<ClusterNode> queryPassive;
