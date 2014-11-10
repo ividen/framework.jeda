@@ -179,7 +179,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void checkActivity(IClusteredComponent component) throws ComponentInActiveExcetion {
-        if (!repository.isComponentStarted(component.getName())) {
+        if (!repository.isActive(component.getName())) {
             throw new ComponentInActiveExcetion("Component " + component.getName() + " is inactive!");
         }
     }
@@ -484,7 +484,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         @Override
         protected void work(IClusteredComponent component) {
-            component.handleStart();
+            if (repository.isActive(component.getName())) {
+                component.handleStart();
+            }
         }
     }
 
@@ -496,7 +498,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         @Override
         protected void work(IClusteredComponent component) {
-            component.handleStop();
+            if (!repository.isActive(component.getName())) {
+                component.handleStop();
+            }
         }
     }
 

@@ -35,7 +35,7 @@ public class ComponentRepository {
         return FieldHelper.getValueFieldMap(activeComponents, ComponentEntry.componentField);
     }
 
-    public boolean isComponentStarted(String name) {
+    public boolean isActive(String name) {
         return activeComponents.containsKey(name);
     }
 
