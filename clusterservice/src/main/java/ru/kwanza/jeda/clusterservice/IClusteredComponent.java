@@ -10,7 +10,7 @@ public interface IClusteredComponent {
 
     void handleStop();
 
-    boolean handleStartRepair(Node node);
+    void handleStartRepair(Node node);
 
     void handleStopRepair(Node node);
 }

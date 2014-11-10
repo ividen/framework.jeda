@@ -146,16 +146,26 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return repository.getStoppedComponents();
     }
 
-    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable) throws InterruptedException, InvocationTargetException {
-        return null;
+    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable) throws InvocationTargetException, ComponentInActiveExcetion {
+        checkActivity(component);
+        R result;
+        try {
+            result = callable.call();
+        } catch (Exception e) {
+            throw new InvocationTargetException(e);
+        }
+
+        checkActivity(component);
+        return result;
     }
 
-    public <R> R criticalSection(IClusteredComponent component, Callable<R> callable, long waitTimeout, TimeUnit unit)
-            throws InterruptedException, InvocationTargetException, TimeoutException {
-        return null;
+    private void checkActivity(IClusteredComponent component) throws ComponentInActiveExcetion {
+        if (!repository.isComponentStarted(component.getName())) {
+            throw new ComponentInActiveExcetion("Component " + component.getName() + " is inactive!");
+        }
     }
 
-    public boolean markReparied(IClusteredComponent component, Node node) {
+    public boolean markRepaired(IClusteredComponent component, Node node) {
         repairLock.lock();
         try {
             ClusteredComponent componentEntity = repository.getAlienComponents().get(ClusteredComponent.createId(node.getId(), component.getName()));

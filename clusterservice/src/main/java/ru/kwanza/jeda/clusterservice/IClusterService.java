@@ -1,13 +1,15 @@
 package ru.kwanza.jeda.clusterservice;
 
+import ru.kwanza.jeda.clusterservice.impl.db.ComponentInActiveExcetion;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
+ * Сервис позволяющий определять
+ *
  * @author Alexander Guzanov
  */
 public interface IClusterService {
@@ -27,12 +29,9 @@ public interface IClusterService {
     Map<String, IClusteredComponent> getStoppedComponents();
 
     <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
-            throws InterruptedException, InvocationTargetException;
+            throws InvocationTargetException, ComponentInActiveExcetion;
 
-    <R> R criticalSection(IClusteredComponent component, Callable<R> callable, long waiteTimeout, TimeUnit unit)
-            throws InterruptedException, InvocationTargetException, TimeoutException;
-
-    boolean markReparied(IClusteredComponent component, Node node);
+    boolean markRepaired(IClusteredComponent component, Node node);
 
     void registerComponent(IClusteredComponent module);
 }

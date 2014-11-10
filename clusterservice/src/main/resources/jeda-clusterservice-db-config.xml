@@ -23,4 +23,8 @@
         <property name="changeLog" value="classpath:jeda-clusterservice-db-liquibase.xml"/>
     </bean>
 
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.ComponentRepository"/>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterServiceDao"/>
+
 </beans>

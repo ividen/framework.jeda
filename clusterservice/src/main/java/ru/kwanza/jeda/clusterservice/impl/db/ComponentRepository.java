@@ -33,6 +33,10 @@ public class ComponentRepository {
         return FieldHelper.getValueFieldMap(activeComponents, ComponentEntry.componentField);
     }
 
+    public boolean isComponentStarted(String name) {
+        return activeComponents.containsKey(name);
+    }
+
     public Map<String, IClusteredComponent> getStoppedComponents() {
         return FieldHelper.getValueFieldMap(passiveCoomponents, ComponentEntry.componentField);
     }
@@ -45,7 +49,7 @@ public class ComponentRepository {
         return FieldHelper.getFieldCollection(passiveCoomponents.values(), ComponentEntry.entityField);
     }
 
-    public Map<String,ClusteredComponent> getAlienComponents(){
+    public Map<String, ClusteredComponent> getAlienComponents() {
         return Collections.unmodifiableMap(alienComponent);
     }
 
