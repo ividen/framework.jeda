@@ -10,10 +10,6 @@ import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
-import ru.kwanza.jeda.clusterservice.impl.db.worker.StartRepairWorker;
-import ru.kwanza.jeda.clusterservice.impl.db.worker.StartWorker;
-import ru.kwanza.jeda.clusterservice.impl.db.worker.StopRepairWorker;
-import ru.kwanza.jeda.clusterservice.impl.db.worker.StopWorker;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -49,6 +45,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private long failoverInterval;
     private long activityInterval;
     private int repairThreadCount;
+    private int workerAttemptCount;
+    private int workerAttemptInterval;
 
     private ExecutorService workerExecutor;
     private AtomicLong counter = new AtomicLong(0);
@@ -110,6 +108,22 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     public void setCurrentNodeId(Integer currentNodeId) {
         this.currentNodeId = currentNodeId;
+    }
+
+    public int getWorkerAttemptCount() {
+        return workerAttemptCount;
+    }
+
+    public void setWorkerAttemptCount(int workerAttemptCount) {
+        this.workerAttemptCount = workerAttemptCount;
+    }
+
+    public int getWorkerAttemptInterval() {
+        return workerAttemptInterval;
+    }
+
+    public void setWorkerAttemptInterval(int workerAttemptInterval) {
+        this.workerAttemptInterval = workerAttemptInterval;
     }
 
     private void initSupervisors() {
@@ -385,19 +399,19 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
         }
 
-        private void startComponent(IClusteredComponent component){
+        private void startComponent(IClusteredComponent component) {
             workerExecutor.execute(new StartWorker(component));
         }
 
-        private void stopComponent(IClusteredComponent component){
+        private void stopComponent(IClusteredComponent component) {
             workerExecutor.execute(new StopWorker(component));
         }
 
-        private void startRepair(IClusteredComponent component, Node node){
+        private void startRepair(IClusteredComponent component, Node node) {
             workerExecutor.execute(new StartRepairWorker(component, node));
         }
 
-        private void stopRepair(IClusteredComponent component,Node node){
+        private void stopRepair(IClusteredComponent component, Node node) {
             workerExecutor.execute(new StopRepairWorker(component, node));
         }
 
@@ -429,4 +443,89 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             return activateCandidates;
         }
     }
+
+    public abstract class AbstractWorker implements Runnable {
+        private IClusteredComponent component;
+
+        public AbstractWorker(IClusteredComponent component) {
+            this.component = component;
+        }
+
+        public void run() {
+            boolean success = false;
+            int attemptCount = getWorkerAttemptCount();
+            while (attemptCount > 0 && !success) {
+                try {
+                    work(component);
+                    success = true;
+                } catch (Throwable ex) {
+                    attemptCount--;
+                    try {
+                        Thread.sleep(getWorkerAttemptInterval());
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                    continue;
+                }
+            }
+
+            if (!success) workerExecutor.execute(this);
+        }
+
+        protected abstract void work(IClusteredComponent component);
+    }
+
+    public class StartWorker extends AbstractWorker {
+        public StartWorker(IClusteredComponent component) {
+            super(component);
+        }
+
+        @Override
+        protected void work(IClusteredComponent component) {
+            component.handleStart();
+        }
+    }
+
+    public class StopWorker extends AbstractWorker {
+
+        public StopWorker(IClusteredComponent component) {
+            super(component);
+        }
+
+        @Override
+        protected void work(IClusteredComponent component) {
+            component.handleStop();
+        }
+    }
+
+    public class StartRepairWorker extends AbstractWorker {
+        private Node node;
+
+        public StartRepairWorker(IClusteredComponent component, Node node) {
+            super(component);
+            this.node = node;
+        }
+
+
+        @Override
+        protected void work(IClusteredComponent component) {
+            component.handleStartRepair(node);
+        }
+    }
+
+    public class StopRepairWorker extends AbstractWorker {
+        private Node node;
+
+        public StopRepairWorker(IClusteredComponent component, Node node) {
+            super(component);
+            this.node = node;
+        }
+
+        @Override
+        protected void work(IClusteredComponent component) {
+            component.handleStopRepair(node);
+        }
+    }
+
+
 }
