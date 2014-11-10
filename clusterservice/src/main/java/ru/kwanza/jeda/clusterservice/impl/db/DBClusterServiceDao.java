@@ -115,7 +115,7 @@ public class DBClusterServiceDao {
     public List<ComponentEntity> selectAlienStaleComponents(Node node) {
         return queryForAlienStale.prepare()
                 .setParameter(1, node.getId())
-                .setParameter(2, repository.getStartedComponents().keySet())
+                .setParameter(2, repository.getActiveComponents().keySet())
                 .setParameter(3, System.currentTimeMillis())
                 .selectList();
     }
@@ -129,14 +129,14 @@ public class DBClusterServiceDao {
 
     public Collection<ComponentEntity> selectWaitForReturn() {
         return em.readByKeys(ComponentEntity.class,
-                FieldHelper.getFieldCollection(repository.getPassiveComponents(),
+                FieldHelper.getFieldCollection(repository.getPassiveEntities(),
                         FieldHelper.construct(ComponentEntity.class, "id")));
     }
 
 
     public void markWaitForReturn() {
         try {
-            em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveComponents(),
+            em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveEntities(),
                     FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitEntity")));
         } catch (UpdateException e) {
             //todo aguzanov log error;

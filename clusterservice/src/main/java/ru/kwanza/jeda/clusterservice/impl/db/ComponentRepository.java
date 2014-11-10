@@ -25,11 +25,11 @@ public class ComponentRepository {
 
     public void registerComponent(IClusteredComponent component) {
         if (components.putIfAbsent(component.getName(), component) != null) {
-            throw new IllegalStateException("Component " + component.getName() + " alredy exists! Can't regiter!");
+            throw new IllegalStateException("Component " + component.getName() + " already exists! Can't register!");
         }
     }
 
-    public Map<String, IClusteredComponent> getStartedComponents() {
+    public Map<String, IClusteredComponent> getActiveComponents() {
         return FieldHelper.getValueFieldMap(activeComponents, ComponentEntry.componentField);
     }
 
@@ -37,19 +37,19 @@ public class ComponentRepository {
         return activeComponents.containsKey(name);
     }
 
-    public Map<String, IClusteredComponent> getStoppedComponents() {
+    public Map<String, IClusteredComponent> getPassiveComponents() {
         return FieldHelper.getValueFieldMap(passiveCoomponents, ComponentEntry.componentField);
     }
 
-    public Collection<ComponentEntity> getActiveComponents() {
+    public Collection<ComponentEntity> getActiveEntities() {
         return FieldHelper.getFieldCollection(activeComponents.values(), ComponentEntry.entityField);
     }
 
-    public Collection<ComponentEntity> getPassiveComponents() {
+    public Collection<ComponentEntity> getPassiveEntities() {
         return FieldHelper.getFieldCollection(passiveCoomponents.values(), ComponentEntry.entityField);
     }
 
-    public Map<String, ComponentEntity> getAlienComponents() {
+    public Map<String, ComponentEntity> getAlienEntities() {
         return Collections.unmodifiableMap(alienComponent);
     }
 

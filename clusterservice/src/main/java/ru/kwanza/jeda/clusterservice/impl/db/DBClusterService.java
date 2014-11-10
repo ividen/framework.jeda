@@ -139,11 +139,11 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     public Map<String, IClusteredComponent> getActiveComponents() {
-        return repository.getStartedComponents();
+        return repository.getActiveComponents();
     }
 
     public Map<String, IClusteredComponent> getPassiveComponents() {
-        return repository.getStoppedComponents();
+        return repository.getPassiveComponents();
     }
 
     public <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
@@ -169,7 +169,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public boolean markRepaired(IClusteredComponent component, Node node) {
         repairLock.lock();
         try {
-            ComponentEntity componentEntity = repository.getAlienComponents().get(ComponentEntity.createId(node.getId(), component.getName()));
+            ComponentEntity componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node.getId(), component.getName()));
             if (componentEntity != null) {
                 componentEntity.clearMarkers();
                 componentEntity.setRepaired(true);
@@ -259,8 +259,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void leaseAlienComponents() {
-            if (!repository.getAlienComponents().isEmpty()) {
-                Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienComponents().keySet());
+            if (!repository.getAlienEntities().isEmpty()) {
+                Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
                 List<ComponentEntity> stopRepair = new ArrayList<ComponentEntity>();
                 for (ComponentEntity item : items) {
                     if (item.getWaitForReturn()) {
@@ -285,7 +285,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
 
                 try {
-                    dao.updateComponents(repository.getAlienComponents().values());
+                    dao.updateComponents(repository.getAlienEntities().values());
                 } catch (UpdateException e) {
                 }
 
@@ -351,7 +351,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         private void leaseActivity() {
             try {
-                updateActivity(repository.getActiveComponents());
+                updateActivity(repository.getActiveEntities());
             } catch (UpdateException e) {
                 for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
                     repository.addPassiveComponent(o);
@@ -393,7 +393,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void checkPassiveComponents() {
-            if (!repository.getPassiveComponents().isEmpty()) {
+            if (!repository.getPassiveEntities().isEmpty()) {
                 Collection<ComponentEntity> items = dao.selectWaitForReturn();
                 List<ComponentEntity> activateCandidates = findCandidateForActivation(items);
                 activateCandidates(activateCandidates);
