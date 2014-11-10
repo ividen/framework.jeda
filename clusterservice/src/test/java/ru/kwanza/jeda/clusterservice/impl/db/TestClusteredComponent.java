@@ -33,9 +33,10 @@ public class TestClusteredComponent implements IClusteredComponent {
         System.out.println("Stopped ");
     }
 
-    public boolean handleStartRepair(Node node) {
+    public void handleStartRepair(Node node) {
         System.out.println("Repair " + counter + " of node " + node);
-        return counter-- <= 0;
+
+
     }
 
     public void handleStopRepair(Node node) {

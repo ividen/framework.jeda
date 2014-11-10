@@ -3,13 +3,12 @@ package ru.kwanza.jeda.clusterservice.impl.db.orm;
 import ru.kwanza.dbtool.orm.annotations.Entity;
 import ru.kwanza.dbtool.orm.annotations.Field;
 import ru.kwanza.dbtool.orm.annotations.IdField;
-import ru.kwanza.dbtool.orm.annotations.VersionField;
 import ru.kwanza.jeda.clusterservice.Node;
 
 /**
  * @author Alexander Guzanov
  */
-@Entity(table = "jeda_cluster_node",  name="jeda.clusterservice.ClusterNode")
+@Entity(table = "jeda_cluster_node", name = "jeda.clusterservice.ClusterNode")
 public class ClusterNode extends Node {
     public ClusterNode(Integer id, Long lastActivity) {
         super(id);
@@ -21,7 +20,7 @@ public class ClusterNode extends Node {
         return id;
     }
 
-    public void setId(Integer id){
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -35,20 +34,20 @@ public class ClusterNode extends Node {
     }
 
     @Field("ip_address")
-    public String getIpAddress(){
+    public String getIpAddress() {
         return ipAddress;
     }
 
     @Field("pid")
-    public String getPid(){
+    public String getPid() {
         return pid;
     }
 
-    public void setPid(String pid){
+    public void setPid(String pid) {
         this.pid = pid;
     }
 
-    public void setIpAddress(String ipAddress){
+    public void setIpAddress(String ipAddress) {
         this.ipAddress = ipAddress;
     }
 }

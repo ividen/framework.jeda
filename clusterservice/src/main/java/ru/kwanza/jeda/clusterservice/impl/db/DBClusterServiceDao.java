@@ -12,7 +12,6 @@ import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusterNode;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ClusteredComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
-import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;

@@ -410,4 +410,69 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             return activateCandidates;
         }
     }
+
+
+
+    private class StartWorker implements Runnable {
+        private IClusteredComponent component;
+
+        public void run() {
+            while (true) {
+                try {
+                    component.handleStart();
+                    break;
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+    }
+
+
+    private class StopWorker implements Runnable {
+        private IClusteredComponent component;
+
+        public void run() {
+            while (true) {
+                try {
+                    component.handleStop();
+                    break;
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+    }
+
+    private class StartRepairWorker implements Runnable {
+        private IClusteredComponent component;
+        private Node node;
+
+        public void run() {
+            while (true) {
+                try {
+                    component.handleStartRepair(node);
+                    break;
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+    }
+
+    private class StopRepairWorker implements Runnable {
+        private IClusteredComponent component;
+        private Node node;
+
+        public void run() {
+            while (true) {
+                try {
+                    component.handleStopRepair(node);
+                    break;
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+    }
 }
