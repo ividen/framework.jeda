@@ -270,8 +270,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 }
 
                 for (ComponentEntity component : stopRepair) {
-                    //todo aguzanov move to worker
-                    repository.getComponent(component.getName()).handleStopRepair(component.getNode());
+                    workers.stopRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
                 }
 
                 try {
@@ -298,9 +297,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
             for (ComponentEntity component : items) {
                 repository.addAlientComponent(component);
-                IClusteredComponent cc = repository.getComponent(component.getName());
-                //todo aguzanov перенести в workers
-                cc.handleStartRepair(component.getNode());
+                workers.startRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
             }
         }
 
@@ -345,13 +342,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        workers.stopComponent(o.getId(),repository.getComponent(o.getName()));
+                        workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
                     }
                 }
                 for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        workers.stopComponent(o.getId(),repository.getComponent(o.getName()));
+                        workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
                     }
                 }
             }
@@ -367,7 +364,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             for (ComponentEntity item : activateCandidates) {
                 repository.addActiveComponent(item);
                 repository.removePassiveComponent(item.getName());
-                workers.startComponent(item.getId(),repository.getComponent(item.getName()));
+                workers.startComponent(item.getId(), repository.getComponent(item.getName()));
             }
         }
 
@@ -400,8 +397,5 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             return activateCandidates;
         }
     }
-
-
-
 
 }

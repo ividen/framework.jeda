@@ -15,9 +15,9 @@ import static ru.kwanza.jeda.clusterservice.impl.db.DBClusterService.logger;
  * @author Alexander Guzanov
  */
 public class WorkerController {
-    private int workerAttemptCount;
-    private int workerAttamptInterval;
-    private int workerThreadCount;
+    private int attemptCount;
+    private int attemptInterval;
+    private int threadCount;
     private int keepAlive;
 
     private ExecutorService workerExecutor;
@@ -26,29 +26,29 @@ public class WorkerController {
     private ConcurrentMap<String, ChangeComponentStatusTask> tasks = new ConcurrentHashMap<String, ChangeComponentStatusTask>();
 
 
-    public int getWorkerAttemptCount() {
-        return workerAttemptCount;
+    public int getAttemptCount() {
+        return attemptCount;
     }
 
-    public int getWorkerAttamptInterval() {
-        return workerAttamptInterval;
+    public int getAttemptInterval() {
+        return attemptInterval;
     }
 
-    public void setWorkerAttemptCount(int workerAttemptCount) {
-        this.workerAttemptCount = workerAttemptCount;
+    public void setAttemptCount(int attemptCount) {
+        this.attemptCount = attemptCount;
     }
 
-    public void setWorkerAttamptInterval(int workerAttamptInterval) {
-        this.workerAttamptInterval = workerAttamptInterval;
+    public void setAttemptInterval(int attemptInterval) {
+        this.attemptInterval = attemptInterval;
     }
 
 
-    public int getWorkerThreadCount() {
-        return workerThreadCount;
+    public int getThreadCount() {
+        return threadCount;
     }
 
-    public void setWorkerThreadCount(int workerThreadCount) {
-        this.workerThreadCount = workerThreadCount;
+    public void setThreadCount(int threadCount) {
+        this.threadCount = threadCount;
     }
 
     public int getKeepAlive() {
@@ -98,7 +98,7 @@ public class WorkerController {
 
     @PostConstruct
     public void init() {
-        workerExecutor = new ThreadPoolExecutor(workerThreadCount, workerThreadCount, keepAlive,
+        workerExecutor = new ThreadPoolExecutor(threadCount, threadCount, keepAlive,
                 TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
             public Thread newThread(Runnable r) {
                 return new Thread(r, DBClusterService.WORKER_NAME + "-" + counter.incrementAndGet());
@@ -123,7 +123,7 @@ public class WorkerController {
 
         public void run() {
             boolean success = false;
-            int attemptCount = workerAttemptCount;
+            int attemptCount = WorkerController.this.attemptCount;
             while (attemptCount > 0 && !success) {
                 try {
                     work(component);
@@ -131,7 +131,7 @@ public class WorkerController {
                 } catch (Throwable ex) {
                     attemptCount--;
                     try {
-                        Thread.sleep(workerAttamptInterval);
+                        Thread.sleep(attemptInterval);
                     } catch (InterruptedException e) {
                         break;
                     }

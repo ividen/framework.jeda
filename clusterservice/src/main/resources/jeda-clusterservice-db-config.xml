@@ -27,10 +27,10 @@
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterServiceDao"/>
 
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.WorkerController">
-        <property name="keepAlive" value="${jeda.clusterservice.db.activityInterval:60000}"/>
-        <property name="workerAttemptCount" value="${jeda.clusterservice.db.worker.workerAttemptCount:10}"/>
-        <property name="workerAttamptInterval" value="${jeda.clusterservice.db.worker.workerAttemptCount:5000}"/>
-        <property name="workerThreadCount" value="${jeda.clusterservice.db.worker.workerAttemptCount:10}"/>
+        <property name="keepAlive" value="${jeda.clusterservice.worker.keepAlive:60000}"/>
+        <property name="attemptCount" value="${jeda.clusterservice.worker.attemptCount:10}"/>
+        <property name="attemptInterval" value="${jeda.clusterservice.worker.attemptInterval:5000}"/>
+        <property name="threadCount" value="${jeda.clusterservice.worker.threadCount:10}"/>
     </bean>
 
 </beans>
