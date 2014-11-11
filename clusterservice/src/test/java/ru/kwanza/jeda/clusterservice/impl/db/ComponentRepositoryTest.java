@@ -32,6 +32,8 @@ public class ComponentRepositoryTest {
 
         final ComponentRepository repository = new ComponentRepository();
 
+        Assert.assertEquals(0,repository.getComponents().size());
+
         repository.registerComponent(component1);
         repository.registerComponent(component2);
         try {
@@ -40,7 +42,7 @@ public class ComponentRepositoryTest {
         } catch (IllegalStateException e) {
         }
 
-
+        Assert.assertEquals(2,repository.getComponents().size());
         ConcurrentHashMap<String,IClusteredComponent> map = Deencapsulation.getField(repository, "components");
 
         Assert.assertEquals(map.size(), 2);

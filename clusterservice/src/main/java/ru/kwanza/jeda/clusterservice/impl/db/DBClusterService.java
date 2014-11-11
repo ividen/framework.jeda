@@ -46,7 +46,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private long failoverInterval;
     private long activityInterval;
-    private int repairThreadCount;
 
     private volatile boolean started = false;
     private Supervisor supervisor;
@@ -90,14 +89,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     public void setActivityInterval(long activityInterval) {
         this.activityInterval = activityInterval;
-    }
-
-    public int getRepairThreadCount() {
-        return repairThreadCount;
-    }
-
-    public void setRepairThreadCount(int repairThreadCount) {
-        this.repairThreadCount = repairThreadCount;
     }
 
     public void setCurrentNodeId(Integer currentNodeId) {

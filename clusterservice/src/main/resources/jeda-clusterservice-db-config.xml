@@ -14,7 +14,6 @@
         <property name="currentNodeId" value="${jeda.clusterservice.nodeId}"/>
         <property name="failoverInterval" value="${jeda.clusterservice.db.failoverInterval:300000}"/>
         <property name="activityInterval" value="${jeda.clusterservice.db.activityInterval:60000}"/>
-        <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
     </bean>
 
     <bean id="jeda.clusterservice.SpringLiquibase" class="liquibase.integration.spring.SpringLiquibase">
@@ -27,10 +26,10 @@
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterServiceDao"/>
 
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.WorkerController">
-        <property name="keepAlive" value="${jeda.clusterservice.worker.keepAlive:60000}"/>
-        <property name="attemptCount" value="${jeda.clusterservice.worker.attemptCount:10}"/>
-        <property name="attemptInterval" value="${jeda.clusterservice.worker.attemptInterval:5000}"/>
-        <property name="threadCount" value="${jeda.clusterservice.worker.threadCount:10}"/>
+        <constructor-arg index="0" value="${jeda.clusterservice.worker.threadCount:10}"/>
+        <constructor-arg index="1" value="${jeda.clusterservice.worker.attemptCount:10}"/>
+        <constructor-arg index="2" value="${jeda.clusterservice.worker.attemptInterval:5000}"/>
+        <constructor-arg index="3" value="${jeda.clusterservice.worker.keepAlive:60000}"/>
     </bean>
 
 </beans>

@@ -13,13 +13,4 @@ public interface IClusteredComponent {
     void handleStartRepair(Node node);
 
     void handleStopRepair(Node node);
-
-
-    public static enum Status{
-        STOPED,
-        STARTING,
-        STARTED,
-        STOPPING,
-        STOPPED;
-    }
 }

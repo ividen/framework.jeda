@@ -5,6 +5,8 @@ import ru.kwanza.jeda.clusterservice.Node;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,8 +25,15 @@ public class WorkerController {
     private ExecutorService workerExecutor;
     private AtomicLong counter = new AtomicLong(0);
 
-    private ConcurrentMap<String, ChangeComponentStatusTask> tasks = new ConcurrentHashMap<String, ChangeComponentStatusTask>();
+    private Map<String, ChangeComponentStatusTask> tasks = new HashMap<String, ChangeComponentStatusTask>();
 
+
+    public WorkerController(int threadCount, int attemptCount, int attemptInterval, int keepAlive) {
+        this.threadCount = threadCount;
+        this.attemptCount = attemptCount;
+        this.attemptInterval = attemptInterval;
+        this.keepAlive = keepAlive;
+    }
 
     public int getAttemptCount() {
         return attemptCount;
@@ -34,65 +43,56 @@ public class WorkerController {
         return attemptInterval;
     }
 
-    public void setAttemptCount(int attemptCount) {
-        this.attemptCount = attemptCount;
-    }
-
-    public void setAttemptInterval(int attemptInterval) {
-        this.attemptInterval = attemptInterval;
-    }
-
-
     public int getThreadCount() {
         return threadCount;
-    }
-
-    public void setThreadCount(int threadCount) {
-        this.threadCount = threadCount;
     }
 
     public int getKeepAlive() {
         return keepAlive;
     }
 
-    public void setKeepAlive(int keepAlive) {
-        this.keepAlive = keepAlive;
-    }
-
     public void startComponent(String id, IClusteredComponent component) {
-        ChangeComponentStatusTask task = new ChangeComponentStatusTask(component);
-        if (tasks.putIfAbsent(id, task) != null) {
-            task = tasks.get(id);
+        synchronized (tasks) {
+            ChangeComponentStatusTask task = tasks.get(id);
+            if (task == null) {
+                task = new ChangeComponentStatusTask(id, component);
+                tasks.put(id, task);
+            }
+            task.scheduleStart();
         }
-
-        task.scheduleStart();
     }
 
     public void stopComponent(String id, IClusteredComponent component) {
-        ChangeComponentStatusTask task = new ChangeComponentStatusTask(component);
-        if (tasks.putIfAbsent(id, task) != null) {
-            task = tasks.get(id);
+        synchronized (tasks) {
+            ChangeComponentStatusTask task = tasks.get(id);
+            if (task == null) {
+                task = new ChangeComponentStatusTask(id, component);
+                tasks.put(id, task);
+            }
+            task.scheduleStop();
         }
-
-        task.scheduleStop();
     }
 
     public void startRepair(String id, IClusteredComponent component, Node node) {
-        ChangeComponentStatusTask task = new ChangeComponentRepairStatusTask(node, component);
-        if (tasks.putIfAbsent(id, task) != null) {
-            task = tasks.get(id);
+        synchronized (tasks) {
+            ChangeComponentStatusTask task = tasks.get(id);
+            if (task == null) {
+                task = new ChangeComponentRepairStatusTask(id, node, component);
+                tasks.put(id, task);
+            }
+            task.scheduleStart();
         }
-
-        task.scheduleStart();
     }
 
     public void stopRepair(String id, IClusteredComponent component, Node node) {
-        ChangeComponentStatusTask task = new ChangeComponentRepairStatusTask(node, component);
-        if (tasks.putIfAbsent(id, task) != null) {
-            task = tasks.get(id);
+        synchronized (tasks) {
+            ChangeComponentStatusTask task = tasks.get(id);
+            if (task == null) {
+                task = new ChangeComponentRepairStatusTask(id, node, component);
+                tasks.put(id, task);
+            }
+            task.scheduleStop();
         }
-
-        task.scheduleStop();
     }
 
 
@@ -115,9 +115,11 @@ public class WorkerController {
 
 
     public abstract class AbstractTask extends ReentrantLock implements Runnable {
-        protected IClusteredComponent component;
+        protected final IClusteredComponent component;
+        protected final String id;
 
-        public AbstractTask(IClusteredComponent component) {
+        public AbstractTask(String id, IClusteredComponent component) {
+            this.id = id;
             this.component = component;
         }
 
@@ -141,7 +143,13 @@ public class WorkerController {
                 }
             }
 
-            if (!success) workerExecutor.execute(this);
+            if (!success) {
+                workerExecutor.execute(this);
+            } else {
+                synchronized (tasks) {
+                    tasks.remove(id);
+                }
+            }
         }
 
         protected abstract void work();
@@ -152,8 +160,8 @@ public class WorkerController {
         private volatile boolean complete = false;
         private volatile boolean scheduled = false;
 
-        public ChangeComponentStatusTask(IClusteredComponent component) {
-            super(component);
+        public ChangeComponentStatusTask(String id, IClusteredComponent component) {
+            super(id, component);
         }
 
         @Override
@@ -202,7 +210,7 @@ public class WorkerController {
         }
 
         void trySchedule() {
-            if (!complete || !scheduled) {
+            if (complete || !scheduled) {
                 scheduled = true;
                 logger.info("Scheduling component {}", component.getName());
                 workerExecutor.execute(this);
@@ -213,8 +221,8 @@ public class WorkerController {
     private class ChangeComponentRepairStatusTask extends ChangeComponentStatusTask {
         private Node node;
 
-        public ChangeComponentRepairStatusTask(Node node, IClusteredComponent component) {
-            super(component);
+        public ChangeComponentRepairStatusTask(String id, Node node, IClusteredComponent component) {
+            super(id, component);
             this.node = node;
         }
 
