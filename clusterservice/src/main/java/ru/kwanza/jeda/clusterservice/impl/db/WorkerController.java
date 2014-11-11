@@ -115,7 +115,7 @@ public class WorkerController {
 
 
     public abstract class AbstractTask extends ReentrantLock implements Runnable {
-        private IClusteredComponent component;
+        protected IClusteredComponent component;
 
         public AbstractTask(IClusteredComponent component) {
             this.component = component;
@@ -126,9 +126,11 @@ public class WorkerController {
             int attemptCount = WorkerController.this.attemptCount;
             while (attemptCount > 0 && !success) {
                 try {
-                    work(component);
+                    work();
                     success = true;
                 } catch (Throwable ex) {
+                    logger.error("Error executing task for component " + component.getName(), ex);
+
                     attemptCount--;
                     try {
                         Thread.sleep(attemptInterval);
@@ -142,7 +144,7 @@ public class WorkerController {
             if (!success) workerExecutor.execute(this);
         }
 
-        protected abstract void work(IClusteredComponent component);
+        protected abstract void work();
     }
 
     private class ChangeComponentStatusTask extends AbstractTask {
@@ -155,13 +157,13 @@ public class WorkerController {
         }
 
         @Override
-        protected void work(IClusteredComponent component) {
+        protected void work() {
             lock();
             try {
                 if (start_or_stop > 0) {
-                    handleStart(component);
+                    handleStart();
                 } else if (start_or_stop < 0) {
-                    handleStop(component);
+                    handleStop();
                 }
                 complete = true;
             } finally {
@@ -169,11 +171,13 @@ public class WorkerController {
             }
         }
 
-        protected void handleStop(IClusteredComponent component) {
+        protected void handleStop() {
+            logger.info("Stopping component {}", component.getName());
             component.handleStop();
+            logger.info("Stopped component {}", component.getName());
         }
 
-        protected void handleStart(IClusteredComponent component) {
+        protected void handleStart() {
             component.handleStart();
         }
 
@@ -200,6 +204,7 @@ public class WorkerController {
         void trySchedule() {
             if (!complete || !scheduled) {
                 scheduled = true;
+                logger.info("Scheduling component {}", component.getName());
                 workerExecutor.execute(this);
             }
         }
@@ -213,14 +218,16 @@ public class WorkerController {
             this.node = node;
         }
 
-        @Override
-        protected void handleStop(IClusteredComponent component) {
+        protected void handleStop() {
+            logger.info("Stopping repair component {} for node {} ...", component.getName(), node.toString());
             component.handleStopRepair(node);
+            logger.info("Stopped repair component {} for node {}", component.getName(), node.toString());
         }
 
-        @Override
-        protected void handleStart(IClusteredComponent component) {
+        protected void handleStart() {
+            logger.info("Starting repair component {} for node {} ...", component.getName(), node.toString());
             component.handleStartRepair(node);
+            logger.info("Started repair component {} for node {}", component.getName(), node.toString());
         }
     }
 }
