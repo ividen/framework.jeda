@@ -21,17 +21,4 @@ public class ComponentEntry {
         this.component = component;
         this.entity = entity;
     }
-
-    public IClusteredComponent getComponent() {
-        return component;
-    }
-
-    public ComponentEntity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(ComponentEntity entity) {
-        this.entity = entity;
-    }
-
 }

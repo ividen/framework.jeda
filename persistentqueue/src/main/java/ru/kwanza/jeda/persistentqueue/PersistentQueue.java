@@ -105,7 +105,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
 
-    public boolean handleStartRepair(Node reparableNode) {
+    public void handleStartRepair(Node reparableNode) {
         int memorySize = memoryCache.size();
         int count = 0;
         try {
@@ -117,7 +117,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             } finally {
                 takeLock.unlock();
             }
-            return count < getRepairIterationItemCount();
+//            return count < getRepairIterationItemCount();
         } finally {
             getObserver().notifyChange(memorySize + count, count);
         }

@@ -6,7 +6,7 @@ import org.junit.Test;
 /**
  * @author Alexander Guzanov
  */
-public class TestModuleEntity {
+public class TestComponentEntity {
 
     @Test
     public void testEntity(){
