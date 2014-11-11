@@ -2,6 +2,7 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import ru.kwanza.dbtool.core.UpdateException;
@@ -17,8 +18,7 @@ import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -29,27 +29,25 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public static final String SUPERVISOR_NAME = "DBClusterService-Supervisor";
     public static final String WORKER_NAME = "DBClusterService-Worker";
 
+    public static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
+
     @Resource(name = "txn.ITransactionManager")
     private ITransactionManager tm;
-    @Resource
+    @Autowired
     private DBClusterServiceDao dao;
-    @Resource
+    @Autowired
     private ComponentRepository repository;
+    @Autowired
+    private WorkerController workers;
 
     private NodeEntity currentNode;
     private Integer currentNodeId;
     private volatile long lastActivityTs;
 
-    private static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
-
     private long failoverInterval;
     private long activityInterval;
     private int repairThreadCount;
-    private int workerAttemptCount;
-    private int workerAttemptInterval;
 
-    private ExecutorService workerExecutor;
-    private AtomicLong counter = new AtomicLong(0);
     private volatile boolean started = false;
     private Supervisor supervisor;
 
@@ -68,10 +66,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         started = false;
         supervisor.interrupt();
         supervisor.join(60000);
-        logger.info("Stopping worker threads ...");
-        workerExecutor.shutdownNow();
-        workerExecutor.awaitTermination(60000, TimeUnit.MILLISECONDS);
-
     }
 
     private void initCurrentNode() {
@@ -110,30 +104,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         this.currentNodeId = currentNodeId;
     }
 
-    public int getWorkerAttemptCount() {
-        return workerAttemptCount;
-    }
-
-    public void setWorkerAttemptCount(int workerAttemptCount) {
-        this.workerAttemptCount = workerAttemptCount;
-    }
-
-    public int getWorkerAttemptInterval() {
-        return workerAttemptInterval;
-    }
-
-    public void setWorkerAttemptInterval(int workerAttemptInterval) {
-        this.workerAttemptInterval = workerAttemptInterval;
-    }
-
     private void initSupervisors() {
         supervisor = new Supervisor();
-
-        workerExecutor = new ThreadPoolExecutor(repairThreadCount, repairThreadCount, activityInterval, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                return new Thread(r, WORKER_NAME + "-" + counter.incrementAndGet());
-            }
-        });
     }
 
     public List<? extends NodeEntity> getActiveNodes() {
@@ -345,8 +317,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void startActiveComponents() {
-            for (IClusteredComponent item : getActiveComponents().values()) {
-                startComponent(item);
+            for (ComponentEntity item : repository.getActiveEntities()) {
+                workers.startComponent(item.getId(), repository.getComponent(item.getName()));
             }
         }
 
@@ -373,13 +345,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        stopComponent(repository.getComponent(o.getName()));
+                        workers.stopComponent(o.getId(),repository.getComponent(o.getName()));
                     }
                 }
                 for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
                     repository.addPassiveComponent(o);
                     if (repository.removeActiveComponent(o.getName())) {
-                        stopComponent(repository.getComponent(o.getName()));
+                        workers.stopComponent(o.getId(),repository.getComponent(o.getName()));
                     }
                 }
             }
@@ -395,25 +367,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             for (ComponentEntity item : activateCandidates) {
                 repository.addActiveComponent(item);
                 repository.removePassiveComponent(item.getName());
-                startComponent(repository.getComponent(item.getName()));
+                workers.startComponent(item.getId(),repository.getComponent(item.getName()));
             }
         }
 
-        private void startComponent(IClusteredComponent component) {
-            workerExecutor.execute(new StartWorker(component));
-        }
-
-        private void stopComponent(IClusteredComponent component) {
-            workerExecutor.execute(new StopWorker(component));
-        }
-
-        private void startRepair(IClusteredComponent component, Node node) {
-            workerExecutor.execute(new StartRepairWorker(component, node));
-        }
-
-        private void stopRepair(IClusteredComponent component, Node node) {
-            workerExecutor.execute(new StopRepairWorker(component, node));
-        }
 
         private void updateActivity(Collection<ComponentEntity> items) throws UpdateException {
             for (ComponentEntity component : items) {
@@ -444,94 +401,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
     }
 
-    public abstract class AbstractWorker implements Runnable {
-        private IClusteredComponent component;
 
-        public AbstractWorker(IClusteredComponent component) {
-            this.component = component;
-        }
-
-        public void run() {
-            boolean success = false;
-            int attemptCount = getWorkerAttemptCount();
-            while (attemptCount > 0 && !success) {
-                try {
-                    synchronized (repository.getMonitor(component)) {
-                        work(component);
-                    }
-                    success = true;
-                } catch (Throwable ex) {
-                    attemptCount--;
-                    try {
-                        Thread.sleep(getWorkerAttemptInterval());
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                    continue;
-                }
-            }
-
-            if (!success) workerExecutor.execute(this);
-        }
-
-        protected abstract void work(IClusteredComponent component);
-    }
-
-    public class StartWorker extends AbstractWorker {
-        public StartWorker(IClusteredComponent component) {
-            super(component);
-        }
-
-        @Override
-        protected void work(IClusteredComponent component) {
-            if (repository.isActive(component.getName())) {
-                component.handleStart();
-            }
-        }
-    }
-
-    public class StopWorker extends AbstractWorker {
-
-        public StopWorker(IClusteredComponent component) {
-            super(component);
-        }
-
-        @Override
-        protected void work(IClusteredComponent component) {
-            if (!repository.isActive(component.getName())) {
-                component.handleStop();
-            }
-        }
-    }
-
-    public class StartRepairWorker extends AbstractWorker {
-        private Node node;
-
-        public StartRepairWorker(IClusteredComponent component, Node node) {
-            super(component);
-            this.node = node;
-        }
-
-
-        @Override
-        protected void work(IClusteredComponent component) {
-            component.handleStartRepair(node);
-        }
-    }
-
-    public class StopRepairWorker extends AbstractWorker {
-        private Node node;
-
-        public StopRepairWorker(IClusteredComponent component, Node node) {
-            super(component);
-            this.node = node;
-        }
-
-        @Override
-        protected void work(IClusteredComponent component) {
-            component.handleStopRepair(node);
-        }
-    }
 
 
 }

@@ -14,7 +14,6 @@
         <property name="currentNodeId" value="${jeda.clusterservice.nodeId}"/>
         <property name="failoverInterval" value="${jeda.clusterservice.db.failoverInterval:300000}"/>
         <property name="activityInterval" value="${jeda.clusterservice.db.activityInterval:60000}"/>
-        <property name="repairInterval" value="${jeda.clusterservice.db.repairInterval:1000}"/>
         <property name="repairThreadCount" value="${jeda.clusterservice.db.repairThreadCount:10}"/>
     </bean>
 
@@ -26,5 +25,12 @@
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.ComponentRepository"/>
 
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterServiceDao"/>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.WorkerController">
+        <property name="keepAlive" value="${jeda.clusterservice.db.activityInterval:60000}"/>
+        <property name="workerAttemptCount" value="${jeda.clusterservice.db.worker.workerAttemptCount:10}"/>
+        <property name="workerAttamptInterval" value="${jeda.clusterservice.db.worker.workerAttemptCount:5000}"/>
+        <property name="workerThreadCount" value="${jeda.clusterservice.db.worker.workerAttemptCount:10}"/>
+    </bean>
 
 </beans>
