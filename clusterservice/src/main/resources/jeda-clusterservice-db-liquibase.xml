@@ -8,29 +8,45 @@
     <property dbms="postgresql" name="long.type" value="bigint"/>
     <property dbms="h2" name="long.type" value="bigint"/>
 
+    <property dbms="oracle" name="bool.type" value="NUMBER(1,0)"/>
+    <property dbms="mysql" name="bool.type" value="java.sql.Types.BOOLEAN"/>
+    <property dbms="mssql" name="bool.type" value="java.sql.Types.BOOLEAN"/>
+    <property dbms="postgresql" name="bool.type" value="java.sql.Types.BOOLEAN"/>
+    <property dbms="h2" name="bool.type" value="java.sql.Types.BOOLEAN"/>
+
     <changeSet author="aguzanov" id="1">
-        <createTable tableName="jeda_cluster_service">
+        <createTable tableName="jeda_cluster_node">
             <column name="id" type="${long.type}">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
+            <column name="ip_address" defaultValue="0" type="VARCHAR(50)"/>
+            <column name="pid" defaultValue="0" type="VARCHAR(50)"/>
             <column name="last_activity" defaultValue="0" type="${long.type}"/>
         </createTable>
     </changeSet>
 
     <changeSet author="aguzanov" id="2">
-        <createTable tableName="jeda_clustered_module">
+        <createTable tableName="jeda_clustered_component">
             <column name="id" type="varchar(255)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="node_id" type="${long.type}">
                 <constraints nullable="false"/>
             </column>
-
+            <column name="hold_node_id" type="${long.type}"/>
+            <column name="wait_for_return" type="${bool.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repaired" type="${bool.type}">
+                <constraints nullable="false"/>
+            </column>
             <column name="name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-
-            <column name="last_repaired" type="${long.type}">
+            <column name="last_activity" type="${long.type}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="version" type="${long.type}">
                 <constraints nullable="false"/>
             </column>
         </createTable>

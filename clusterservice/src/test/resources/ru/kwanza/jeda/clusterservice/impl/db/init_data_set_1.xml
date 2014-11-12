@@ -1,4 +1,4 @@
 <dataset>
-    <jeda_cluster_service/>
-    <jeda_clustered_module/>
+    <jeda_cluster_node/>
+    <jeda_clustered_component/>
 </dataset>

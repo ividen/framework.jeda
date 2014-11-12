@@ -1,3 +1,7 @@
 <dataset>
-    <jeda_cluster_service id="1"/>
+    <jeda_clustered_component id="1_test_component"
+                              node_id="1"
+                              name="test_component"
+                              wait_for_return="false" repaired="false"
+                              />
 </dataset>

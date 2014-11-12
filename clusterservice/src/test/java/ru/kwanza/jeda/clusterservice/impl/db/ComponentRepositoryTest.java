@@ -4,7 +4,6 @@ import junit.framework.Assert;
 import mockit.Deencapsulation;
 import mockit.Expectations;
 import mockit.Injectable;
-import mockit.Mocked;
 import org.junit.Test;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
@@ -177,17 +176,4 @@ public class ComponentRepositoryTest {
         Assert.assertEquals(1,repository.getAlienEntities().size());
         Assert.assertEquals(entity2,repository.getAlienEntities().get("1_component_2"));
     }
-
-
-
-
-    @Test
-    public void test1(@Mocked({"(Integer,String)","getId()"}) final ComponentEntity c1,
-                      @Mocked({"(Integer,String)","getId()"}) final ComponentEntity c2){
-
-
-
-    }
-
-
 }

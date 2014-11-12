@@ -137,7 +137,7 @@ public class WorkerController {
                     try {
                         Thread.sleep(attemptInterval);
                     } catch (InterruptedException e) {
-                        break;
+                        break;  
                     }
                     continue;
                 }

@@ -2,8 +2,10 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <context:annotation-config/>
 
@@ -13,18 +15,32 @@
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
-    <import resource="classpath:jeda-clusterservice-db-config.xml"/>
-    <import resource="classpath:txn-ds-config.xml"/>
+
+
+    <dbtool-orm:entityMapping scan-package="ru.kwanza.jeda.clusterservice.impl.db.orm"/>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.DBClusterServiceDao"/>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.ComponentRepository"/>
 
     <bean id="propertyPlaceholderConfigurer"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <list>
-                <value>classpath:test_1.properties</value>
+                <value>classpath:test.properties</value>
             </list>
         </property>
     </bean>
 
+
+    <bean id="jeda.clusterservice.SpringLiquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:jeda-clusterservice-db-liquibase.xml"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <constructor-arg name="targetDataSource">
@@ -38,18 +54,6 @@
                 <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>
             </bean>
         </constructor-arg>
-    </bean>
-
-    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
-        <constructor-arg index="0" value="module_1"/>
-    </bean>
-
-    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
-        <constructor-arg index="0" value="module_2"/>
-    </bean>
-
-    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
-        <constructor-arg index="0" value="module_3"/>
     </bean>
 
     <bean id="dbTester" class="org.dbunit.JdbcDatabaseTester">

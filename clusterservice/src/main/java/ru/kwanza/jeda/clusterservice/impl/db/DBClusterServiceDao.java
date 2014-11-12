@@ -2,14 +2,15 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -26,7 +27,7 @@ public class DBClusterServiceDao {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Resource
+    @Autowired
     private ComponentRepository repository;
 
     private IQuery<NodeEntity> queryActive;
@@ -76,11 +77,15 @@ public class DBClusterServiceDao {
     public ComponentEntity findOrCreateComponent(NodeEntity node, IClusteredComponent component) {
         ComponentEntity result;
 
-        if ((result = em.readByKey(ComponentEntity.class, ComponentEntity.createId(node.getId(), component.getName()))) == null) {
+        final String id = ComponentEntity.createId(node.getId(), component.getName());
+        if ((result = em.readByKey(ComponentEntity.class, id)) == null) {
             try {
                 result = em.create(new ComponentEntity(node.getId(), component.getName()));
             } catch (UpdateException e) {
-                logger.debug("Module {} already registered in database for node {}", component.getName(), node.getId());
+                result = em.readByKey(ComponentEntity.class, id);
+                if (result == null) {
+                    throw new RuntimeException("Can't create component!");
+                }
             }
         }
 

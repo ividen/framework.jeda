@@ -29,7 +29,7 @@ public class ComponentEntity {
     @VersionField("version")
     private Long version;
 
-    @ManyToOne(property = "noteId")
+    @ManyToOne(property = "nodeId")
     private NodeEntity node;
 
     @ManyToOne(property = "holdNodeId")
