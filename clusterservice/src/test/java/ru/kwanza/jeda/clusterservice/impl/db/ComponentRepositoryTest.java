@@ -3,6 +3,7 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 import junit.framework.Assert;
 import mockit.Deencapsulation;
 import mockit.Expectations;
+import mockit.Injectable;
 import mockit.Mocked;
 import org.junit.Test;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
@@ -17,9 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ComponentRepositoryTest {
 
     @Test
-    public void testRegisterComponent(@Mocked final IClusteredComponent component1,
-                                      @Mocked final IClusteredComponent component2,
-                                      @Mocked final IClusteredComponent component3) {
+    public void testRegisterComponent(@Injectable final IClusteredComponent component1,
+                                      @Injectable final IClusteredComponent component2,
+                                      @Injectable final IClusteredComponent component3) {
 
         new Expectations() {{
             component1.getName();
@@ -55,10 +56,10 @@ public class ComponentRepositoryTest {
     }
 
     @Test
-    public void testActiveComponent(@Mocked final IClusteredComponent component1,
-                                    @Mocked final IClusteredComponent component2,
-                                    @Mocked final ComponentEntity entity1,
-                                    @Mocked final ComponentEntity entity2) {
+    public void testActiveComponent(@Injectable final IClusteredComponent component1,
+                                    @Injectable final IClusteredComponent component2,
+                                    @Injectable final ComponentEntity entity1,
+                                    @Injectable final ComponentEntity entity2) {
 
         new Expectations() {{
             entity1.getName();result = "component_1";
@@ -101,10 +102,10 @@ public class ComponentRepositoryTest {
     }
 
     @Test
-    public void testPassiveComponent(@Mocked final IClusteredComponent component1,
-                                    @Mocked final IClusteredComponent component2,
-                                    @Mocked final ComponentEntity entity1,
-                                    @Mocked final ComponentEntity entity2) {
+    public void testPassiveComponent(@Injectable final IClusteredComponent component1,
+                                    @Injectable final IClusteredComponent component2,
+                                    @Injectable final ComponentEntity entity1,
+                                    @Injectable final ComponentEntity entity2) {
 
         new Expectations() {{
             entity1.getName();result = "component_1";
@@ -145,10 +146,10 @@ public class ComponentRepositoryTest {
 
 
     @Test
-    public void tesAlienComponent(@Mocked final IClusteredComponent component1,
-                                     @Mocked final IClusteredComponent component2,
-                                     @Mocked final ComponentEntity entity1,
-                                     @Mocked final ComponentEntity entity2) {
+    public void tesAlienComponent(@Injectable final IClusteredComponent component1,
+                                     @Injectable final IClusteredComponent component2,
+                                     @Injectable final ComponentEntity entity1,
+                                     @Injectable final ComponentEntity entity2) {
 
         new Expectations() {{
             component1.getName();result = "component_1";
@@ -177,6 +178,16 @@ public class ComponentRepositoryTest {
         Assert.assertEquals(entity2,repository.getAlienEntities().get("1_component_2"));
     }
 
+
+
+
+    @Test
+    public void test1(@Mocked({"(Integer,String)","getId()"}) final ComponentEntity c1,
+                      @Mocked({"(Integer,String)","getId()"}) final ComponentEntity c2){
+
+
+
+    }
 
 
 }
