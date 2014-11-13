@@ -70,7 +70,7 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
 
     @Test
     public void testRegisterComponent_1(@Mocked final NodeEntity n,
-                               @Mocked final IClusteredComponent c) throws Exception {
+                                        @Mocked final IClusteredComponent c) throws Exception {
         new Expectations() {{
             n.getId();
             result = 1;
@@ -88,7 +88,7 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
 
     @Test
     public void testRegisterComponent_2(@Mocked final NodeEntity n,
-                               @Mocked final IClusteredComponent c) throws Exception {
+                                        @Mocked final IClusteredComponent c) throws Exception {
         new Expectations() {{
             n.getId();
             result = 1;
@@ -96,7 +96,7 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
             result = "test_component";
         }};
 
-        em.create(new ComponentEntity(n.getId(),c.getName()));
+        em.create(new ComponentEntity(n.getId(), c.getName()));
 
         final ComponentEntity entity = dao.findOrCreateComponent(n, c);
         Assert.assertEquals("1_test_component", entity.getId());
@@ -110,14 +110,19 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
 
     @Test(expected = RuntimeException.class)
     public void testRegisterComponent_3(@Mocked final NodeEntity n,
-                               @Mocked final IClusteredComponent c
-                               ) throws Exception {
+                                        @Mocked final IClusteredComponent c
+    ) throws Exception {
         new Expectations() {{
-            n.getId();result = 1;
-            c.getName(); result = "test_component";
-            mockedEm.readByKey(ComponentEntity.class,any);result=null;
-            mockedEm.create(any); result = new UpdateException();
-            mockedEm.readByKey(ComponentEntity.class,any);result=null;
+            n.getId();
+            result = 1;
+            c.getName();
+            result = "test_component";
+            mockedEm.readByKey(ComponentEntity.class, any);
+            result = null;
+            mockedEm.create(any);
+            result = new UpdateException();
+            mockedEm.readByKey(ComponentEntity.class, any);
+            result = null;
         }};
 
 
@@ -126,60 +131,72 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     }
 
     @Test
-    public void testRegisterNode_1(@Mocked final  NodeEntity n) throws Exception {
-        new Expectations(){{
-            n.getId();result=1;
-            n.getLastActivity();result=666;
-            n.getIpAddress();result="1.1.1.1";
-            n.getPid();result="test_pid";
+    public void testRegisterNode_1(@Mocked final NodeEntity n) throws Exception {
+        new Expectations() {{
+            n.getId();
+            result = 1;
+            n.getLastActivity();
+            result = 666;
+            n.getIpAddress();
+            result = "1.1.1.1";
+            n.getPid();
+            result = "test_pid";
         }};
         NodeEntity result = dao.findOrCreateNode(n);
-        Assert.assertEquals(1,result.getId().intValue());
-        Assert.assertEquals("1.1.1.1",result.getIpAddress());
-        Assert.assertEquals(666,result.getLastActivity().intValue());
-        Assert.assertEquals("test_pid",result.getPid());
+        Assert.assertEquals(1, result.getId().intValue());
+        Assert.assertEquals("1.1.1.1", result.getIpAddress());
+        Assert.assertEquals(666, result.getLastActivity().intValue());
+        Assert.assertEquals("test_pid", result.getPid());
 
         Assertion.assertEquals(getActualDataSet("jeda_cluster_node"),
                 getResourceSet("data_set_2.xml"));
     }
 
     @Test
-    public void testRegisterNode_2(@Mocked final  NodeEntity n) throws Exception {
-        new Expectations(){{
-            n.getId();result=1;
-            n.getLastActivity();result=666;
-            n.getIpAddress();result="1.1.1.1";
-            n.getPid();result="test_pid";
+    public void testRegisterNode_2(@Mocked final NodeEntity n) throws Exception {
+        new Expectations() {{
+            n.getId();
+            result = 1;
+            n.getLastActivity();
+            result = 666;
+            n.getIpAddress();
+            result = "1.1.1.1";
+            n.getPid();
+            result = "test_pid";
         }};
 
         em.create(n);
 
         NodeEntity result = dao.findOrCreateNode(n);
-        Assert.assertEquals(1,result.getId().intValue());
-        Assert.assertEquals("1.1.1.1",result.getIpAddress());
-        Assert.assertEquals(666,result.getLastActivity().intValue());
-        Assert.assertEquals("test_pid",result.getPid());
+        Assert.assertEquals(1, result.getId().intValue());
+        Assert.assertEquals("1.1.1.1", result.getIpAddress());
+        Assert.assertEquals(666, result.getLastActivity().intValue());
+        Assert.assertEquals("test_pid", result.getPid());
 
         Assertion.assertEquals(getActualDataSet("jeda_cluster_node"),
                 getResourceSet("data_set_2.xml"));
     }
 
     @Test(expected = RuntimeException.class)
-    public void testRegisterNode_3(@Mocked final  NodeEntity n) throws Exception {
-        new Expectations(){{
-            n.getId();result=1;
-            mockedEm.readByKey(NodeEntity.class,any);result=null;
-            mockedEm.create(n); result = new UpdateException();
-            mockedEm.readByKey(NodeEntity.class,any);result=null;
+    public void testRegisterNode_3(@Mocked final NodeEntity n) throws Exception {
+        new Expectations() {{
+            n.getId();
+            result = 1;
+            mockedEm.readByKey(NodeEntity.class, any);
+            result = null;
+            mockedEm.create(n);
+            result = new UpdateException();
+            mockedEm.readByKey(NodeEntity.class, any);
+            result = null;
         }};
 
         NodeEntity result = mockedDao.findOrCreateNode(n);
     }
 
     @Test
-    public void testLoadComponentsByKeys_1(){
+    public void testLoadComponentsByKeys_1() {
         Assert.assertTrue(dao.loadComponentsByKey(Collections.<String>emptyList()).isEmpty());
-        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("1_cp_1","1_cp_2","1_cp_3")).isEmpty());
+        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("1_cp_1", "1_cp_2", "1_cp_3")).isEmpty());
     }
 
     @Test
@@ -206,66 +223,73 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     public void testSelectActive(@Mocked({"currentTimeMillis"}) final System system) throws Exception {
         initDataSet("init_data_set_3.xml");
 
-        new Expectations(){{
-            System.currentTimeMillis();result=0l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 0l;
         }};
 
         List<? extends Node> nodeEntities = dao.selectActiveNodes();
-        Assert.assertEquals(2,nodeEntities.size());
-        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
-        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
-        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
-        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.size());
+        Assert.assertEquals(1, nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1", nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2", nodeEntities.get(1).getIpAddress());
 
-        new Expectations(){{
-            System.currentTimeMillis();result=80l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 80l;
         }};
 
         nodeEntities = dao.selectActiveNodes();
-        Assert.assertEquals(1,nodeEntities.size());
-        Assert.assertEquals(2,nodeEntities.get(0).getId().intValue());
-        Assert.assertEquals("1.1.1.2",nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(1, nodeEntities.size());
+        Assert.assertEquals(2, nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.2", nodeEntities.get(0).getIpAddress());
 
-        new Expectations(){{
-            System.currentTimeMillis();result=200l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 200l;
         }};
         nodeEntities = dao.selectActiveNodes();
-        Assert.assertEquals(0,nodeEntities.size());
+        Assert.assertEquals(0, nodeEntities.size());
     }
 
     @Test
     public void testSelectPassive(@Mocked({"currentTimeMillis"}) final System system) throws Exception {
-        new Expectations(){{
-            System.currentTimeMillis();result=200l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 200l;
         }};
 
         initDataSet("init_data_set_3.xml");
 
-        new Expectations(){{
-            System.currentTimeMillis();result=200l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 200l;
         }};
 
         List<? extends Node> nodeEntities = dao.selectPassiveNodes();
-        Assert.assertEquals(2,nodeEntities.size());
-        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
-        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
-        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
-        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.size());
+        Assert.assertEquals(1, nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1", nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2", nodeEntities.get(1).getIpAddress());
 
-        new Expectations(){{
-            System.currentTimeMillis();result=80l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 80l;
         }};
 
         nodeEntities = dao.selectPassiveNodes();
-        Assert.assertEquals(1,nodeEntities.size());
-        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
-        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(1, nodeEntities.size());
+        Assert.assertEquals(1, nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1", nodeEntities.get(0).getIpAddress());
 
-        new Expectations(){{
-            System.currentTimeMillis();result=0l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 0l;
         }};
         nodeEntities = dao.selectPassiveNodes();
-        Assert.assertEquals(0,nodeEntities.size());
+        Assert.assertEquals(0, nodeEntities.size());
     }
 
     @Test
@@ -273,11 +297,11 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         initDataSet("init_data_set_3.xml");
 
         List<? extends Node> nodeEntities = dao.selectNodes();
-        Assert.assertEquals(2,nodeEntities.size());
-        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
-        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
-        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
-        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.size());
+        Assert.assertEquals(1, nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1", nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2, nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2", nodeEntities.get(1).getIpAddress());
     }
 
 
@@ -285,11 +309,12 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     public void testSelectComponents(@Mocked final Node node) throws Exception {
         initDataSet("init_data_set_2.xml");
 
-        new Expectations(){{
-            node.getId();result=1;
+        new Expectations() {{
+            node.getId();
+            result = 1;
         }};
 
-        Collection<ComponentEntity> result = dao.selectComponents(node,Arrays.asList("test_component"));
+        Collection<ComponentEntity> result = dao.selectComponents(node, Arrays.asList("test_component"));
         Assert.assertEquals(1, result.size());
         ComponentEntity entity = result.iterator().next();
 
@@ -309,33 +334,74 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
                                      @Mocked({"currentTimeMillis"}) final System system) throws Exception {
         initDataSet("init_data_set_4.xml");
 
-        new NonStrictExpectations(){{
-            node.getId();result=2;
+        new NonStrictExpectations() {{
+            node.getId();
+            result = 2;
         }};
 
-        new Expectations(){{
-            System.currentTimeMillis();result=200l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 200l;
         }};
 
-        List<ComponentEntity> componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
+        List<ComponentEntity> componentEntities = dao.selectAlienStaleComponents(node, Arrays.asList("test_component_1", "test_component_2"));
         Assert.assertEquals(2, componentEntities.size());
         Assert.assertEquals("1_test_component_1", componentEntities.get(0).getId());
-        Assert.assertEquals("1_test_component_2",componentEntities.get(1).getId());
+        Assert.assertEquals("1_test_component_2", componentEntities.get(1).getId());
 
 
-        new Expectations(){{
-            System.currentTimeMillis();result=80l;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 80l;
         }};
 
-        componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
-        Assert.assertEquals(1,componentEntities.size());
-        Assert.assertEquals("1_test_component_1",componentEntities.get(0).getId());
+        componentEntities = dao.selectAlienStaleComponents(node, Arrays.asList("test_component_1", "test_component_2"));
+        Assert.assertEquals(1, componentEntities.size());
+        Assert.assertEquals("1_test_component_1", componentEntities.get(0).getId());
 
-        new Expectations(){{
-            System.currentTimeMillis();result=0;
+        new Expectations() {{
+            System.currentTimeMillis();
+            result = 0;
         }};
-        componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
+        componentEntities = dao.selectAlienStaleComponents(node, Arrays.asList("test_component_1", "test_component_2"));
         Assert.assertEquals(0, componentEntities.size());
+    }
+
+
+    @Test
+    public void testUpdateComponent() throws Exception {
+        initDataSet("init_data_set_4.xml");
+
+        Collection<ComponentEntity> componentEntities =
+                dao.loadComponentsByKey(Arrays.asList("1_test_component_1", "1_test_component_2",
+                        "2_test_component_1", "2_test_component_2"));
+
+        for (ComponentEntity componentEntity : componentEntities) {
+            componentEntity.setLastActivity(-666l);
+        }
+
+        dao.updateComponents(componentEntities);
+
+        Assertion.assertEqualsIgnoreCols(getActualDataSet("jeda_clustered_component"),
+                getResourceSet("data_set_3.xml"),"jeda_clustered_component", new String[]{"version","hold_node_id"});
+    }
+
+    @Test
+    public void testMarkWaiteReturn() throws Exception {
+        initDataSet("init_data_set_4.xml");
+
+        Collection<ComponentEntity> componentEntities =
+                dao.loadComponentsByKey(Arrays.asList("1_test_component_1", "1_test_component_2",
+                        "2_test_component_1", "2_test_component_2"));
+
+        for (ComponentEntity componentEntity : componentEntities) {
+            componentEntity.setLastActivity(-666l);
+        }
+
+        dao.markWaitForReturn(componentEntities);
+
+        Assertion.assertEqualsIgnoreCols(getActualDataSet("jeda_clustered_component"),
+                getResourceSet("data_set_4.xml"),"jeda_clustered_component", new String[]{"hold_node_id"});
     }
 
 

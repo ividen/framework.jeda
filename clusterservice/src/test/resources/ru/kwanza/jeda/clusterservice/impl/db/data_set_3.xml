@@ -1,0 +1,34 @@
+<dataset>
+    <jeda_clustered_component id="1_test_component_1"
+                              node_id="1"
+                              name="test_component_1"
+                              last_activity="-666"
+                              wait_for_return="false" repaired="false"
+            />
+
+
+    <jeda_clustered_component id="1_test_component_2"
+                              node_id="1"
+                              name="test_component_2"
+                              last_activity="-666"
+                              wait_for_return="false" repaired="false"
+            />
+
+
+    <jeda_clustered_component id="2_test_component_1"
+                              node_id="2"
+                              name="test_component_1"
+                              last_activity="-666"
+                              wait_for_return="false" repaired="false"
+            />
+
+
+    <jeda_clustered_component id="2_test_component_2"
+                              node_id="2"
+                              name="test_component_2"
+                              last_activity="-666"
+                              wait_for_return="false" repaired="false"
+            />
+
+
+</dataset>
