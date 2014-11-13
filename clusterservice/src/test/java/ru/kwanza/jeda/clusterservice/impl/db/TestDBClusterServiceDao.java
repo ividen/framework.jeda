@@ -271,4 +271,17 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         Assert.assertEquals(0,nodeEntities.size());
     }
 
+    @Test
+    public void testSelectAll() throws Exception {
+        initDataSet("init_data_set_3.xml");
+
+        List<? extends Node> nodeEntities = dao.selectNodes();
+        Assert.assertEquals(2,nodeEntities.size());
+        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+    }
+
+
 }

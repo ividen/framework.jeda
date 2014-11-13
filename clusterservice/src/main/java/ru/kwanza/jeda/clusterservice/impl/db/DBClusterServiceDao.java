@@ -113,7 +113,7 @@ public class DBClusterServiceDao {
     }
 
     public List<? extends Node> selectNodes() {
-        return queryAll.prepare().setParameter(1, System.currentTimeMillis()).selectList();
+        return queryAll.prepare().selectList();
     }
 
 
