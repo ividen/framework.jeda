@@ -12,11 +12,9 @@ import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
-import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -32,8 +30,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     public static Logger logger = LoggerFactory.getLogger(DBClusterService.class);
 
-    @Resource(name = "txn.ITransactionManager")
-    private ITransactionManager tm;
     @Autowired
     private DBClusterServiceDao dao;
     @Autowired
@@ -68,7 +64,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         supervisor.join(60000);
     }
 
-    private void initCurrentNode() {
+    private void initCurrentNode() {         
         currentNode = dao.findOrCreateNode(new NodeEntity(currentNodeId, System.currentTimeMillis()));
     }
 
@@ -160,7 +156,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 try {
                     dao.updateComponents(Collections.singleton(componentEntity));
                     repository.removeAlienComponent(componentEntity.getId());
-                    component.handleStopRepair(node);
+                    workers.stopRepair(componentEntity.getId(), component, node);
                 } catch (UpdateException e) {
                     //todo aguzanov log error
                     return false;
@@ -205,14 +201,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         while (started && !Thread.currentThread().isInterrupted()) {
             calcLastActivity();
             try {
-                try {
-                    tm.begin();
-                    leaseActivity();
-                    checkPassiveComponents();
-                    handleAlienComponents();
-                } finally {
-                    tm.commit();
-                }
+                leaseActivity();
+                checkPassiveComponents();
+                handleAlienComponents();
                 Thread.sleep(activityInterval);
             } catch (InterruptedException e) {
                 break;
