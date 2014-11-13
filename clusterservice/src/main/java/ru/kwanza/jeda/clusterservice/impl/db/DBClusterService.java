@@ -11,6 +11,7 @@ import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.txn.api.spi.ITransactionManager;
 
 import javax.annotation.PostConstruct;
@@ -273,7 +274,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void findAlienStaleComponents() {
-            List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode);
+            List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode,
+                    repository.getActiveComponents().keySet());
 
             for (ComponentEntity component : items) {
                 component.clearMarkers();
@@ -298,7 +300,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         private void processInitialState() {
-            List<ComponentEntity> items = dao.selectAllComponents(currentNode);
+            Collection<ComponentEntity> items = dao.selectComponents(currentNode, repository.getComponents().keySet());
             filterComponentByState(items);
             leaseActivity();
             startActiveComponents();
@@ -310,7 +312,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             }
         }
 
-        private void filterComponentByState(List<ComponentEntity> items) {
+        private void filterComponentByState(Collection<ComponentEntity> items) {
             final long ts = System.currentTimeMillis();
             for (ComponentEntity item : items) {
                 if (item.getHoldNodeId() != null) {
@@ -371,11 +373,16 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         private void checkPassiveComponents() {
             if (!repository.getPassiveEntities().isEmpty()) {
-                Collection<ComponentEntity> items = dao.selectWaitForReturn();
+                Collection<ComponentEntity> items = dao.selectComponents(currentNode, getPassiveEntitiesKeys());
                 List<ComponentEntity> activateCandidates = findCandidateForActivation(items);
                 activateCandidates(activateCandidates);
-                dao.markWaitForReturn();
+                dao.markWaitForReturn(repository.getPassiveEntities());
             }
+        }
+
+        private Collection<String> getPassiveEntitiesKeys() {
+            return FieldHelper.getFieldCollection(repository.getPassiveEntities(),
+                    FieldHelper.<ComponentEntity, String>construct(ComponentEntity.class, "id"));
         }
 
         private List<ComponentEntity> findCandidateForActivation(Collection<ComponentEntity> items) {

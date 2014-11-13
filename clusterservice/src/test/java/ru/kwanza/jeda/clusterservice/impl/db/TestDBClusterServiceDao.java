@@ -1,10 +1,7 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import junit.framework.Assert;
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
+import mockit.*;
 import org.dbunit.Assertion;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.database.DatabaseConnection;
@@ -281,6 +278,64 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
         Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
         Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+    }
+
+
+    @Test
+    public void testSelectComponents(@Mocked final Node node) throws Exception {
+        initDataSet("init_data_set_2.xml");
+
+        new Expectations(){{
+            node.getId();result=1;
+        }};
+
+        Collection<ComponentEntity> result = dao.selectComponents(node,Arrays.asList("test_component"));
+        Assert.assertEquals(1, result.size());
+        ComponentEntity entity = result.iterator().next();
+
+        Assert.assertEquals("1_test_component", entity.getId());
+        Assert.assertEquals(1, entity.getNodeId().intValue());
+        Assert.assertEquals("test_component", entity.getName());
+
+        Assert.assertEquals(1, entity.getNode().getId().intValue());
+        Assert.assertEquals("1.1.1.1", entity.getNode().getIpAddress());
+        Assert.assertEquals(666, entity.getNode().getLastActivity().intValue());
+        Assert.assertEquals("test_pid", entity.getNode().getPid());
+    }
+
+
+    @Test
+    public void testSelectAlienStale(@Mocked final Node node,
+                                     @Mocked({"currentTimeMillis"}) final System system) throws Exception {
+        initDataSet("init_data_set_4.xml");
+
+        new NonStrictExpectations(){{
+            node.getId();result=2;
+        }};
+
+        new Expectations(){{
+            System.currentTimeMillis();result=200l;
+        }};
+
+        List<ComponentEntity> componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
+        Assert.assertEquals(2, componentEntities.size());
+        Assert.assertEquals("1_test_component_1", componentEntities.get(0).getId());
+        Assert.assertEquals("1_test_component_2",componentEntities.get(1).getId());
+
+
+        new Expectations(){{
+            System.currentTimeMillis();result=80l;
+        }};
+
+        componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
+        Assert.assertEquals(1,componentEntities.size());
+        Assert.assertEquals("1_test_component_1",componentEntities.get(0).getId());
+
+        new Expectations(){{
+            System.currentTimeMillis();result=0;
+        }};
+        componentEntities = dao.selectAlienStaleComponents(node,Arrays.asList("test_component_1","test_component_2"));
+        Assert.assertEquals(0, componentEntities.size());
     }
 
 

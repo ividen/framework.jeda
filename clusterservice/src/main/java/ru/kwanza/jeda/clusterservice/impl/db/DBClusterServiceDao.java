@@ -2,7 +2,6 @@ package ru.kwanza.jeda.clusterservice.impl.db;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.dbtool.orm.api.IQuery;
@@ -27,28 +26,18 @@ public class DBClusterServiceDao {
 
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
-    @Autowired
-    private ComponentRepository repository;
 
     private IQuery<NodeEntity> queryActive;
     private IQuery<NodeEntity> queryPassive;
     private IQuery<NodeEntity> queryAll;
-    private IQuery<ComponentEntity> queryForComponents;
-    private IQuery<ComponentEntity> queryForAlienStale;
+    private IQuery<ComponentEntity> queryForAlienStaleComponents;
 
     @PostConstruct
     public void init() {
         queryActive = em.queryBuilder(NodeEntity.class).where(If.isGreater("lastActivity")).create();
         queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
         queryAll = em.queryBuilder(NodeEntity.class).create();
-        queryForComponents = em.queryBuilder(ComponentEntity.class)
-                .where(
-                        If.and(
-                                If.isEqual("nodeId"),
-                                If.in("name"))
-                ).create();
-
-        queryForAlienStale = em.queryBuilder(ComponentEntity.class)
+        queryForAlienStaleComponents = em.queryBuilder(ComponentEntity.class)
                 .lazy()
                 .where(
                         If.and(
@@ -117,34 +106,31 @@ public class DBClusterServiceDao {
     }
 
 
-    public List<ComponentEntity> selectAlienStaleComponents(Node node) {
-        return queryForAlienStale.prepare()
+    public List<ComponentEntity> selectAlienStaleComponents(Node node, Collection<String> components) {
+        return queryForAlienStaleComponents.prepare()
                 .setParameter(1, node.getId())
-                .setParameter(2, repository.getActiveComponents().keySet())
+                .setParameter(2, components)
                 .setParameter(3, System.currentTimeMillis())
                 .selectList();
     }
 
-    public List<ComponentEntity> selectAllComponents(Node node) {
-        return queryForComponents.prepare()
-                .setParameter(1, node.getId())
-                .setParameter(2, repository.getComponents().keySet())
-                .selectList();
+    public Collection<ComponentEntity> selectComponents(final Node node, final Collection<String> components) {
+
+        return loadComponentsByKey(
+                FieldHelper.getFieldCollection(components, new FieldHelper.Field<String, String>() {
+                    public String value(String object) {
+                        return ComponentEntity.createId(node.getId(), object);
+                    }
+                }));
+
     }
 
-    public Collection<ComponentEntity> selectWaitForReturn() {
-        return em.readByKeys(ComponentEntity.class,
-                FieldHelper.getFieldCollection(repository.getPassiveEntities(),
-                        FieldHelper.construct(ComponentEntity.class, "id")));
-    }
-
-
-    public void markWaitForReturn() {
+    public void markWaitForReturn(Collection<ComponentEntity> passiveEntities) {
         try {
-            em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(repository.getPassiveEntities(),
+            em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(passiveEntities,
                     FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitEntity")));
         } catch (UpdateException e) {
-            //todo aguzanov log error;
+            logger.error("Error mark waitForReturn!", e);
         }
     }
 
