@@ -22,10 +22,10 @@ import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.orm.api.IEntityManager;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
+import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collection;
@@ -206,17 +206,69 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     }
 
     @Test
-    public void testSelectActive_1(@Mocked final System system) throws Exception {
+    public void testSelectActive(@Mocked({"currentTimeMillis"}) final System system) throws Exception {
         initDataSet("init_data_set_3.xml");
 
         new Expectations(){{
-            System.currentTimeMillis();result = 80l;
+            System.currentTimeMillis();result=0l;
         }};
 
-        List<? extends NodeEntity> nodeEntities = dao.selectActiveNodes();
+        List<? extends Node> nodeEntities = dao.selectActiveNodes();
+        Assert.assertEquals(2,nodeEntities.size());
+        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+
+        new Expectations(){{
+            System.currentTimeMillis();result=80l;
+        }};
+
+        nodeEntities = dao.selectActiveNodes();
         Assert.assertEquals(1,nodeEntities.size());
         Assert.assertEquals(2,nodeEntities.get(0).getId().intValue());
         Assert.assertEquals("1.1.1.2",nodeEntities.get(0).getIpAddress());
+
+        new Expectations(){{
+            System.currentTimeMillis();result=200l;
+        }};
+        nodeEntities = dao.selectActiveNodes();
+        Assert.assertEquals(0,nodeEntities.size());
+    }
+
+    @Test
+    public void testSelectPassive(@Mocked({"currentTimeMillis"}) final System system) throws Exception {
+        new Expectations(){{
+            System.currentTimeMillis();result=200l;
+        }};
+
+        initDataSet("init_data_set_3.xml");
+
+        new Expectations(){{
+            System.currentTimeMillis();result=200l;
+        }};
+
+        List<? extends Node> nodeEntities = dao.selectPassiveNodes();
+        Assert.assertEquals(2,nodeEntities.size());
+        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
+        Assert.assertEquals(2,nodeEntities.get(1).getId().intValue());
+        Assert.assertEquals("1.1.1.2",nodeEntities.get(1).getIpAddress());
+
+        new Expectations(){{
+            System.currentTimeMillis();result=80l;
+        }};
+
+        nodeEntities = dao.selectPassiveNodes();
+        Assert.assertEquals(1,nodeEntities.size());
+        Assert.assertEquals(1,nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.1",nodeEntities.get(0).getIpAddress());
+
+        new Expectations(){{
+            System.currentTimeMillis();result=0l;
+        }};
+        nodeEntities = dao.selectPassiveNodes();
+        Assert.assertEquals(0,nodeEntities.size());
     }
 
 }

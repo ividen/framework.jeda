@@ -104,7 +104,7 @@ public class DBClusterServiceDao {
         em.update(ComponentEntity.class, items);
     }
 
-    public List<? extends NodeEntity> selectActiveNodes() {
+    public List<? extends Node> selectActiveNodes() {
         return queryActive.prepare().setParameter(1, System.currentTimeMillis()).selectList();
     }
 

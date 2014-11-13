@@ -99,7 +99,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         supervisor = new Supervisor();
     }
 
-    public List<? extends NodeEntity> getActiveNodes() {
+    public List<? extends Node> getActiveNodes() {
         return dao.selectActiveNodes();
     }
 
