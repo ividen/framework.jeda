@@ -26,7 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author Alexander Guzanov
  */
-public class DBClusterService implements IClusterService, ApplicationListener<ContextRefreshedEvent> {
+public class DBClusterService implements IClusterService, ApplicationListener<ContextRefreshedEvent>, Runnable {
     public static final String SUPERVISOR_NAME = "DBClusterService-Supervisor";
     public static final String WORKER_NAME = "DBClusterService-Worker";
 
@@ -49,7 +49,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private long activityInterval;
 
     private volatile boolean started = false;
-    private Supervisor supervisor;
+    private Thread supervisor;
 
     private Lock repairLock = new ReentrantLock();
 
@@ -97,7 +97,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void initSupervisors() {
-        supervisor = new Supervisor();
+        supervisor = new Thread(this, SUPERVISOR_NAME);
+        supervisor.setDaemon(true);
     }
 
     public List<? extends Node> getActiveNodes() {
@@ -187,213 +188,207 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         started = true;
     }
 
-    public class Supervisor extends Thread {
-        public Supervisor() {
-            super(SUPERVISOR_NAME);
-            setDaemon(true);
-        }
 
-        @Override
-        public void run() {
-            logger.info("Started {}", SUPERVISOR_NAME);
+    public void run() {
+        logger.info("Started {}", SUPERVISOR_NAME);
 
-            while (true) {
-                try {
-                    calcLastActivity();
-                    processInitialState();
-                    break;
-                } catch (Throwable ex) {
-                    continue;
-                }
-            }
-
-            while (started && !isInterrupted()) {
+        while (true) {
+            try {
                 calcLastActivity();
+                processInitialState();
+                break;
+            } catch (Throwable ex) {
+                continue;
+            }
+        }
+
+        while (started && !Thread.currentThread().isInterrupted()) {
+            calcLastActivity();
+            try {
                 try {
-                    try {
-                        tm.begin();
-                        leaseActivity();
-                        checkPassiveComponents();
-                        handleAlienComponents();
-                    } finally {
-                        tm.commit();
-                    }
-                    Thread.sleep(activityInterval);
-                } catch (InterruptedException e) {
-                    break;
-                } catch (Throwable e) {
-                    logger.error("Error in supervisor!", e);
-                    continue;
+                    tm.begin();
+                    leaseActivity();
+                    checkPassiveComponents();
+                    handleAlienComponents();
+                } finally {
+                    tm.commit();
                 }
-            }
-
-            logger.info("Stopped {}", SUPERVISOR_NAME);
-        }
-
-        private void handleAlienComponents() {
-            repairLock.lock();
-            try {
-                leaseAlienComponents();
-                findAlienStaleComponents();
-            } finally {
-                repairLock.unlock();
+                Thread.sleep(activityInterval);
+            } catch (InterruptedException e) {
+                break;
+            } catch (Throwable e) {
+                logger.error("Error in supervisor!", e);
+                continue;
             }
         }
 
-        private void leaseAlienComponents() {
-            if (!repository.getAlienEntities().isEmpty()) {
-                Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
-                List<ComponentEntity> stopRepair = new ArrayList<ComponentEntity>();
-                for (ComponentEntity item : items) {
-                    if (item.getWaitForReturn()) {
-                        item.clearMarkers();
-                        item.setRepaired(true);
-                        stopRepair.add(item);
-                    } else {
-                        repository.removeAlienComponent(item.getId());
-                    }
-                }
+        logger.info("Stopped {}", SUPERVISOR_NAME);
+    }
 
-
-                try {
-                    dao.updateComponents(stopRepair);
-                } catch (UpdateException e) {
-                    stopRepair = e.getUpdated();
-                }
-
-                for (ComponentEntity component : stopRepair) {
-                    workers.stopRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
-                }
-
-                try {
-                    dao.updateComponents(repository.getAlienEntities().values());
-                } catch (UpdateException e) {
-                }
-
-            }
-        }
-
-        private void findAlienStaleComponents() {
-            List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode,
-                    repository.getActiveComponents().keySet());
-
-            for (ComponentEntity component : items) {
-                component.clearMarkers();
-                component.setHoldNodeId(currentNodeId);
-            }
-
-            try {
-                dao.updateComponents(items);
-            } catch (UpdateException e) {
-                items = e.getUpdated();
-            }
-
-            for (ComponentEntity component : items) {
-                repository.addAlientComponent(component);
-                workers.startRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
-            }
-        }
-
-
-        private void calcLastActivity() {
-            lastActivityTs = System.currentTimeMillis() + failoverInterval;
-        }
-
-        private void processInitialState() {
-            Collection<ComponentEntity> items = dao.selectComponents(currentNode, repository.getComponents().keySet());
-            filterComponentByState(items);
-            leaseActivity();
-            startActiveComponents();
-        }
-
-        private void startActiveComponents() {
-            for (ComponentEntity item : repository.getActiveEntities()) {
-                workers.startComponent(item.getId(), repository.getComponent(item.getName()));
-            }
-        }
-
-        private void filterComponentByState(Collection<ComponentEntity> items) {
-            final long ts = System.currentTimeMillis();
-            for (ComponentEntity item : items) {
-                if (item.getHoldNodeId() != null) {
-                    if (item.getLastActivity() <= ts) {
-                        item.clearMarkers();
-                        repository.addActiveComponent(item);
-                    } else {
-                        repository.addPassiveComponent(item);
-                    }
-                } else {
-                    repository.addActiveComponent(item);
-                }
-            }
-        }
-
-        private void leaseActivity() {
-            try {
-                updateActivity(repository.getActiveEntities());
-            } catch (UpdateException e) {
-                for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
-                    repository.addPassiveComponent(o);
-                    if (repository.removeActiveComponent(o.getName())) {
-                        workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
-                    }
-                }
-                for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
-                    repository.addPassiveComponent(o);
-                    if (repository.removeActiveComponent(o.getName())) {
-                        workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
-                    }
-                }
-            }
-        }
-
-        private void activateCandidates(List<ComponentEntity> activateCandidates) {
-            try {
-                updateActivity(activateCandidates);
-            } catch (UpdateException e) {
-                activateCandidates = e.getUpdated();
-            }
-
-            for (ComponentEntity item : activateCandidates) {
-                repository.addActiveComponent(item);
-                repository.removePassiveComponent(item.getName());
-                workers.startComponent(item.getId(), repository.getComponent(item.getName()));
-            }
-        }
-
-
-        private void updateActivity(Collection<ComponentEntity> items) throws UpdateException {
-            for (ComponentEntity component : items) {
-                component.setLastActivity(lastActivityTs);
-                component.clearMarkers();
-            }
-
-            dao.updateComponents(items);
-        }
-
-        private void checkPassiveComponents() {
-            if (!repository.getPassiveEntities().isEmpty()) {
-                Collection<ComponentEntity> items = dao.selectComponents(currentNode, getPassiveEntitiesKeys());
-                List<ComponentEntity> activateCandidates = findCandidateForActivation(items);
-                activateCandidates(activateCandidates);
-                dao.markWaitForReturn(repository.getPassiveEntities());
-            }
-        }
-
-        private Collection<String> getPassiveEntitiesKeys() {
-            return FieldHelper.getFieldCollection(repository.getPassiveEntities(),
-                    FieldHelper.<ComponentEntity, String>construct(ComponentEntity.class, "id"));
-        }
-
-        private List<ComponentEntity> findCandidateForActivation(Collection<ComponentEntity> items) {
-            List<ComponentEntity> activateCandidates = new ArrayList<ComponentEntity>();
-            for (ComponentEntity item : items) {
-                if (item.getHoldNodeId() == null) {
-                    activateCandidates.add(item);
-                }
-            }
-            return activateCandidates;
+    private void handleAlienComponents() {
+        repairLock.lock();
+        try {
+            leaseAlienComponents();
+            findAlienStaleComponents();
+        } finally {
+            repairLock.unlock();
         }
     }
+
+    private void leaseAlienComponents() {
+        if (!repository.getAlienEntities().isEmpty()) {
+            Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
+            List<ComponentEntity> stopRepair = new ArrayList<ComponentEntity>();
+            for (ComponentEntity item : items) {
+                if (item.getWaitForReturn()) {
+                    item.clearMarkers();
+                    item.setRepaired(true);
+                    stopRepair.add(item);
+                } else {
+                    repository.removeAlienComponent(item.getId());
+                }
+            }
+
+
+            try {
+                dao.updateComponents(stopRepair);
+            } catch (UpdateException e) {
+                stopRepair = e.getUpdated();
+            }
+
+            for (ComponentEntity component : stopRepair) {
+                workers.stopRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
+            }
+
+            try {
+                dao.updateComponents(repository.getAlienEntities().values());
+            } catch (UpdateException e) {
+            }
+
+        }
+    }
+
+    private void findAlienStaleComponents() {
+        List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode,
+                repository.getActiveComponents().keySet());
+
+        for (ComponentEntity component : items) {
+            component.clearMarkers();
+            component.setHoldNodeId(currentNodeId);
+        }
+
+        try {
+            dao.updateComponents(items);
+        } catch (UpdateException e) {
+            items = e.getUpdated();
+        }
+
+        for (ComponentEntity component : items) {
+            repository.addAlientComponent(component);
+            workers.startRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
+        }
+    }
+
+
+    private void calcLastActivity() {
+        lastActivityTs = System.currentTimeMillis() + failoverInterval;
+    }
+
+    private void processInitialState() {
+        Collection<ComponentEntity> items = dao.selectComponents(currentNode, repository.getComponents().keySet());
+        filterComponentByState(items);
+        leaseActivity();
+        startActiveComponents();
+    }
+
+    private void startActiveComponents() {
+        for (ComponentEntity item : repository.getActiveEntities()) {
+            workers.startComponent(item.getId(), repository.getComponent(item.getName()));
+        }
+    }
+
+    private void filterComponentByState(Collection<ComponentEntity> items) {
+        final long ts = System.currentTimeMillis();
+        for (ComponentEntity item : items) {
+            if (item.getHoldNodeId() != null) {
+                if (item.getLastActivity() <= ts) {
+                    item.clearMarkers();
+                    repository.addActiveComponent(item);
+                } else {
+                    repository.addPassiveComponent(item);
+                }
+            } else {
+                repository.addActiveComponent(item);
+            }
+        }
+    }
+
+    private void leaseActivity() {
+        try {
+            updateActivity(repository.getActiveEntities());
+        } catch (UpdateException e) {
+            for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
+                repository.addPassiveComponent(o);
+                if (repository.removeActiveComponent(o.getName())) {
+                    workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
+                }
+            }
+            for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
+                repository.addPassiveComponent(o);
+                if (repository.removeActiveComponent(o.getName())) {
+                    workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
+                }
+            }
+        }
+    }
+
+    private void activateCandidates(List<ComponentEntity> activateCandidates) {
+        try {
+            updateActivity(activateCandidates);
+        } catch (UpdateException e) {
+            activateCandidates = e.getUpdated();
+        }
+
+        for (ComponentEntity item : activateCandidates) {
+            repository.addActiveComponent(item);
+            repository.removePassiveComponent(item.getName());
+            workers.startComponent(item.getId(), repository.getComponent(item.getName()));
+        }
+    }
+
+
+    private void updateActivity(Collection<ComponentEntity> items) throws UpdateException {
+        for (ComponentEntity component : items) {
+            component.setLastActivity(lastActivityTs);
+            component.clearMarkers();
+        }
+
+        dao.updateComponents(items);
+    }
+
+    private void checkPassiveComponents() {
+        if (!repository.getPassiveEntities().isEmpty()) {
+            Collection<ComponentEntity> items = dao.selectComponents(currentNode, getPassiveEntitiesKeys());
+            List<ComponentEntity> activateCandidates = findCandidateForActivation(items);
+            activateCandidates(activateCandidates);
+            dao.markWaitForReturn(repository.getPassiveEntities());
+        }
+    }
+
+    private Collection<String> getPassiveEntitiesKeys() {
+        return FieldHelper.getFieldCollection(repository.getPassiveEntities(),
+                FieldHelper.<ComponentEntity, String>construct(ComponentEntity.class, "id"));
+    }
+
+    private List<ComponentEntity> findCandidateForActivation(Collection<ComponentEntity> items) {
+        List<ComponentEntity> activateCandidates = new ArrayList<ComponentEntity>();
+        for (ComponentEntity item : items) {
+            if (item.getHoldNodeId() == null) {
+                activateCandidates.add(item);
+            }
+        }
+        return activateCandidates;
+    }
+
 
 }
