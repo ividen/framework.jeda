@@ -15,7 +15,11 @@ import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.Lock;
@@ -64,8 +68,45 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         supervisor.join(60000);
     }
 
-    private void initCurrentNode() {         
-        currentNode = dao.findOrCreateNode(new NodeEntity(currentNodeId, System.currentTimeMillis()));
+    private void initCurrentNode() {
+        currentNode = dao.findOrCreateNode(new NodeEntity(currentNodeId,
+                System.currentTimeMillis(), getIPAddress(), getPID()));
+    }
+
+    private String getPID() {
+        String fallback = "<PID>";
+        String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        int index = jvmName.indexOf('@');
+
+        if (index < 1) {
+            return fallback;
+        }
+
+        try {
+            return Long.toString(Long.parseLong(jvmName.substring(0, index)));
+        } catch (NumberFormatException e) {
+        }
+        return fallback;
+    }
+
+    private String getIPAddress() {
+        try {
+            Enumeration e = NetworkInterface.getNetworkInterfaces();
+            final InetAddress localHost = InetAddress.getLocalHost();
+            while (e.hasMoreElements()) {
+                NetworkInterface n = (NetworkInterface) e.nextElement();
+                Enumeration ee = n.getInetAddresses();
+                while (ee.hasMoreElements()) {
+                    InetAddress i = (InetAddress) ee.nextElement();
+                    if ((i instanceof Inet4Address) && !localHost.equals(i)) {
+                        return i.getHostAddress();
+                    }
+                }
+            }
+            return localHost.getHostAddress();
+        } catch (Exception e) {
+            throw new RuntimeException("Can't determine localhost ip address!", e);
+        }
     }
 
     public Integer getCurrentNodeId() {
@@ -201,6 +242,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         while (started && !Thread.currentThread().isInterrupted()) {
             calcLastActivity();
             try {
+                leaseCurrentNode();
                 leaseActivity();
                 checkPassiveComponents();
                 handleAlienComponents();
@@ -214,6 +256,11 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
 
         logger.info("Stopped {}", SUPERVISOR_NAME);
+    }
+
+    private void leaseCurrentNode() {
+        currentNode.setLastActivity(lastActivityTs);
+        dao.updateNode(currentNode);
     }
 
     private void handleAlienComponents() {
@@ -380,6 +427,4 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
         return activateCandidates;
     }
-
-
 }

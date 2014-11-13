@@ -11,10 +11,12 @@ public class TestNodeEntity {
     @Test
     public void testEntity(){
         long lastActivity = System.currentTimeMillis();
-        NodeEntity test = new NodeEntity(10, lastActivity);
+        NodeEntity test = new NodeEntity(10, lastActivity,"1.1.1.2","mypid");
 
         Assert.assertEquals(10,test.getId().intValue());
         Assert.assertEquals(lastActivity,test.getLastActivity().longValue());
+        Assert.assertEquals("1.1.1.2",test.getIpAddress());
+        Assert.assertEquals("mypid",test.getPid());
 
         test.setId(100);
         test.setLastActivity(10000l);

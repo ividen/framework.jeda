@@ -134,4 +134,11 @@ public class DBClusterServiceDao {
         }
     }
 
+    public void updateNode(NodeEntity currentNode) {
+        try{
+            em.update(currentNode);
+        }catch (UpdateException e){
+            logger.error("Error updating node",e);
+        }
+    }
 }

@@ -10,9 +10,11 @@ import ru.kwanza.jeda.clusterservice.Node;
  */
 @Entity(table = "jeda_cluster_node", name = "jeda.clusterservice.NodeEntity")
 public class NodeEntity extends Node {
-    public NodeEntity(Integer id, Long lastActivity) {
+    public NodeEntity(Integer id, Long lastActivity, String ipAddress, String pid) {
         super(id);
         this.lastActivity = lastActivity;
+        this.ipAddress = ipAddress;
+        this.pid = pid;
     }
 
     @IdField("id")
