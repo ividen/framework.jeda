@@ -30,6 +30,7 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Alexander Guzanov
@@ -188,7 +189,7 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     public void testLoadComponentsByKeys_2() throws Exception {
         initDataSet("init_data_set_2.xml");
         Assert.assertTrue(dao.loadComponentsByKey(Collections.<String>emptyList()).isEmpty());
-        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("cp_1","cp_2","cp_3")).isEmpty());
+        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("cp_1", "cp_2", "cp_3")).isEmpty());
 
         Collection<ComponentEntity> result = dao.loadComponentsByKey(Arrays.asList("1_test_component"));
         Assert.assertEquals(1, result.size());
@@ -198,10 +199,24 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         Assert.assertEquals(1, entity.getNodeId().intValue());
         Assert.assertEquals("test_component", entity.getName());
 
-        Assert.assertEquals(1,entity.getNode().getId().intValue());
-        Assert.assertEquals("1.1.1.1",entity.getNode().getIpAddress());
-        Assert.assertEquals(666,entity.getNode().getLastActivity().intValue());
-        Assert.assertEquals("test_pid",entity.getNode().getPid());
+        Assert.assertEquals(1, entity.getNode().getId().intValue());
+        Assert.assertEquals("1.1.1.1", entity.getNode().getIpAddress());
+        Assert.assertEquals(666, entity.getNode().getLastActivity().intValue());
+        Assert.assertEquals("test_pid", entity.getNode().getPid());
+    }
+
+    @Test
+    public void testSelectActive_1(@Mocked final System system) throws Exception {
+        initDataSet("init_data_set_3.xml");
+
+        new Expectations(){{
+            System.currentTimeMillis();result = 80l;
+        }};
+
+        List<? extends NodeEntity> nodeEntities = dao.selectActiveNodes();
+        Assert.assertEquals(1,nodeEntities.size());
+        Assert.assertEquals(2,nodeEntities.get(0).getId().intValue());
+        Assert.assertEquals("1.1.1.2",nodeEntities.get(0).getIpAddress());
     }
 
 }

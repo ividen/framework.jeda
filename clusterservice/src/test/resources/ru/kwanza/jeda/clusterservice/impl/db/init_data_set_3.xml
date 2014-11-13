@@ -1,0 +1,14 @@
+<dataset>
+
+    <jeda_cluster_node id="1"
+                       last_activity="50"
+                       pid="test_pid_1"
+                       ip_address="1.1.1.1"
+            />
+
+    <jeda_cluster_node id="2"
+                       last_activity="100"
+                       pid="test_pid_1"
+                       ip_address="1.1.1.2"
+            />
+</dataset>
