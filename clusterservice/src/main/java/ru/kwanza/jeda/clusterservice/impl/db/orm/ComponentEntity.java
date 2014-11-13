@@ -35,9 +35,6 @@ public class ComponentEntity {
     @ManyToOne(property = "holdNodeId")
     private NodeEntity holdNode;
 
-    public ComponentEntity() {
-    }
-
     public ComponentEntity(Integer nodeId, String name) {
         this.id = createId(nodeId, name);
         this.nodeId = nodeId;

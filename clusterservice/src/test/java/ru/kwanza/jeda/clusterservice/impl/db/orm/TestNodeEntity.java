@@ -21,5 +21,11 @@ public class TestNodeEntity {
         Assert.assertEquals(100,test.getId().intValue());
         Assert.assertEquals(10000l,test.getLastActivity().longValue());
 
+        test.setIpAddress("1.1.1.1");
+        test.setPid("pid");
+
+        Assert.assertEquals("1.1.1.1",test.getIpAddress());
+        Assert.assertEquals("pid",test.getPid());
+
     }
 }

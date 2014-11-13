@@ -22,6 +22,7 @@ import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -383,11 +384,11 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         dao.updateComponents(componentEntities);
 
         Assertion.assertEqualsIgnoreCols(getActualDataSet("jeda_clustered_component"),
-                getResourceSet("data_set_3.xml"),"jeda_clustered_component", new String[]{"version","hold_node_id"});
+                getResourceSet("data_set_3.xml"), "jeda_clustered_component", new String[]{"version", "hold_node_id"});
     }
 
     @Test
-    public void testMarkWaiteReturn() throws Exception {
+    public void testMarkWaiteReturn_1() throws Exception {
         initDataSet("init_data_set_4.xml");
 
         Collection<ComponentEntity> componentEntities =
@@ -402,6 +403,29 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
 
         Assertion.assertEqualsIgnoreCols(getActualDataSet("jeda_clustered_component"),
                 getResourceSet("data_set_4.xml"),"jeda_clustered_component", new String[]{"hold_node_id"});
+    }
+
+
+    @Test
+    public void testMarkWaiteReturn_2() throws Exception {
+        initDataSet("init_data_set_4.xml");
+
+        Collection<ComponentEntity> componentEntities =
+                dao.loadComponentsByKey(Arrays.asList("1_test_component_1", "1_test_component_2",
+                        "2_test_component_1", "2_test_component_2"));
+
+        for (ComponentEntity componentEntity : componentEntities) {
+            componentEntity.setLastActivity(-666l);
+        }
+
+        new Expectations(){{
+                mockedEm.update(WaitForReturnComponent.class, (Collection) any);result=new UpdateException();
+        }};
+
+        mockedDao.markWaitForReturn(componentEntities);
+
+        Assertion.assertEqualsIgnoreCols(getActualDataSet("jeda_clustered_component"),
+                getResourceSet("init_data_set_4.xml"),"jeda_clustered_component", new String[]{"hold_node_id"});
     }
 
 
