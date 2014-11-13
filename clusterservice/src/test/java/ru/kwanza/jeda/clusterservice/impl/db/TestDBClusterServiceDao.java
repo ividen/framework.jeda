@@ -6,11 +6,13 @@ import mockit.Injectable;
 import mockit.Mocked;
 import mockit.Tested;
 import org.dbunit.Assertion;
+import org.dbunit.IDatabaseTester;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.SortedDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
@@ -23,7 +25,11 @@ import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * @author Alexander Guzanov
@@ -35,9 +41,14 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     private DBTool dbTool;
     @Resource(name = "dbtool.IEntityManager")
     private IEntityManager em;
+    @Resource(name = "dbTester")
+    private IDatabaseTester dbTester;
     @Autowired
     private DBClusterServiceDao dao;
-
+    @Tested
+    private DBClusterServiceDao mockedDao;
+    @Injectable
+    private IEntityManager mockedEm;
 
     protected IDataSet getActualDataSet(String tablename) throws Exception {
         return new SortedDataSet(new DatabaseConnection(dbTool.getJDBCConnection())
@@ -48,9 +59,19 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         return new SortedDataSet(new FlatXmlDataSetBuilder().build(this.getClass().getResourceAsStream(fileName)));
     }
 
+    private IDataSet getDataSet(String fileName) throws Exception {
+        return new FlatXmlDataSetBuilder()
+                .build(this.getClass().getResourceAsStream(fileName));
+    }
+
+    private void initDataSet(String fileName) throws Exception {
+        dbTester.setDataSet(getDataSet(fileName));
+        dbTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+        dbTester.onSetup();
+    }
 
     @Test
-    public void testRegister_1(@Mocked final NodeEntity n,
+    public void testRegisterComponent_1(@Mocked final NodeEntity n,
                                @Mocked final IClusteredComponent c) throws Exception {
         new Expectations() {{
             n.getId();
@@ -68,7 +89,7 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     }
 
     @Test
-    public void testRegister_2(@Mocked final NodeEntity n,
+    public void testRegisterComponent_2(@Mocked final NodeEntity n,
                                @Mocked final IClusteredComponent c) throws Exception {
         new Expectations() {{
             n.getId();
@@ -89,15 +110,8 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
     }
 
 
-
-    @Tested
-    private DBClusterServiceDao mockedDao;
-    @Injectable
-    private IEntityManager mockedEm;
-
-
-    @Test
-    public void testRegister_3(@Mocked final NodeEntity n,
+    @Test(expected = RuntimeException.class)
+    public void testRegisterComponent_3(@Mocked final NodeEntity n,
                                @Mocked final IClusteredComponent c
                                ) throws Exception {
         new Expectations() {{
@@ -109,13 +123,85 @@ public class TestDBClusterServiceDao extends AbstractTransactionalJUnit4SpringCo
         }};
 
 
-        try {
-            mockedDao.findOrCreateComponent(n, c);
-            Assert.fail("Expected " + RuntimeException.class);
-        }catch (RuntimeException e){
-        }
+        mockedDao.findOrCreateComponent(n, c);
+        Assert.fail("Expected " + RuntimeException.class);
+    }
 
+    @Test
+    public void testRegisterNode_1(@Mocked final  NodeEntity n) throws Exception {
+        new Expectations(){{
+            n.getId();result=1;
+            n.getLastActivity();result=666;
+            n.getIpAddress();result="1.1.1.1";
+            n.getPid();result="test_pid";
+        }};
+        NodeEntity result = dao.findOrCreateNode(n);
+        Assert.assertEquals(1,result.getId().intValue());
+        Assert.assertEquals("1.1.1.1",result.getIpAddress());
+        Assert.assertEquals(666,result.getLastActivity().intValue());
+        Assert.assertEquals("test_pid",result.getPid());
 
+        Assertion.assertEquals(getActualDataSet("jeda_cluster_node"),
+                getResourceSet("data_set_2.xml"));
+    }
+
+    @Test
+    public void testRegisterNode_2(@Mocked final  NodeEntity n) throws Exception {
+        new Expectations(){{
+            n.getId();result=1;
+            n.getLastActivity();result=666;
+            n.getIpAddress();result="1.1.1.1";
+            n.getPid();result="test_pid";
+        }};
+
+        em.create(n);
+
+        NodeEntity result = dao.findOrCreateNode(n);
+        Assert.assertEquals(1,result.getId().intValue());
+        Assert.assertEquals("1.1.1.1",result.getIpAddress());
+        Assert.assertEquals(666,result.getLastActivity().intValue());
+        Assert.assertEquals("test_pid",result.getPid());
+
+        Assertion.assertEquals(getActualDataSet("jeda_cluster_node"),
+                getResourceSet("data_set_2.xml"));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testRegisterNode_3(@Mocked final  NodeEntity n) throws Exception {
+        new Expectations(){{
+            n.getId();result=1;
+            mockedEm.readByKey(NodeEntity.class,any);result=null;
+            mockedEm.create(n); result = new UpdateException();
+            mockedEm.readByKey(NodeEntity.class,any);result=null;
+        }};
+
+        NodeEntity result = mockedDao.findOrCreateNode(n);
+    }
+
+    @Test
+    public void testLoadComponentsByKeys_1(){
+        Assert.assertTrue(dao.loadComponentsByKey(Collections.<String>emptyList()).isEmpty());
+        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("1_cp_1","1_cp_2","1_cp_3")).isEmpty());
+    }
+
+    @Test
+    public void testLoadComponentsByKeys_2() throws Exception {
+        initDataSet("init_data_set_2.xml");
+        Assert.assertTrue(dao.loadComponentsByKey(Collections.<String>emptyList()).isEmpty());
+        Assert.assertTrue(dao.loadComponentsByKey(Arrays.asList("cp_1","cp_2","cp_3")).isEmpty());
+
+        Collection<ComponentEntity> result = dao.loadComponentsByKey(Arrays.asList("1_test_component"));
+        Assert.assertEquals(1, result.size());
+        ComponentEntity entity = result.iterator().next();
+
+        Assert.assertEquals("1_test_component", entity.getId());
+        Assert.assertEquals(1, entity.getNodeId().intValue());
+        Assert.assertEquals("test_component", entity.getName());
+
+        Assert.assertEquals(1,entity.getNode().getId().intValue());
+        Assert.assertEquals("1.1.1.1",entity.getNode().getIpAddress());
+        Assert.assertEquals(666,entity.getNode().getLastActivity().intValue());
+        Assert.assertEquals("test_pid",entity.getNode().getPid());
     }
 
 }

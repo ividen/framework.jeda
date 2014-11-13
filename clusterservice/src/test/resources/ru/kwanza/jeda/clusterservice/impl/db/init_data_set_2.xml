@@ -1,6 +1,14 @@
 <dataset>
-    <jeda_cluster_service id="1" last_activity="0"/>
-    <jeda_clustered_module id="1_module_1" node_id="1" name="module_1" last_repaired="0"/>
-    <jeda_clustered_module id="1_module_2" node_id="1" name="module_2" last_repaired="0"/>
-    <jeda_clustered_module id="1_module_3" node_id="1" name="module_3" last_repaired="0"/>
+    <jeda_clustered_component id="1_test_component"
+                              node_id="1"
+                              name="test_component"
+                              last_activity="666"
+                              version="1"
+                              wait_for_return="false" repaired="false"
+            />
+    <jeda_cluster_node id="1"
+                       last_activity="666"
+                       pid="test_pid"
+                       ip_address="1.1.1.1"
+            />
 </dataset>
