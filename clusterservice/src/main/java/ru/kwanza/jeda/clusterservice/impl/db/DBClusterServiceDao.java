@@ -115,7 +115,6 @@ public class DBClusterServiceDao {
     }
 
     public Collection<ComponentEntity> selectComponents(final Node node, final Collection<String> components) {
-
         return loadComponentsByKey(
                 FieldHelper.getFieldCollection(components, new FieldHelper.Field<String, String>() {
                     public String value(String object) {

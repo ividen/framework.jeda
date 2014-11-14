@@ -48,4 +48,14 @@ public class Node {
     public int hashCode() {
         return id.hashCode();
     }
+
+    @Override
+    public String toString() {
+        return "Node{" +
+                "id=" + id +
+                ", lastActivity=" + lastActivity +
+                ", pid='" + pid + '\'' +
+                ", ipAddress='" + ipAddress + '\'' +
+                '}';
+    }
 }

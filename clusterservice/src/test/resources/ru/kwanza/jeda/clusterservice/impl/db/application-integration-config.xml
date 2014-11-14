@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dbtool-orm="http://www.kwanza-systems.ru/schema/dbtool-orm"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.kwanza-systems.ru/schema/dbtool-orm http://www.kwanza-systems.ru/schema/dbtool-orm.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:dbtool-orm-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-db-config.xml"/>
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:db_oracle.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
+        <constructor-arg index="0" value="component_1"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
+        <constructor-arg index="0" value="component_2"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
+        <constructor-arg index="0" value="component_3"/>
+    </bean>
+
+    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
+        <constructor-arg index="0" value="component_4"/>
+    </bean>
+
+
+</beans>
