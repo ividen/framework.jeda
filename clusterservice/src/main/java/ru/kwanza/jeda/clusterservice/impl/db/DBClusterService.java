@@ -9,6 +9,7 @@ import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.AlienComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
@@ -189,13 +190,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public boolean markRepaired(IClusteredComponent component, Node node) {
         repairLock.lock();
         try {
-            ComponentEntity componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node.getId(), component.getName()));
+            AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node.getId(), component.getName()));
             if (componentEntity != null) {
                 componentEntity.clearMarkers();
                 componentEntity.setRepaired(true);
                 componentEntity.setLastActivity(0l);
                 try {
-                    dao.updateComponents(Collections.singleton(componentEntity));
+                    dao.updateAlienComponents(Collections.singleton(componentEntity));
                     repository.removeAlienComponent(componentEntity.getId());
                     workers.stopRepair(componentEntity.getId(), component, node);
                 } catch (UpdateException e) {
@@ -281,8 +282,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 if (item.getWaitForReturn()) {
                     item.clearMarkers();
                     item.setRepaired(true);
+                    item.setLastActivity(0l);
                     stopRepair.add(item);
-                } else {
                     repository.removeAlienComponent(item.getId());
                 }
             }
@@ -298,8 +299,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 workers.stopRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
             }
 
+            for (AlienComponent o : repository.getAlienEntities().values()) {
+                o.setLastActivity(lastActivityTs);
+            }
+
             try {
-                dao.updateComponents(repository.getAlienEntities().values());
+                dao.updateAlienComponents(repository.getAlienEntities().values());
             } catch (UpdateException e) {
             }
 
@@ -307,21 +312,26 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void findAlienStaleComponents() {
-        List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode,
+        List<AlienComponent> items = dao.selectAlienStaleComponents(currentNode,
                 repository.getActiveComponents().keySet());
 
-        for (ComponentEntity component : items) {
-            component.clearMarkers();
-            component.setHoldNodeId(currentNodeId);
+        List<AlienComponent> newItems = new ArrayList<AlienComponent>();
+        for (AlienComponent component : items) {
+            if (!repository.getAlienEntities().containsKey(component.getId())) {
+                component.clearMarkers();
+                component.setLastActivity(lastActivityTs);
+                component.setHoldNodeId(currentNodeId);
+                newItems.add(component);
+            }
         }
 
         try {
-            dao.updateComponents(items);
+            dao.updateAlienComponents(newItems);
         } catch (UpdateException e) {
-            items = e.getUpdated();
+            newItems = e.getUpdated();
         }
 
-        for (ComponentEntity component : items) {
+        for (AlienComponent component : newItems) {
             repository.addAlientComponent(component);
             workers.startRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
         }
@@ -380,7 +390,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
     }
 
-    private void activateCandidates(List<ComponentEntity> activateCandidates) {
+    private void activateCandidates(Collection<ComponentEntity> activateCandidates) {
         try {
             updateActivity(activateCandidates);
         } catch (UpdateException e) {
@@ -406,9 +416,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void checkPassiveComponents() {
         if (!repository.getPassiveEntities().isEmpty()) {
-            Collection<ComponentEntity> items = dao.selectComponents(currentNode, getPassiveEntitiesKeys());
-            List<ComponentEntity> activateCandidates = findCandidateForActivation(items);
-            activateCandidates(activateCandidates);
+            Collection<ComponentEntity> items = dao.selectActivationCandidate(getPassiveEntitiesKeys());
+            activateCandidates(items);
             dao.markWaitForReturn(repository.getPassiveEntities());
         }
     }
@@ -416,15 +425,5 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private Collection<String> getPassiveEntitiesKeys() {
         return FieldHelper.getFieldCollection(repository.getPassiveEntities(),
                 FieldHelper.<ComponentEntity, String>construct(ComponentEntity.class, "id"));
-    }
-
-    private List<ComponentEntity> findCandidateForActivation(Collection<ComponentEntity> items) {
-        List<ComponentEntity> activateCandidates = new ArrayList<ComponentEntity>();
-        for (ComponentEntity item : items) {
-            if (item.getHoldNodeId() == null) {
-                activateCandidates.add(item);
-            }
-        }
-        return activateCandidates;
     }
 }

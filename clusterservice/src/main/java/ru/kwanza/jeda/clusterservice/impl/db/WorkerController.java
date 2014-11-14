@@ -186,7 +186,9 @@ public class WorkerController {
         }
 
         protected void handleStart() {
+            logger.info("Starting component {}", component.getName());
             component.handleStart();
+            logger.info("Started component {}", component.getName());
         }
 
         void scheduleStart() {
@@ -212,7 +214,6 @@ public class WorkerController {
         void trySchedule() {
             if (complete || !scheduled) {
                 scheduled = true;
-                logger.info("Scheduling component {}", component.getName());
                 workerExecutor.execute(this);
             }
         }

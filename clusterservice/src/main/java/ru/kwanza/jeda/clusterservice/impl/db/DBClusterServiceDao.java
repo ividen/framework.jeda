@@ -8,6 +8,7 @@ import ru.kwanza.dbtool.orm.api.IQuery;
 import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.AlienComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.WaitForReturnComponent;
@@ -30,14 +31,15 @@ public class DBClusterServiceDao {
     private IQuery<NodeEntity> queryActive;
     private IQuery<NodeEntity> queryPassive;
     private IQuery<NodeEntity> queryAll;
-    private IQuery<ComponentEntity> queryForAlienStaleComponents;
+    private IQuery<AlienComponent> queryForAlienStaleComponents;
+    private IQuery<ComponentEntity> queryForActivationCandidates;
 
     @PostConstruct
     public void init() {
         queryActive = em.queryBuilder(NodeEntity.class).where(If.isGreater("lastActivity")).create();
         queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
         queryAll = em.queryBuilder(NodeEntity.class).create();
-        queryForAlienStaleComponents = em.queryBuilder(ComponentEntity.class)
+        queryForAlienStaleComponents = em.queryBuilder(AlienComponent.class)
                 .lazy()
                 .where(
                         If.and(
@@ -45,6 +47,14 @@ public class DBClusterServiceDao {
                                 If.in("name"),
                                 If.isLessOrEqual("lastActivity"),
                                 If.isEqual("repaired", If.valueOf(false))
+                        )).create();
+
+        queryForActivationCandidates = em.queryBuilder(ComponentEntity.class)
+                .lazy()
+                .where(
+                        If.and(
+                                If.in("id"),
+                                If.isLessOrEqual("lastActivity")
                         )).create();
     }
 
@@ -93,6 +103,10 @@ public class DBClusterServiceDao {
         em.update(ComponentEntity.class, items);
     }
 
+    public void updateAlienComponents(Collection<AlienComponent> items) throws UpdateException {
+        em.update(AlienComponent.class, items);
+    }
+
     public List<? extends Node> selectActiveNodes() {
         return queryActive.prepare().setParameter(1, System.currentTimeMillis()).selectList();
     }
@@ -106,7 +120,7 @@ public class DBClusterServiceDao {
     }
 
 
-    public List<ComponentEntity> selectAlienStaleComponents(Node node, Collection<String> components) {
+    public List<AlienComponent> selectAlienStaleComponents(Node node, Collection<String> components) {
         return queryForAlienStaleComponents.prepare()
                 .setParameter(1, node.getId())
                 .setParameter(2, components)
@@ -124,10 +138,16 @@ public class DBClusterServiceDao {
 
     }
 
+    public  Collection<ComponentEntity> selectActivationCandidate(Collection<String> ids){
+        return queryForActivationCandidates.prepare()
+                .setParameter(1,ids)
+                .setParameter(2,System.currentTimeMillis()).selectList();
+    }
+
     public void markWaitForReturn(Collection<ComponentEntity> passiveEntities) {
         try {
             em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(passiveEntities,
-                    FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitEntity")));
+                    FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitFoReturn")));
         } catch (UpdateException e) {
             logger.error("Error mark waitForReturn!", e);
         }

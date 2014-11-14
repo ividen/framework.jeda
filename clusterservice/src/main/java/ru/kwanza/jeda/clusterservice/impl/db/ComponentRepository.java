@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
+import ru.kwanza.jeda.clusterservice.impl.db.orm.AlienComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
@@ -17,7 +18,7 @@ public class ComponentRepository {
     private ConcurrentMap<String, IClusteredComponent> components = new ConcurrentHashMap<String, IClusteredComponent>();
     private ConcurrentMap<String, ComponentEntry> activeComponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntry> passiveCoomponents = new ConcurrentHashMap<String, ComponentEntry>();
-    private ConcurrentMap<String, ComponentEntity> alienComponent = new ConcurrentHashMap<String, ComponentEntity>();
+    private ConcurrentMap<String, AlienComponent> alienComponent = new ConcurrentHashMap<String, AlienComponent>();
 
     public Map<String, IClusteredComponent> getComponents() {
         return Collections.unmodifiableMap(components);
@@ -49,7 +50,7 @@ public class ComponentRepository {
         return FieldHelper.getFieldCollection(passiveCoomponents.values(), ComponentEntry.entityField);
     }
 
-    public Map<String, ComponentEntity> getAlienEntities() {
+    public Map<String, AlienComponent> getAlienEntities() {
         return Collections.unmodifiableMap(alienComponent);
     }
 
@@ -61,7 +62,7 @@ public class ComponentRepository {
         passiveCoomponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
 
-    public void addAlientComponent(ComponentEntity componentEntity) {
+    public void addAlientComponent(AlienComponent componentEntity) {
         alienComponent.put(componentEntity.getId(), componentEntity);
     }
 
