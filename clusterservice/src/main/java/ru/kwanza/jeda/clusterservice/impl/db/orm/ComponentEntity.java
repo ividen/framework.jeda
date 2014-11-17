@@ -16,10 +16,6 @@ public class ComponentEntity extends BaseComponentEntity {
         this.waitForReturn = null;
     }
 
-    public AlienComponent getAlien() {
-        return new AlienComponent(this);
-    }
-
     public Long getWaitForReturn() {
         return waitForReturn;
     }

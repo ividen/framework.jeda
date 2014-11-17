@@ -15,7 +15,7 @@ public class AlienComponent extends BaseComponentEntity{
         this.lastActivity = entity.lastActivity;
         this.version = entity.version;
         this.nodeId = entity.nodeId;
-        this.holdNodeId = entity.nodeId;
+        this.holdNodeId = entity.holdNodeId;
         this.node = entity.node;
     }
 
