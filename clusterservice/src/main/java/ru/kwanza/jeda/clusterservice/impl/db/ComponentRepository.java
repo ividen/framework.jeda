@@ -100,6 +100,7 @@ public class ComponentRepository {
     public boolean removeStopRepairComponent(String id) {
         return stopRepair.remove(id) != null;
     }
+
     public boolean removeStopingRepairComponent(String id) {
         return stopingRepair.remove(id) != null;
     }

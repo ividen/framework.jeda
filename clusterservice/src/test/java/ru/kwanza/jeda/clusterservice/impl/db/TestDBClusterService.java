@@ -18,7 +18,7 @@ import static junit.framework.Assert.*;
 /**
  * @author Alexander Guzanov
  */
-public class TestDBClusterService {
+public class TestDBClusterService  {
 
     @Tested
     private DBClusterService service;
@@ -61,7 +61,6 @@ public class TestDBClusterService {
     @Test
     public void testParams() throws InterruptedException, UpdateException {
         start();
-        assertEquals(1, service.getCurrentNodeId().intValue());
         assertEquals(1, service.getCurrentNodeId().intValue());
         assertEquals(100, service.getFailoverInterval());
         service.destroy();
