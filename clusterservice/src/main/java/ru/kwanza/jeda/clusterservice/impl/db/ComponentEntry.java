@@ -7,7 +7,7 @@ import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 /**
  * @author Alexander Guzanov
  */
-public class ComponentEntry {
+public class ComponentEntry{
     private IClusteredComponent component;
     private ComponentEntity entity;
 

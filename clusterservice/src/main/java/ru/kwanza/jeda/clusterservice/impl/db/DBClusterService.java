@@ -62,11 +62,19 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     @PreDestroy
-    public void destroy() throws InterruptedException {
+    public void destroy() throws InterruptedException, UpdateException {
         logger.info("Stopping {} ...", SUPERVISOR_NAME);
         started = false;
         supervisor.interrupt();
         supervisor.join(60000);
+        updateActivity(repository.getActiveEntities(),0);
+        for (IClusteredComponent o : repository.getActiveComponents().values()) {
+            try {
+                o.handleStop();
+            }catch (Throwable e){
+                logger.error("Error stopping "+o.getName(),e);
+            }
+        }
     }
 
     private void initCurrentNode() {
@@ -190,19 +198,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public boolean markRepaired(IClusteredComponent component, Node node) {
         repairLock.lock();
         try {
-            AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node.getId(), component.getName()));
+            AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node, component));
             if (componentEntity != null) {
-                componentEntity.clearMarkers();
-                componentEntity.setRepaired(true);
-                componentEntity.setLastActivity(0l);
-                try {
-                    dao.updateAlienComponents(Collections.singleton(componentEntity));
-                    repository.removeAlienComponent(componentEntity.getId());
-                    workers.stopRepair(componentEntity.getId(), component, node);
-                } catch (UpdateException e) {
-                    //todo aguzanov log error
-                    return false;
-                }
+                workers.stopRepair(componentEntity.getId(), new ComponentHandler(repository, component), node);
             }
         } finally {
             repairLock.unlock();
@@ -230,16 +228,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     public void run() {
         logger.info("Started {}", SUPERVISOR_NAME);
 
-        while (true) {
-            try {
-                calcLastActivity();
-                processInitialState();
-                break;
-            } catch (Throwable ex) {
-                continue;
-            }
-        }
+        initLoop();
+        workLoop();
 
+        logger.info("Stopped {}", SUPERVISOR_NAME);
+    }
+
+    private void workLoop() {
         while (started && !Thread.currentThread().isInterrupted()) {
             calcLastActivity();
             try {
@@ -255,8 +250,18 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 continue;
             }
         }
+    }
 
-        logger.info("Stopped {}", SUPERVISOR_NAME);
+    private void initLoop() {
+        while (true) {
+            try {
+                calcLastActivity();
+                processInitialState();
+                break;
+            } catch (Throwable ex) {
+                continue;
+            }
+        }
     }
 
     private void leaseCurrentNode() {
@@ -267,57 +272,59 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private void handleAlienComponents() {
         repairLock.lock();
         try {
-            leaseAlienComponents();
-            findAlienStaleComponents();
+            leaseAlien();
+            finishStop();
+            findStaleAlien();
         } finally {
             repairLock.unlock();
         }
     }
 
-    private void leaseAlienComponents() {
+    private void finishStop() {
+        if(!repository.getStopRepairEntities().isEmpty()){
+
+            final Collection<AlienComponent> items = repository.getStopRepairEntities().values();
+            try {
+                dao.updateAlienComponents(items);
+            } catch (UpdateException e) {
+            }
+
+            for (AlienComponent alienComponent : items) {
+                repository.removeAlienComponent(alienComponent.getId());
+                repository.removeStopRepairComponent(alienComponent.getId());
+            }
+        }
+    }
+
+    private void leaseAlien() {
         if (!repository.getAlienEntities().isEmpty()) {
             Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
-            List<ComponentEntity> stopRepair = new ArrayList<ComponentEntity>();
             for (ComponentEntity item : items) {
                 if (item.getWaitForReturn()) {
-                    item.clearMarkers();
-                    item.setRepaired(true);
-                    item.setLastActivity(0l);
-                    stopRepair.add(item);
-                    repository.removeAlienComponent(item.getId());
+                    workers.stopRepair(item.getId(),new ComponentHandler(repository,item.getName()), item.getNode());
                 }
-            }
-
-
-            try {
-                dao.updateComponents(stopRepair);
-            } catch (UpdateException e) {
-                stopRepair = e.getUpdated();
-            }
-
-            for (ComponentEntity component : stopRepair) {
-                workers.stopRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
             }
 
             for (AlienComponent o : repository.getAlienEntities().values()) {
                 o.setLastActivity(lastActivityTs);
+                o.setHoldNodeId(currentNode.getId());
             }
 
             try {
                 dao.updateAlienComponents(repository.getAlienEntities().values());
             } catch (UpdateException e) {
             }
-
         }
     }
 
-    private void findAlienStaleComponents() {
+    private void findStaleAlien() {
         List<AlienComponent> items = dao.selectAlienStaleComponents(currentNode,
                 repository.getActiveComponents().keySet());
 
         List<AlienComponent> newItems = new ArrayList<AlienComponent>();
+        final Map<String, AlienComponent> alienEntities = repository.getAlienEntities();
         for (AlienComponent component : items) {
-            if (!repository.getAlienEntities().containsKey(component.getId())) {
+            if (!alienEntities.containsKey(component.getId())) {
                 component.clearMarkers();
                 component.setLastActivity(lastActivityTs);
                 component.setHoldNodeId(currentNodeId);
@@ -333,7 +340,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
         for (AlienComponent component : newItems) {
             repository.addAlientComponent(component);
-            workers.startRepair(component.getId(), repository.getComponent(component.getName()), component.getNode());
+            workers.startRepair(component.getId(), new ComponentHandler(repository, component.getName()), component.getNode());
         }
     }
 
@@ -351,7 +358,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void startActiveComponents() {
         for (ComponentEntity item : repository.getActiveEntities()) {
-            workers.startComponent(item.getId(), repository.getComponent(item.getName()));
+            workers.startComponent(item.getId(), new ComponentHandler(repository, item.getName()));
         }
     }
 
@@ -373,26 +380,25 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void leaseActivity() {
         try {
-            updateActivity(repository.getActiveEntities());
+            updateActivity(repository.getActiveEntities(),lastActivityTs);
         } catch (UpdateException e) {
-            for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
-                repository.addPassiveComponent(o);
-                if (repository.removeActiveComponent(o.getName())) {
-                    workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
-                }
-            }
-            for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
-                repository.addPassiveComponent(o);
-                if (repository.removeActiveComponent(o.getName())) {
-                    workers.stopComponent(o.getId(), repository.getComponent(o.getName()));
-                }
+            stopComponents(e.<ComponentEntity>getConstrainted());
+            stopComponents(e.<ComponentEntity>getOptimistic());
+        }
+    }
+
+    private void stopComponents(List<ComponentEntity> optimistic) {
+        for (ComponentEntity o : optimistic) {
+            repository.addPassiveComponent(o);
+            if (repository.removeActiveComponent(o.getName())) {
+                workers.stopComponent(o.getId(), new ComponentHandler(repository, o.getName()));
             }
         }
     }
 
     private void activateCandidates(Collection<ComponentEntity> activateCandidates) {
         try {
-            updateActivity(activateCandidates);
+            updateActivity(activateCandidates,lastActivityTs);
         } catch (UpdateException e) {
             activateCandidates = e.getUpdated();
         }
@@ -400,14 +406,15 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         for (ComponentEntity item : activateCandidates) {
             repository.addActiveComponent(item);
             repository.removePassiveComponent(item.getName());
-            workers.startComponent(item.getId(), repository.getComponent(item.getName()));
+            workers.startComponent(item.getId(), new ComponentHandler(repository, item.getName()));
         }
     }
 
 
-    private void updateActivity(Collection<ComponentEntity> items) throws UpdateException {
+
+    private void updateActivity(Collection<ComponentEntity> items, long ts) throws UpdateException {
         for (ComponentEntity component : items) {
-            component.setLastActivity(lastActivityTs);
+            component.setLastActivity(ts);
             component.clearMarkers();
         }
 

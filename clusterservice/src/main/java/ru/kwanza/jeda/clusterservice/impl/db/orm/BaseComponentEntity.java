@@ -5,6 +5,7 @@ import ru.kwanza.dbtool.orm.annotations.IdField;
 import ru.kwanza.dbtool.orm.annotations.ManyToOne;
 import ru.kwanza.dbtool.orm.annotations.VersionField;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
+import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.sql.Types;
@@ -42,6 +43,10 @@ public class BaseComponentEntity {
 
     public static String createId(Integer nodeId, String name) {
         return nodeId.toString() + "_" + name;
+    }
+
+    public static String createId(Node node, IClusteredComponent component) {
+        return node.getId() + "_" + component.getName();
     }
 
     public String getId() {

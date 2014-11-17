@@ -19,6 +19,8 @@ public class ComponentRepository {
     private ConcurrentMap<String, ComponentEntry> activeComponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntry> passiveCoomponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, AlienComponent> alienComponent = new ConcurrentHashMap<String, AlienComponent>();
+    private ConcurrentMap<String,AlienComponent>  stopRepair = new ConcurrentHashMap<String,AlienComponent>();
+
 
     public Map<String, IClusteredComponent> getComponents() {
         return Collections.unmodifiableMap(components);
@@ -54,6 +56,10 @@ public class ComponentRepository {
         return Collections.unmodifiableMap(alienComponent);
     }
 
+    public Map<String, AlienComponent> getStopRepairEntities() {
+        return Collections.unmodifiableMap(stopRepair);
+    }
+
     public void addActiveComponent(ComponentEntity componentEntity) {
         activeComponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
@@ -66,6 +72,10 @@ public class ComponentRepository {
         alienComponent.put(componentEntity.getId(), componentEntity);
     }
 
+    public void addStopRepair(AlienComponent component){
+        stopRepair.put(component.getId(),component);
+    }
+
     public boolean removeActiveComponent(String name) {
         return activeComponents.remove(name) != null;
     }
@@ -76,6 +86,10 @@ public class ComponentRepository {
 
     public boolean removeAlienComponent(String id) {
         return alienComponent.remove(id) != null;
+    }
+
+    public boolean removeStopRepairComponent(String id) {
+        return stopRepair.remove(id) != null;
     }
 
     public IClusteredComponent getComponent(String name) {

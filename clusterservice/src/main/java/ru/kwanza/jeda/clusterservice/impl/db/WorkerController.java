@@ -25,7 +25,7 @@ public class WorkerController {
     private ExecutorService workerExecutor;
     private AtomicLong counter = new AtomicLong(0);
 
-    private Map<String, ChangeComponentStatusTask> tasks = new HashMap<String, ChangeComponentStatusTask>();
+    private final Map<String, ChangeComponentStatusTask> tasks = new HashMap<String, ChangeComponentStatusTask>();
 
 
     public WorkerController(int threadCount, int attemptCount, int attemptInterval, int keepAlive) {
@@ -116,7 +116,11 @@ public class WorkerController {
 
     public abstract class AbstractTask extends ReentrantLock implements Runnable {
         protected final IClusteredComponent component;
-        protected final String id;
+        private final String id;
+        private volatile int start_or_stop;
+        private volatile boolean complete = false;
+        private volatile boolean scheduled = false;
+
 
         public AbstractTask(String id, IClusteredComponent component) {
             this.id = id;
@@ -137,7 +141,7 @@ public class WorkerController {
                     try {
                         Thread.sleep(attemptInterval);
                     } catch (InterruptedException e) {
-                        break;  
+                        break;
                     }
                     continue;
                 }
@@ -152,19 +156,6 @@ public class WorkerController {
             }
         }
 
-        protected abstract void work();
-    }
-
-    private class ChangeComponentStatusTask extends AbstractTask {
-        private volatile int start_or_stop;
-        private volatile boolean complete = false;
-        private volatile boolean scheduled = false;
-
-        public ChangeComponentStatusTask(String id, IClusteredComponent component) {
-            super(id, component);
-        }
-
-        @Override
         protected void work() {
             lock();
             try {
@@ -179,6 +170,48 @@ public class WorkerController {
             }
         }
 
+        protected abstract void handleStop();
+
+        protected abstract void handleStart();
+
+        void scheduleStart() {
+            lock();
+            try {
+                if (start_or_stop <= 0) {
+                    start_or_stop = start_or_stop + 1;
+                    trySchedule();
+                }
+            } finally {
+                unlock();
+            }
+        }
+
+        void scheduleStop() {
+            lock();
+            try {
+                if (start_or_stop >= 0) {
+                    start_or_stop = start_or_stop - 1;
+                    trySchedule();
+                }
+            } finally {
+                unlock();
+            }
+        }
+
+        void trySchedule() {
+            if (complete || !scheduled) {
+                scheduled = true;
+                workerExecutor.execute(this);
+            }
+        }
+
+    }
+
+    private class ChangeComponentStatusTask extends AbstractTask {
+        public ChangeComponentStatusTask(String id, IClusteredComponent component) {
+            super(id, component);
+        }
+
         protected void handleStop() {
             logger.info("Stopping component {}", component.getName());
             component.handleStop();
@@ -191,32 +224,6 @@ public class WorkerController {
             logger.info("Started component {}", component.getName());
         }
 
-        void scheduleStart() {
-            lock();
-            try {
-                start_or_stop = start_or_stop + 1;
-                trySchedule();
-            } finally {
-                unlock();
-            }
-        }
-
-        void scheduleStop() {
-            lock();
-            try {
-                start_or_stop = start_or_stop - 1;
-                trySchedule();
-            } finally {
-                unlock();
-            }
-        }
-
-        void trySchedule() {
-            if (complete || !scheduled) {
-                scheduled = true;
-                workerExecutor.execute(this);
-            }
-        }
     }
 
     private class ChangeComponentRepairStatusTask extends ChangeComponentStatusTask {
