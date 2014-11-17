@@ -15,6 +15,7 @@ public class TestComponent implements IClusteredComponent {
     private String name;
     @Autowired
     private IClusterService service;
+    private ProcessFileLock locks = new ProcessFileLock();
 
     private static final Timer timer = new Timer(true);
 
@@ -32,10 +33,11 @@ public class TestComponent implements IClusteredComponent {
     }
 
     public void handleStart() {
+        locks.lock(this, service.getCurrentNode());
     }
 
     public void handleStop() {
-
+        locks.unlock(this,service.getCurrentNode());
     }
 
     public void handleStartRepair(final Node node) {
@@ -47,9 +49,11 @@ public class TestComponent implements IClusteredComponent {
 //            }
 //        }, 60000);
 
+        locks.lock(this,node);
     }
 
     public void handleStopRepair(Node node) {
-
+        locks.unlock(this,node);
     }
+
 }

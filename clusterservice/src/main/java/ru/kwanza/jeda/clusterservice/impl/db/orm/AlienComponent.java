@@ -15,12 +15,4 @@ public class AlienComponent extends BaseComponentEntity{
         this.nodeId = entity.nodeId;
         this.holdNodeId = entity.nodeId;
     }
-
-    public Integer getHoldNodeId() {
-        return holdNodeId;
-    }
-
-    public Boolean getRepaired() {
-        return repaired;
-    }
 }

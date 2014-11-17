@@ -52,47 +52,48 @@ public class WorkerController {
     }
 
     public void startComponent(String id, IClusteredComponent component) {
+        ChangeComponentStatusTask task;
         synchronized (tasks) {
-            ChangeComponentStatusTask task = tasks.get(id);
+            task = tasks.get(id);
             if (task == null) {
                 task = new ChangeComponentStatusTask(id, component);
                 tasks.put(id, task);
             }
-            task.scheduleStart();
         }
+        task.scheduleStart();
     }
 
     public void stopComponent(String id, IClusteredComponent component) {
+        ChangeComponentStatusTask task = tasks.get(id);
         synchronized (tasks) {
-            ChangeComponentStatusTask task = tasks.get(id);
             if (task == null) {
                 task = new ChangeComponentStatusTask(id, component);
                 tasks.put(id, task);
             }
-            task.scheduleStop();
         }
+        task.scheduleStop();
     }
 
     public void startRepair(String id, IClusteredComponent component, Node node) {
+        ChangeComponentStatusTask task = tasks.get(id);
         synchronized (tasks) {
-            ChangeComponentStatusTask task = tasks.get(id);
             if (task == null) {
                 task = new ChangeComponentRepairStatusTask(id, node, component);
                 tasks.put(id, task);
             }
-            task.scheduleStart();
         }
+        task.scheduleStart();
     }
 
     public void stopRepair(String id, IClusteredComponent component, Node node) {
+        ChangeComponentStatusTask task = tasks.get(id);
         synchronized (tasks) {
-            ChangeComponentStatusTask task = tasks.get(id);
             if (task == null) {
                 task = new ChangeComponentRepairStatusTask(id, node, component);
                 tasks.put(id, task);
             }
-            task.scheduleStop();
         }
+        task.scheduleStop();
     }
 
 

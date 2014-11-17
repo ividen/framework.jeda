@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
+import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
@@ -58,7 +59,7 @@ public class TestDBClusterService {
 
 
     @Test
-    public void testParams() throws InterruptedException {
+    public void testParams() throws InterruptedException, UpdateException {
         start();
         assertEquals(1, service.getCurrentNodeId().intValue());
         assertEquals(1, service.getCurrentNodeId().intValue());
@@ -67,7 +68,7 @@ public class TestDBClusterService {
     }
 
     @Test
-    public void testDelegate() throws InterruptedException {
+    public void testDelegate() throws InterruptedException, UpdateException {
         start();
         assertEquals(currentNode, service.getCurrentNode());
         assertEquals(1, service.getCurrentNodeId().intValue());
@@ -114,7 +115,7 @@ public class TestDBClusterService {
     @Test
     public void testRegisterComponentsAfterStart(@Mocked final IClusteredComponent c1,
                                                  @Mocked final IClusteredComponent c2,
-                                                 @Mocked final IClusteredComponent c3) throws InterruptedException {
+                                                 @Mocked final IClusteredComponent c3) throws InterruptedException, UpdateException {
 
 
         service.registerComponent(c1);
@@ -143,7 +144,7 @@ public class TestDBClusterService {
     public void testProcessInitialStates_1(@Mocked final IClusteredComponent c1,
                                            @Mocked final IClusteredComponent c2,
                                            @Mocked final ComponentEntity e_1,
-                                           @Mocked final ComponentEntity e_2) throws InterruptedException {
+                                           @Mocked final ComponentEntity e_2) throws InterruptedException, UpdateException {
 
 
         new Expectations() {{

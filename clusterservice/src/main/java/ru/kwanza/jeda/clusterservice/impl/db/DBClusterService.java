@@ -67,12 +67,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         started = false;
         supervisor.interrupt();
         supervisor.join(60000);
-        updateActivity(repository.getActiveEntities(),0);
+        updateActivity(repository.getActiveEntities(), 0);
         for (IClusteredComponent o : repository.getActiveComponents().values()) {
             try {
                 o.handleStop();
-            }catch (Throwable e){
-                logger.error("Error stopping "+o.getName(),e);
+            } catch (Throwable e) {
+                logger.error("Error stopping " + o.getName(), e);
             }
         }
     }
@@ -281,17 +281,24 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void finishStop() {
-        if(!repository.getStopRepairEntities().isEmpty()){
+        if (!repository.getStopRepairEntities().isEmpty()) {
 
             final Collection<AlienComponent> items = repository.getStopRepairEntities().values();
+            for (AlienComponent item : items) {
+                item.clearMarkers();
+                item.setRepaired(true);
+                item.setLastActivity(0l);
+            }
+
             try {
                 dao.updateAlienComponents(items);
             } catch (UpdateException e) {
             }
 
             for (AlienComponent alienComponent : items) {
-                repository.removeAlienComponent(alienComponent.getId());
+                repository.removeStopingRepairComponent(alienComponent.getId());
                 repository.removeStopRepairComponent(alienComponent.getId());
+                repository.removeAlienComponent(alienComponent.getId());
             }
         }
     }
@@ -301,7 +308,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
             for (ComponentEntity item : items) {
                 if (item.getWaitForReturn()) {
-                    workers.stopRepair(item.getId(),new ComponentHandler(repository,item.getName()), item.getNode());
+                    if (!repository.getStopigRepairEntities().containsKey(item.getId())) {
+                        workers.stopRepair(item.getId(), new ComponentHandler(repository, item.getName()), item.getNode());
+                    }
                 }
             }
 
@@ -320,6 +329,12 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private void findStaleAlien() {
         List<AlienComponent> items = dao.selectAlienStaleComponents(currentNode,
                 repository.getActiveComponents().keySet());
+
+        for (AlienComponent item : items) {
+            if(item.getRepaired()){
+                throw new RuntimeException("BUG JOP!");
+            }
+        }
 
         List<AlienComponent> newItems = new ArrayList<AlienComponent>();
         final Map<String, AlienComponent> alienEntities = repository.getAlienEntities();
@@ -380,7 +395,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void leaseActivity() {
         try {
-            updateActivity(repository.getActiveEntities(),lastActivityTs);
+            updateActivity(repository.getActiveEntities(), lastActivityTs);
         } catch (UpdateException e) {
             stopComponents(e.<ComponentEntity>getConstrainted());
             stopComponents(e.<ComponentEntity>getOptimistic());
@@ -398,7 +413,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void activateCandidates(Collection<ComponentEntity> activateCandidates) {
         try {
-            updateActivity(activateCandidates,lastActivityTs);
+            updateActivity(activateCandidates, lastActivityTs);
         } catch (UpdateException e) {
             activateCandidates = e.getUpdated();
         }
@@ -409,7 +424,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             workers.startComponent(item.getId(), new ComponentHandler(repository, item.getName()));
         }
     }
-
 
 
     private void updateActivity(Collection<ComponentEntity> items, long ts) throws UpdateException {
