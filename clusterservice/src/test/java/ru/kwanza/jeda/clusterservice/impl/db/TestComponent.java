@@ -7,6 +7,7 @@ import ru.kwanza.jeda.clusterservice.Node;
 
 import javax.annotation.PostConstruct;
 import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * @author Alexander Guzanov
@@ -41,13 +42,13 @@ public class TestComponent implements IClusteredComponent {
     }
 
     public void handleStartRepair(final Node node) {
-//        final TestComponent self = this;
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                service.markRepaired(self, node);
-//            }
-//        }, 60000);
+        final TestComponent self = this;
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                service.markRepaired(self, node);
+            }
+        }, 60000);
 
         locks.lock(this,node);
     }

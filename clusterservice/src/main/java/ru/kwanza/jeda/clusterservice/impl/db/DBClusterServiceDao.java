@@ -31,7 +31,7 @@ public class DBClusterServiceDao {
     private IQuery<NodeEntity> queryActive;
     private IQuery<NodeEntity> queryPassive;
     private IQuery<NodeEntity> queryAll;
-    private IQuery<AlienComponent> queryForAlienStaleComponents;
+    private IQuery<ComponentEntity> queryForAlienStaleComponents;
     private IQuery<ComponentEntity> queryForActivationCandidates;
 
     @PostConstruct
@@ -39,13 +39,17 @@ public class DBClusterServiceDao {
         queryActive = em.queryBuilder(NodeEntity.class).where(If.isGreater("lastActivity")).create();
         queryPassive = em.queryBuilder(NodeEntity.class).where(If.isLessOrEqual("lastActivity")).create();
         queryAll = em.queryBuilder(NodeEntity.class).create();
-        queryForAlienStaleComponents = em.queryBuilder(AlienComponent.class)
+        queryForAlienStaleComponents = em.queryBuilder(ComponentEntity.class)
                 .lazy()
                 .where(
                         If.and(
                                 If.notEqual("nodeId"),
                                 If.in("name"),
                                 If.isLessOrEqual("lastActivity"),
+                                If.or(
+                                        If.isNull("waitForReturn"),
+                                        If.isLessOrEqual("waitForReturn")
+                                ),
                                 If.isEqual("repaired", If.valueOf(false))
                         )).create();
 
@@ -120,11 +124,12 @@ public class DBClusterServiceDao {
     }
 
 
-    public List<AlienComponent> selectAlienStaleComponents(Node node, Collection<String> components) {
+    public List<ComponentEntity> selectAlienStaleComponents(Node node, Collection<String> components, long ts) {
         return queryForAlienStaleComponents.prepare()
                 .setParameter(1, node.getId())
                 .setParameter(2, components)
-                .setParameter(3, System.currentTimeMillis())
+                .setParameter(3, ts)
+                .setParameter(4, ts)
                 .selectList();
     }
 
@@ -138,26 +143,30 @@ public class DBClusterServiceDao {
 
     }
 
-    public  Collection<ComponentEntity> selectActivationCandidate(Collection<String> ids){
+    public Collection<ComponentEntity> selectActivationCandidate(Collection<String> ids) {
         return queryForActivationCandidates.prepare()
-                .setParameter(1,ids)
-                .setParameter(2,System.currentTimeMillis()).selectList();
+                .setParameter(1, ids)
+                .setParameter(2, System.currentTimeMillis()).selectList();
     }
 
-    public void markWaitForReturn(Collection<ComponentEntity> passiveEntities) {
+    public void markWaitForReturn(Collection<ComponentEntity> passiveEntities, final long ts) {
         try {
             em.update(WaitForReturnComponent.class, FieldHelper.getFieldCollection(passiveEntities,
-                    FieldHelper.<ComponentEntity, WaitForReturnComponent>construct(ComponentEntity.class, "waitFoReturn")));
+                    new FieldHelper.Field<ComponentEntity, WaitForReturnComponent>() {
+                        public WaitForReturnComponent value(ComponentEntity object) {
+                            return new WaitForReturnComponent(object.getId(), ts);
+                        }
+                    }));
         } catch (UpdateException e) {
             logger.error("Error mark waitForReturn!", e);
         }
     }
 
     public void updateNode(NodeEntity currentNode) {
-        try{
+        try {
             em.update(currentNode);
-        }catch (UpdateException e){
-            logger.error("Error updating node",e);
+        } catch (UpdateException e) {
+            logger.error("Error updating node", e);
         }
     }
 }

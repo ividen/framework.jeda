@@ -200,6 +200,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         try {
             AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node, component));
             if (componentEntity != null) {
+                componentEntity.setMarkRepaired(true);
                 workers.stopRepair(componentEntity.getId(), new ComponentHandler(repository, component), node);
             }
         } finally {
@@ -286,8 +287,13 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             final Collection<AlienComponent> items = repository.getStopRepairEntities().values();
             for (AlienComponent item : items) {
                 item.clearMarkers();
-                item.setRepaired(true);
-                item.setLastActivity(0l);
+                if (item.isMarkRepaired()) {
+                    item.setRepaired(true);
+                    item.setLastActivity(0l);
+                } else {
+                    item.setRepaired(false);
+                    item.setLastActivity(System.currentTimeMillis());
+                }
             }
 
             try {
@@ -307,7 +313,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         if (!repository.getAlienEntities().isEmpty()) {
             Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
             for (ComponentEntity item : items) {
-                if (item.getWaitForReturn()) {
+                if (item.getWaitForReturn() != null && item.getWaitForReturn() > System.currentTimeMillis()) {
                     if (!repository.getStopigRepairEntities().containsKey(item.getId())) {
                         repository.addStopingRepair(repository.getAlienEntities().get(item.getId()));
                         workers.stopRepair(item.getId(), new ComponentHandler(repository, item.getName()), item.getNode());
@@ -328,23 +334,18 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void findStaleAlien() {
-        List<AlienComponent> items = dao.selectAlienStaleComponents(currentNode,
-                repository.getActiveComponents().keySet());
-
-        for (AlienComponent item : items) {
-            if(item.getRepaired()){
-                throw new RuntimeException("BUG JOP!");
-            }
-        }
+        List<ComponentEntity> items = dao.selectAlienStaleComponents(currentNode,
+                repository.getActiveComponents().keySet(), System.currentTimeMillis() - failoverInterval);
 
         List<AlienComponent> newItems = new ArrayList<AlienComponent>();
         final Map<String, AlienComponent> alienEntities = repository.getAlienEntities();
-        for (AlienComponent component : items) {
+        for (ComponentEntity component : items) {
             if (!alienEntities.containsKey(component.getId())) {
-                component.clearMarkers();
-                component.setLastActivity(lastActivityTs);
-                component.setHoldNodeId(currentNodeId);
-                newItems.add(component);
+                AlienComponent item = new AlienComponent(component);
+                item.clearMarkers();
+                item.setLastActivity(lastActivityTs);
+                item.setHoldNodeId(currentNodeId);
+                newItems.add(item);
             }
         }
 
@@ -369,7 +370,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         Collection<ComponentEntity> items = dao.selectComponents(currentNode, repository.getComponents().keySet());
         filterComponentByState(items);
         try {
-            updateActivity(repository.getActiveEntities(),lastActivityTs);
+            updateActivity(repository.getActiveEntities(), lastActivityTs);
         } catch (UpdateException e) {
             for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
                 repository.removeActiveComponent(o.getId());
@@ -451,7 +452,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         if (!repository.getPassiveEntities().isEmpty()) {
             Collection<ComponentEntity> items = dao.selectActivationCandidate(getPassiveEntitiesKeys());
             activateCandidates(items);
-            dao.markWaitForReturn(repository.getPassiveEntities());
+            dao.markWaitForReturn(repository.getPassiveEntities(), lastActivityTs);
         }
     }
 

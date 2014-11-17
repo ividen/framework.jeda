@@ -14,9 +14,9 @@ public class WaitForReturnComponent {
     @IdField(value = "id", type = Types.VARCHAR)
     private String id;
     @Field("wait_for_return")
-    private Boolean waitForReturn;
+    private Long waitForReturn;
 
-    public WaitForReturnComponent(String id, Boolean waitForReturn) {
+    public WaitForReturnComponent(String id, Long waitForReturn) {
         this.id = id;
         this.waitForReturn = waitForReturn;
     }

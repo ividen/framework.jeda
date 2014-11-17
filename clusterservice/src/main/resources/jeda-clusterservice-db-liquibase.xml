@@ -34,9 +34,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="hold_node_id" type="${long.type}"/>
-            <column name="wait_for_return" type="${bool.type}">
-                <constraints nullable="false"/>
-            </column>
+            <column name="wait_for_return" type="${long.type}"/>
             <column name="repaired" type="${bool.type}">
                 <constraints nullable="false"/>
             </column>

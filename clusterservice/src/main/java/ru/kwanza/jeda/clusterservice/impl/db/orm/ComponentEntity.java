@@ -9,32 +9,28 @@ import ru.kwanza.dbtool.orm.annotations.Field;
 @Entity(table = "jeda_clustered_component", name = "jeda.clusterservice.ComponentEntity")
 public class ComponentEntity extends BaseComponentEntity {
     @Field("wait_for_return")
-    private Boolean waitForReturn;
+    private Long waitForReturn;
 
     public ComponentEntity(Integer nodeId, String name) {
         super(nodeId, name);
-        this.waitForReturn = false;
-    }
-
-    public WaitForReturnComponent getWaitFoReturn() {
-        return new WaitForReturnComponent(id, true);
+        this.waitForReturn = null;
     }
 
     public AlienComponent getAlien() {
         return new AlienComponent(this);
     }
 
-    public Boolean getWaitForReturn() {
+    public Long getWaitForReturn() {
         return waitForReturn;
     }
 
-    public void setWaitForReturn(Boolean waitForReturn) {
+    public void setWaitForReturn(Long waitForReturn) {
         this.waitForReturn = waitForReturn;
     }
 
     @Override
     public void clearMarkers() {
         super.clearMarkers();
-        this.waitForReturn = false;
+        this.waitForReturn = null;
     }
 }

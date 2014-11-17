@@ -7,6 +7,8 @@ import ru.kwanza.dbtool.orm.annotations.Entity;
  */
 @Entity(table = "jeda_clustered_component", name = "jeda.clusterservice.AlienComponent")
 public class AlienComponent extends BaseComponentEntity{
+    private transient boolean markRepaired = false;
+
     public AlienComponent(ComponentEntity entity) {
         super(entity.getNodeId(), entity.getName());
         this.repaired = false;
@@ -14,5 +16,14 @@ public class AlienComponent extends BaseComponentEntity{
         this.version = entity.version;
         this.nodeId = entity.nodeId;
         this.holdNodeId = entity.nodeId;
+        this.node = entity.node;
+    }
+
+    public boolean isMarkRepaired() {
+        return markRepaired;
+    }
+
+    public void setMarkRepaired(boolean markRepaired) {
+        this.markRepaired = markRepaired;
     }
 }
