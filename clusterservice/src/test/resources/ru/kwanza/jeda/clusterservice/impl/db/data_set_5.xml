@@ -1,0 +1,10 @@
+<dataset>
+    <jeda_cluster_node id="1"
+                       last_activity="777"
+                       pid="new_pid"
+                       ip_address="2.2.2.2"
+            />
+
+
+
+</dataset>

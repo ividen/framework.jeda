@@ -77,7 +77,7 @@ public class TestComponentEntity {
          Assert.assertTrue(!new ComponentEntity(1, "name").equals(new ComponentEntity(1, "name1")));
     }
     @Test
-    public void tsetWaiteForReturn(){
+    public void tsetWaiteForReturlnjn(){
         Assert.assertEquals(666l, Deencapsulation.getField(new WaitForReturnComponent("111",666l),"waitForReturn"));
         Assert.assertEquals("111", Deencapsulation.getField(new WaitForReturnComponent("111",666l),"id"));
     }

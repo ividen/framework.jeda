@@ -2,6 +2,6 @@
     <jeda_clustered_component id="1_test_component"
                               node_id="1"
                               name="test_component"
-                              wait_for_return="false" repaired="false"
+                              repaired="false"
                               />
 </dataset>

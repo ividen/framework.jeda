@@ -143,10 +143,10 @@ public class DBClusterServiceDao {
 
     }
 
-    public Collection<ComponentEntity> selectActivationCandidate(Collection<String> ids) {
+    public Collection<ComponentEntity> selectActivationCandidate(Collection<String> ids, long ts) {
         return queryForActivationCandidates.prepare()
                 .setParameter(1, ids)
-                .setParameter(2, System.currentTimeMillis()).selectList();
+                .setParameter(2, ts).selectList();
     }
 
     public void markWaitForReturn(Collection<ComponentEntity> passiveEntities, final long ts) {

@@ -3,7 +3,7 @@
                               node_id="1"
                               name="test_component_1"
                               last_activity="-666"
-                              wait_for_return="false" repaired="false"
+                              repaired="false"
             />
 
 
@@ -11,7 +11,7 @@
                               node_id="1"
                               name="test_component_2"
                               last_activity="-666"
-                              wait_for_return="false" repaired="false"
+                              repaired="false"
             />
 
 
@@ -19,7 +19,7 @@
                               node_id="2"
                               name="test_component_1"
                               last_activity="-666"
-                              wait_for_return="false" repaired="false"
+                              repaired="false"
             />
 
 

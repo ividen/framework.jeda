@@ -3,6 +3,7 @@
                               node_id="1"
                               name="test_component_1"
                               last_activity="50"
+                              wait_for_return="30"
                               version="1"
                               repaired="false"
             />
@@ -12,6 +13,7 @@
                               node_id="1"
                               name="test_component_2"
                               last_activity="100"
+                              wait_for_return="280"
                               version="1"
                               repaired="false"
             />
@@ -21,6 +23,7 @@
                               node_id="2"
                               name="test_component_1"
                               last_activity="50"
+                              wait_for_return="140"
                               version="1"
                               repaired="false"
             />
@@ -30,6 +33,7 @@
                               node_id="2"
                               name="test_component_2"
                               last_activity="100"
+                              wait_for_return="300"
                               version="1"
                               repaired="false"
             />

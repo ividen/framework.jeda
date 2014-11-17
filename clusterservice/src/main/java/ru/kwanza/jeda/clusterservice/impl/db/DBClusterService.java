@@ -450,7 +450,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private void checkPassiveComponents() {
         if (!repository.getPassiveEntities().isEmpty()) {
-            Collection<ComponentEntity> items = dao.selectActivationCandidate(getPassiveEntitiesKeys());
+            Collection<ComponentEntity> items = dao.selectActivationCandidate(getPassiveEntitiesKeys(), System.currentTimeMillis());
             activateCandidates(items);
             dao.markWaitForReturn(repository.getPassiveEntities(), lastActivityTs);
         }

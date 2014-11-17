@@ -4,7 +4,7 @@
                               name="test_component"
                               last_activity="666"
                               version="1"
-                              wait_for_return="false" repaired="false"
+                              repaired="false"
             />
     <jeda_cluster_node id="1"
                        last_activity="666"
