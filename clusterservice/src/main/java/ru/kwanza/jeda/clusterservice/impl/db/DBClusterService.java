@@ -248,6 +248,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
                 break;
             } catch (Throwable e) {
                 logger.error("Error in supervisor!", e);
+                stopComponents(repository.getActiveEntities());
                 continue;
             }
         }
@@ -415,7 +416,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
     }
 
-    private void stopComponents(List<ComponentEntity> optimistic) {
+    private void stopComponents(Collection<ComponentEntity> optimistic) {
         for (ComponentEntity o : optimistic) {
             repository.addPassiveComponent(o);
             if (repository.removeActiveComponent(o.getName())) {
