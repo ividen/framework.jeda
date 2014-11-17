@@ -309,6 +309,7 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
             for (ComponentEntity item : items) {
                 if (item.getWaitForReturn()) {
                     if (!repository.getStopigRepairEntities().containsKey(item.getId())) {
+                        repository.addStopingRepair(repository.getAlienEntities().get(item.getId()));
                         workers.stopRepair(item.getId(), new ComponentHandler(repository, item.getName()), item.getNode());
                     }
                 }
@@ -367,7 +368,18 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     private void processInitialState() {
         Collection<ComponentEntity> items = dao.selectComponents(currentNode, repository.getComponents().keySet());
         filterComponentByState(items);
-        leaseActivity();
+        try {
+            updateActivity(repository.getActiveEntities(),lastActivityTs);
+        } catch (UpdateException e) {
+            for (ComponentEntity o : e.<ComponentEntity>getConstrainted()) {
+                repository.removeActiveComponent(o.getId());
+                repository.addPassiveComponent(o);
+            }
+            for (ComponentEntity o : e.<ComponentEntity>getOptimistic()) {
+                repository.removeActiveComponent(o.getId());
+                repository.addPassiveComponent(o);
+            }
+        }
         startActiveComponents();
     }
 

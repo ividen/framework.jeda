@@ -25,9 +25,9 @@ public class ProcessFileLock {
             throw new RuntimeException("LockExists!");
         }
 
-
+        final File file = new File(id);
         if (!files.containsKey(id)) {
-            final File file = new File(id);
+
             if (!file.exists()) {
                 try {
                     file.createNewFile();
@@ -36,13 +36,13 @@ public class ProcessFileLock {
                     throw new RuntimeException(e);
                 }
             }
+        }
 
-            try {
+        try {
 
-                files.put(id, new RandomAccessFile(file, "rw"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            files.put(id, new RandomAccessFile(file, "rw"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         final RandomAccessFile raf = files.get(id);
@@ -66,7 +66,7 @@ public class ProcessFileLock {
 
         final FileLock fl = locks.get(id);
         if (fl == null) {
-            throw new RuntimeException("LockNOTExists!");
+            throw new RuntimeException("LockNOTExists! " + cmp.getName() + " " + node);
         }
 
         locks.remove(id);
@@ -76,6 +76,7 @@ public class ProcessFileLock {
         try {
             fl.release();
             channel.close();
+            files.get(id).close();
         } catch (IOException e) {
             e.printStackTrace();
         }

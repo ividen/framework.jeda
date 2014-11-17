@@ -80,6 +80,7 @@ public class ComponentRepository {
     public void addStopRepair(AlienComponent component){
         stopRepair.put(component.getId(),component);
     }
+
     public void addStopingRepair(AlienComponent component){
         stopingRepair.put(component.getId(),component);
     }
