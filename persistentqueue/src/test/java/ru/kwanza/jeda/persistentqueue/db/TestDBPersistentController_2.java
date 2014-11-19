@@ -91,31 +91,7 @@ public class TestDBPersistentController_2 extends AbstractTransactionalJUnit4Spr
         Assert.assertEquals(2, load.size());
         load = controller2.load(100, node2);
         Assert.assertEquals(4, load.size());
-
     }
 
-    @Test
-    public void testTransfer_1() throws Exception {
-        Assert.assertEquals(1, controller1.transfer(1, node1, node2));
-        Assert.assertEquals(2, controller2.transfer(2, node1, node2));
-        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_3.xml"),
-                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
-    }
-
-    @Test
-    public void testTransfer_2() throws Exception {
-        Assert.assertEquals(4, controller1.transfer(4, node1, node2));
-        Assert.assertEquals(4, controller2.transfer(4, node1, node2));
-        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_4.xml"),
-                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
-    }
-
-    @Test
-    public void testTransfer_3() throws Exception {
-        Assert.assertEquals(4, controller1.transfer(100, node1, node2));
-        Assert.assertEquals(4, controller2.transfer(100, node1, node2));
-        Assertion.assertEqualsIgnoreCols(getResourceSet("dataset_2_5.xml"),
-                getActualDataSet("jeda_event_nqueue"), "jeda_event_nqueue", new String[]{"data"});
-    }
 }
 

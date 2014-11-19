@@ -31,9 +31,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
     private volatile boolean active = false;
-    private volatile boolean tryLoad = false;
     private int maxSize;
-    private int repairIterationItemCount = 100;
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
                            int maxSize, IQueuePersistenceController<E> controller) {
@@ -64,9 +62,6 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
                 if (load != null && !load.isEmpty()) {
                     memoryCache.put(load);
-                    if (load.size() >= maxSize) {
-                        tryLoad = true;
-                    }
                 }
                 tm.commit();
             } catch (Throwable e) {
@@ -96,31 +91,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         return maxSize;
     }
 
-    public void setRepairIterationItemCount(int repairIterationItemCount) {
-        this.repairIterationItemCount = repairIterationItemCount;
-    }
-
-    public int getRepairIterationItemCount() {
-        return repairIterationItemCount;
-    }
-
-
     public void handleStartRepair(Node reparableNode) {
-        int memorySize = memoryCache.size();
-        int count = 0;
-        try {
-            count = persistenceController.transfer(getRepairIterationItemCount(), clusterService.getCurrentNode(),
-                    reparableNode);
-            takeLock.lock();
-            try {
-                tryLoad = true;
-            } finally {
-                takeLock.unlock();
-            }
-//            return count < getRepairIterationItemCount();
-        } finally {
-            getObserver().notifyChange(memorySize + count, count);
-        }
     }
 
     public void handleStopRepair(Node node) {
@@ -219,25 +190,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 return null;
             }
 
-            Collection<E> result;
-            if (tryLoad) {
-                result = new ArrayList<E>(count);
-                Collection<E> take = memoryCache.take(Math.max(count / 2, 1));
-                int c = 0;
-                if (take != null && !take.isEmpty()) {
-                    result.addAll(take);
-                    c = take.size();
-                }
-                Collection<E> load = persistenceController.load(count - c, clusterService.getCurrentNode());
-                if (load == null || load.isEmpty()) {
-                    tryLoad = false;
-                } else {
-                    result.addAll(load);
-                }
-
-            } else {
-                result = memoryCache.take(count);
-            }
+            Collection<E> result = memoryCache.take(count);
 
             persistenceController.delete(result, clusterService.getCurrentNode());
 

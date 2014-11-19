@@ -11,7 +11,6 @@ import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Guzanov Alexander
@@ -79,20 +78,5 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
         } catch (UpdateException e) {
             e.printStackTrace();
         }
-    }
-
-    public int transfer(int count, Node currentNode, Node repairableNode) {
-        List<R> list = loadQuery.prepare().paging(0, count).setParameter(1, repairableNode.getId()).selectList();
-
-        for (R e : list) {
-            e.setNodeId(currentNode.getId());
-        }
-        try {
-            em.update(builder.getORMClass(), list);
-        } catch (UpdateException e) {
-            throw new RuntimeException(e);
-        }
-
-        return list.size();
     }
 }

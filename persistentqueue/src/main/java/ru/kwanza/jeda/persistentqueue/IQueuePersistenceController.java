@@ -1,6 +1,5 @@
 package ru.kwanza.jeda.persistentqueue;
 
-import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.clusterservice.Node;
 
 import java.util.Collection;
@@ -17,6 +16,4 @@ public interface IQueuePersistenceController<E extends IPersistableEvent> {
     void delete(Collection<E> result, Node node);
 
     void persist(Collection<E> events, Node node);
-
-    int transfer(int count, Node currentNode, Node repairableNode);
 }

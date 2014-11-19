@@ -3,10 +3,8 @@ package ru.kwanza.jeda.persistentqueue.berkeley;
 import com.sleepycat.je.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.clusterservice.Node;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
-import ru.kwanza.jeda.persistentqueue.EventWithKey;
 import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
 import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
 import ru.kwanza.jeda.persistentqueue.PersistenceQueueException;
@@ -110,41 +108,6 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
             log.error("Error while persisting events", e);
             throw new PersistenceQueueException(e);
         }
-    }
-
-    public int transfer(int count, Node currentNode, Node repairNode) {
-        final Collection<EventWithKey> resultCollection = new ArrayList<EventWithKey>();
-        Database refusedDatabase = null;
-        Database newDatabase = null;
-        Cursor cursor = null;
-        try {
-            refusedDatabase = jeFactory.getTxConnection(repairNode.getId()).openDatabase(databaseName, databaseConfig);
-            newDatabase = getDatabase(currentNode.getId());
-            cursor = openCursor(refusedDatabase);
-
-            final DatabaseEntry keyEntry = new DatabaseEntry();
-            final DatabaseEntry valueEntry = new DatabaseEntry();
-
-            long index = count;
-
-            while ((cursor.getNext(keyEntry, valueEntry, LockMode.DEFAULT) == OperationStatus.SUCCESS)
-                    && (index--) > 0) {
-                final Long key = SerializationHelper.bytesToLong(keyEntry.getData());
-                final Object value = SerializationHelper.bytesToObject(valueEntry.getData());
-                resultCollection.add(new EventWithKey(key, (IEvent) value));
-
-                cursor.delete();
-
-                newDatabase.put(null, keyEntry, valueEntry);
-            }
-        } catch (Exception e) {
-            log.error("Error while transfering events", e);
-            throw new PersistenceQueueException(e);
-        } finally {
-            closeResources(cursor);
-        }
-
-        return resultCollection.size();
     }
 
     protected Cursor openCursor(Database database) {
