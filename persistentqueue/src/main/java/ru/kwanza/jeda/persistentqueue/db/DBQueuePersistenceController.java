@@ -30,17 +30,16 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
 
 
     public DBQueuePersistenceController(IEntityManager em,
-                                        IEventRecordHelper<R, E> builder,
-                                        String idField,
-                                        String nodeIdField) {
+                                        IEventRecordHelper<R, E> builder) {
         this.builder = builder;
         this.em = em;
         initFields();
 
         IQueryBuilder queryBuilder = em.queryBuilder(builder.getORMClass());
-        this.determinator = builder.getCondition();
-        If condition = determinator == null ? If.isEqual(nodeIdField) : If.and(If.isEqual(nodeIdField), determinator);
-        loadQuery = queryBuilder.where(condition).orderBy(idField).create();
+        this.determinator = builder.getQueueNameField() == null || builder.getQueueNameValue() == null
+                ? null : If.isEqual(builder.getQueueNameField(), If.valueOf(builder.getQueueNameValue()));
+        If condition = determinator == null ? If.isEqual(builder.getNodeIdField()) : If.and(If.isEqual(builder.getNodeIdField()), determinator);
+        loadQuery = queryBuilder.where(condition).orderBy(builder.getIdField()).create();
     }
 
     private void initFields() {
@@ -48,10 +47,9 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
     }
 
     public String getQueueName() {
-
         return DBQueuePersistenceController.class.getSimpleName() + "."
-                + builder.getORMClass().getName() + (builder.getConditionAsString() == null ?
-                "" : ":" + builder.getConditionAsString());
+                + builder.getORMClass().getName() + (builder.getQueueNameField() == null || builder.getQueueNameValue() == null ?
+                "" : ":" + builder.getQueueNameField() + "=" + builder.getQueueNameValue());
     }
 
     public Collection<E> load(int count, Node node) {

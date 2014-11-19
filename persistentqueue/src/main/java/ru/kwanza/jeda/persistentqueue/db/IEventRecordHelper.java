@@ -12,7 +12,11 @@ public interface IEventRecordHelper<R extends IEventRecord, E extends IPersistab
 
     R buildRecord(E event, int nodeId);
 
-    If getCondition();
+    String getQueueNameField();
 
-    String getConditionAsString();
+    String getQueueNameValue();
+
+    String getIdField();
+
+    String getNodeIdField();
 }

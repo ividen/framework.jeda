@@ -16,7 +16,7 @@ public class NamedPriorityEventQueue<E extends DefaultPriorityPersistableEvent> 
         super(id, nodeId, eventData, priority, queueName);
     }
 
-    public static class Helper implements IEventRecordHelper<NamedPriorityEventQueue, DefaultPriorityPersistableEvent> {
+    public static class Helper extends BaseEventQueueHelper<NamedPriorityEventQueue, DefaultPriorityPersistableEvent> {
         private String queueName;
 
         public Helper(String queueName) {
@@ -36,12 +36,12 @@ public class NamedPriorityEventQueue<E extends DefaultPriorityPersistableEvent> 
             }
         }
 
-        public If getCondition() {
-            return If.isEqual("queueName",If.valueOf(queueName));
+        public String getQueueNameField() {
+            return "queueName";
         }
 
-        public String getConditionAsString() {
-            return "queueName="+queueName;
+        public String getQueueNameValue() {
+            return queueName;
         }
     }
 }

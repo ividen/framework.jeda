@@ -16,7 +16,7 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
         super(id, nodeId, eventData, priority);
     }
 
-    public static class Helper implements IEventRecordHelper<PriorityEventQueue, DefaultPriorityPersistableEvent> {
+    public static class Helper extends BaseEventQueueHelper<PriorityEventQueue, DefaultPriorityPersistableEvent> {
         public Class<PriorityEventQueue> getORMClass() {
             return PriorityEventQueue.class;
         }
@@ -30,12 +30,5 @@ public class PriorityEventQueue<E extends DefaultPriorityPersistableEvent> exten
             }
         }
 
-        public If getCondition() {
-            return null;
-        }
-
-        public String getConditionAsString() {
-            return null;
-        }
     }
 }

@@ -8,7 +8,7 @@ import ru.kwanza.jeda.persistentqueue.db.queue.EventQueue;
 /**
  * @author Alexander Guzanov
  */
-public class BasePriorityEventQueue<E extends DefaultPriorityPersistableEvent> extends EventQueue<E> {
+public class BasePriorityEventQueue<E extends DefaultPriorityPersistableEvent> extends BaseEventQueue<E> {
     @Field("priority")
     private Integer priority;
 

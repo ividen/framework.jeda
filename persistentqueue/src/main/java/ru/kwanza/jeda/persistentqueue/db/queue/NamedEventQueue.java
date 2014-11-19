@@ -18,7 +18,7 @@ public class NamedEventQueue<E extends DefaultPersistableEvent> extends BaseName
         super(id, nodeId, eventData, queueName);
     }
 
-    public static class Helper implements IEventRecordHelper<NamedEventQueue, DefaultPersistableEvent> {
+    public static class Helper extends BaseEventQueueHelper<NamedEventQueue, DefaultPersistableEvent> {
         private String queueName;
 
         public Helper(String queueName) {
@@ -37,12 +37,13 @@ public class NamedEventQueue<E extends DefaultPersistableEvent> extends BaseName
             }
         }
 
-        public If getCondition() {
-            return If.isEqual("queueName", If.valueOf(queueName));
+        public String getQueueNameField() {
+            return "queueName";
         }
 
-        public String getConditionAsString() {
-            return "queueName=" + queueName;
+        public String getQueueNameValue() {
+            return queueName;
         }
+
     }
 }
