@@ -8,6 +8,6 @@ import java.io.Serializable;
 /**
  * @author Alexander Guzanov
  */
-public interface IPriorityPersistableEvent extends IPriorityEvent, Serializable {
+public interface IPriorityPersistableEvent extends IPriorityEvent, IPersistableEvent, Serializable {
     Long getPersistId();
 }
