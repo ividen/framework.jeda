@@ -16,6 +16,7 @@ import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -30,6 +31,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private QueueObserverChain observer;
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
+    private Map<Node,AbstractTransactionalMemoryQueue<E>> repairableNodes;
     private volatile boolean active = false;
     private int maxSize;
 
@@ -91,10 +93,28 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         return maxSize;
     }
 
-    public void handleStartRepair(Node reparableNode) {
+    public void handleStartRepair(Node node) {
+        final AbstractTransactionalMemoryQueue<E> nodeCache = createCache(manager, maxSize);
+        repairableNodes.put(node,nodeCache);
+        final Collection<E> elements = persistenceController.load(maxSize, node);
+
+        if(elements!=null && !elements.isEmpty()) {
+            try {
+                nodeCache.put(elements);
+            } catch (SinkException e) {
+            }
+
+            getObserver().notifyChange(size() + nodeCache.size(), elements.size());
+        }else{
+            clusterService.markRepaired(this,node);
+        }
     }
 
     public void handleStopRepair(Node node) {
+        final AbstractTransactionalMemoryQueue<E> remove = repairableNodes.remove(node);
+        if(remove!=null){
+            
+        }
 
     }
 
