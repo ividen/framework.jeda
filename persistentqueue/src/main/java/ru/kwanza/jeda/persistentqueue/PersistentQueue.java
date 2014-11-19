@@ -17,6 +17,7 @@ import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -34,6 +35,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private Map<Node,AbstractTransactionalMemoryQueue<E>> repairableNodes;
     private volatile boolean active = false;
     private int maxSize;
+    private AtomicInteger size = new AtomicInteger(0);
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
                            int maxSize, IQueuePersistenceController<E> controller) {
@@ -55,8 +57,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         takeLock.lock();
         putLock.lock();
         try {
-            memoryCache = createCache(manager, maxSize);
-            memoryCache.setObserver(observer);
+            memoryCache = createCache();
             ITransactionManagerInternal tm = manager.getTransactionManager();
             tm.begin();
             try {
@@ -94,17 +95,15 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void handleStartRepair(Node node) {
-        final AbstractTransactionalMemoryQueue<E> nodeCache = createCache(manager, maxSize);
+        final AbstractTransactionalMemoryQueue<E> nodeCache = createCache();
         repairableNodes.put(node,nodeCache);
         final Collection<E> elements = persistenceController.load(maxSize, node);
-
         if(elements!=null && !elements.isEmpty()) {
             try {
                 nodeCache.put(elements);
             } catch (SinkException e) {
             }
 
-            getObserver().notifyChange(size() + nodeCache.size(), elements.size());
         }else{
             clusterService.markRepaired(this,node);
         }
@@ -113,7 +112,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     public void handleStopRepair(Node node) {
         final AbstractTransactionalMemoryQueue<E> remove = repairableNodes.remove(node);
         if(remove!=null){
-            
+
         }
 
     }
@@ -144,6 +143,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void notifyChange(int queueSize, int delta) {
+        size.addAndGet(delta);
     }
 
     public void put(Collection<E> events) throws SinkException {
@@ -221,16 +221,24 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public int size() {
-        return active ? memoryCache.size() : 0;
+        return active ? size.get() : 0;
     }
 
     public boolean isActive() {
         return active;
     }
 
-    protected AbstractTransactionalMemoryQueue<E> createCache(IJedaManager manager, int maxSize) {
+    private AbstractTransactionalMemoryQueue<E> createCache() {
+        final AbstractTransactionalMemoryQueue<E> result = createMemoryQueue(manager, maxSize);
+        result.setObserver(observer);
+
+        return result;
+    }
+
+    protected AbstractTransactionalMemoryQueue<E> createMemoryQueue(IJedaManager manager, int maxSize){
         return new TransactionalMemoryQueue<E>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
+
 
 
 }
