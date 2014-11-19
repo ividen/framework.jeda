@@ -9,14 +9,9 @@ import ru.kwanza.jeda.api.internal.SourceException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
-import ru.kwanza.jeda.core.queue.ObjectCloneType;
-import ru.kwanza.jeda.core.queue.QueueObserverChain;
-import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
+import ru.kwanza.jeda.core.queue.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -26,21 +21,21 @@ import java.util.concurrent.locks.ReentrantLock;
 public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, IClusteredComponent, IQueueObserver {
     private AbstractTransactionalMemoryQueue<E> memoryCache;
     private IQueuePersistenceController<E> persistenceController;
-    private IQueueObserver originalObserver;
     private IClusterService clusterService;
     private IJedaManager manager;
     private QueueObserverChain observer;
     private ReentrantLock putLock = new ReentrantLock();
     private ReentrantLock takeLock = new ReentrantLock();
-    private Map<Node,AbstractTransactionalMemoryQueue<E>> repairableNodes;
+    private Map<Node, AbstractTransactionalMemoryQueue<E>> repairableNodes
+            = new LinkedHashMap<Node, AbstractTransactionalMemoryQueue<E>>();
     private volatile boolean active = false;
     private int maxSize;
     private AtomicInteger size = new AtomicInteger(0);
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
                            int maxSize, IQueuePersistenceController<E> controller) {
-        observer = new QueueObserverChain();
-        observer.addObserver(this);
+        this.observer = new QueueObserverChain();
+        this.observer.addObserver(this);
         this.manager = manager;
         this.persistenceController = controller;
         this.clusterService = clusterService;
@@ -84,6 +79,8 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         try {
             active = false;
             memoryCache = null;
+            repairableNodes.clear();
+            size.set(0);
         } finally {
             putLock.unlock();
             takeLock.unlock();
@@ -95,24 +92,31 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void handleStartRepair(Node node) {
-        final AbstractTransactionalMemoryQueue<E> nodeCache = createCache();
-        repairableNodes.put(node,nodeCache);
+        final AbstractTransactionalMemoryQueue<E> queue = createCache();
+
         final Collection<E> elements = persistenceController.load(maxSize, node);
-        if(elements!=null && !elements.isEmpty()) {
+        if (elements != null && !elements.isEmpty()) {
             try {
-                nodeCache.put(elements);
+                queue.put(elements);
             } catch (SinkException e) {
             }
 
-        }else{
-            clusterService.markRepaired(this,node);
+            takeLock.lock();
+            try {
+                repairableNodes.put(node, queue);
+            } finally {
+                takeLock.unlock();
+            }
+
+        } else {
+            clusterService.markRepaired(this, node);
         }
     }
 
     public void handleStopRepair(Node node) {
         final AbstractTransactionalMemoryQueue<E> remove = repairableNodes.remove(node);
-        if(remove!=null){
-
+        if (remove != null) {
+            notifyChange(size() - remove.size(), -remove.size());
         }
 
     }
@@ -122,16 +126,11 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void setObserver(IQueueObserver observer) {
-        if (this.originalObserver != null) {
-            this.observer.removeObserver(observer);
-        }
-        this.originalObserver = observer;
-
-        this.observer.addObserver(originalObserver);
+        this.observer.addObserver(observer);
     }
 
     public IQueueObserver getObserver() {
-        return originalObserver;
+        return observer;
     }
 
     public int getEstimatedCount() {
@@ -210,14 +209,57 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 return null;
             }
 
-            Collection<E> result = memoryCache.take(count);
+            Collection<E> result;
 
-            persistenceController.delete(result, clusterService.getCurrentNode());
+            if (!repairableNodes.isEmpty()) {
+                result = repairTake(count);
+            } else {
+                result = memoryCache.take(count);
+                if (result != null && !result.isEmpty()) {
+                    persistenceController.delete(result, clusterService.getCurrentNode());
+                }
+            }
 
             return result;
         } finally {
             takeLock.unlock();
         }
+    }
+
+    private Collection<E> repairTake(int count) throws SourceException {
+        Collection<E> result;
+        int i = repairableNodes.size() + 1;
+        int takeCount = Math.max(1, count / i);
+        int restCount = count;
+        result = new ArrayList<E>(count);
+        Collection<E> take;
+        for (Iterator<Map.Entry<Node, AbstractTransactionalMemoryQueue<E>>> iterator = repairableNodes.entrySet().iterator();
+             iterator.hasNext(); ) {
+            Map.Entry<Node, AbstractTransactionalMemoryQueue<E>> e = iterator.next();
+            AbstractTransactionalMemoryQueue<E> queue = e.getValue();
+            Node node = e.getKey();
+            take = queue.take(takeCount);
+            i--;
+            if (take != null && !take.isEmpty()) {
+                result.addAll(take);
+                persistenceController.delete(take, node);
+                restCount -= take.size();
+            } else {
+                clusterService.markRepaired(this, node);
+                iterator.remove();
+            }
+
+            takeCount = Math.max(1, restCount / i);
+
+            if (restCount <= 0) break;
+        }
+        if (restCount > 0) {
+            take = memoryCache.take(count);
+            if (take != null && !take.isEmpty()) {
+                persistenceController.delete(take, clusterService.getCurrentNode());
+            }
+        }
+        return result;
     }
 
     public int size() {
@@ -235,10 +277,9 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         return result;
     }
 
-    protected AbstractTransactionalMemoryQueue<E> createMemoryQueue(IJedaManager manager, int maxSize){
+    protected AbstractTransactionalMemoryQueue<E> createMemoryQueue(IJedaManager manager, int maxSize) {
         return new TransactionalMemoryQueue<E>(manager, ObjectCloneType.SERIALIZE, maxSize);
     }
-
 
 
 }

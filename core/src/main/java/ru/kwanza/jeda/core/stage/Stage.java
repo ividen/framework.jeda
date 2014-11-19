@@ -29,6 +29,7 @@ public class Stage implements IStageInternal, IQueueObserver {
         this.processor = processor;
         this.admissionController = admissionController;
         this.resourceController = resourceController;
+        //todo aguzanov remove. ugly
         if (resourceController instanceof AbstractResourceController) {
             ((AbstractResourceController) resourceController).initStage(this);
         }
