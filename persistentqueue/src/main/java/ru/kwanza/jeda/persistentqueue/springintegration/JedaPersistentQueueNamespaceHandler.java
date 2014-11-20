@@ -13,8 +13,8 @@ public class JedaPersistentQueueNamespaceHandler extends NamespaceHandlerSupport
         registerBeanDefinitionParser("db-queue", new DBQueueParser());
         registerBeanDefinitionParser("helperBean", new HelperBeanParser());
         registerBeanDefinitionParser("event-queue", new EventQueueHelperParser());
-        registerBeanDefinitionParser("named-event-queue", new DBQueueParser());
-        registerBeanDefinitionParser("priority-event-queue", new DBQueueParser());
-        registerBeanDefinitionParser("named-priority-event-queue", new DBQueueParser());
+        registerBeanDefinitionParser("named-event-queue", new NamedEventQueueHelperParser());
+        registerBeanDefinitionParser("priority-event-queue", new PriorityEventQueueHelperParser());
+        registerBeanDefinitionParser("named-priority-event-queue", new NamedPriorityEventQueueHelperParser());
     }
 }

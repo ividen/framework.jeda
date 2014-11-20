@@ -13,7 +13,7 @@ import ru.kwanza.jeda.persistentqueue.db.IDBQueueHelper;
  */
 class DBQueueFactory implements SmartFactoryBean<PersistentQueue> {
     private int maxSize;
-    private IDBQueueHelper recordHelper;
+    private IDBQueueHelper helper;
     private IJedaManager manager;
     private IEntityManager em;
     private IClusterService clusterService;
@@ -27,12 +27,12 @@ class DBQueueFactory implements SmartFactoryBean<PersistentQueue> {
         this.maxSize = maxSize;
     }
 
-    public IDBQueueHelper getRecordHelper() {
-        return recordHelper;
+    public IDBQueueHelper getHelper() {
+        return helper;
     }
 
-    public void setRecordHelper(IDBQueueHelper recordHelper) {
-        this.recordHelper = recordHelper;
+    public void setHelper(IDBQueueHelper helper) {
+        this.helper = helper;
     }
 
     public IJedaManager getManager() {
@@ -68,7 +68,7 @@ class DBQueueFactory implements SmartFactoryBean<PersistentQueue> {
     }
 
     public PersistentQueue getObject() throws Exception {
-        DBQueuePersistenceController controller = new DBQueuePersistenceController(em,recordHelper);
+        DBQueuePersistenceController controller = new DBQueuePersistenceController(em, helper);
 
         return new PersistentQueue(manager,clusterService, maxSize, controller);
     }

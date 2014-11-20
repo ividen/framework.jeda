@@ -16,7 +16,6 @@ import java.util.Collection;
  * @author Guzanov Alexander
  */
 public class DBQueuePersistenceController<E extends IPersistableEvent, R extends IEventRecord> implements IQueuePersistenceController<E> {
-    private FieldHelper.Field<R, E> eventField;
     private FieldHelper.Field<E, Long> persistIdField = new FieldHelper.Field<E, Long>() {
         public Long value(E o) {
             return o.getPersistId();
@@ -33,7 +32,6 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
                                         IDBQueueHelper<R, E> builder) {
         this.builder = builder;
         this.em = em;
-        initFields();
 
         IQueryBuilder queryBuilder = em.queryBuilder(builder.getORMClass());
         this.determinator = builder.getQueueNameField() == null || builder.getQueueNameValue() == null
@@ -42,9 +40,6 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
         loadQuery = queryBuilder.where(condition).orderBy(builder.getIdField()).create();
     }
 
-    private void initFields() {
-        this.eventField = FieldHelper.construct(builder.getORMClass(), "eventData");
-    }
 
     public String getQueueName() {
         return DBQueuePersistenceController.class.getSimpleName() + "."
@@ -55,7 +50,7 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
     public Collection<E> load(int count, Node node) {
         return FieldHelper
                 .getFieldCollection(loadQuery.prepare()
-                        .paging(0, count).setParameter(1, node.getId()).selectList(), eventField);
+                        .paging(0, count).setParameter(1, node.getId()).selectList(), builder.getEvent());
     }
 
     public void delete(Collection<E> result, Node node) {

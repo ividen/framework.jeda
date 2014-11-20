@@ -6,7 +6,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.w3c.dom.Element;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
 import ru.kwanza.jeda.persistentqueue.db.IDBQueueHelper;
-import ru.kwanza.jeda.persistentqueue.db.queue.EventQueue;
+import ru.kwanza.jeda.persistentqueue.db.queue.NamedEventQueue;
 
 /**
  * @author Alexander Guzanov
@@ -14,7 +14,7 @@ import ru.kwanza.jeda.persistentqueue.db.queue.EventQueue;
 class NamedEventQueueHelperParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
-                .genericBeanDefinition(EventQueue.Helper.class);
+                .genericBeanDefinition(NamedEventQueue.Helper.class);
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("queueName"));
 

@@ -42,33 +42,33 @@
     </bean>
 
 
-    <jeda-core:stage name="testStage1">
+    <jeda-core:stage name="testStage" transaction="true">
         <jeda-persistentqueue:db-queue maxSize="1000">
             <jeda-persistentqueue:event-queue/>
         </jeda-persistentqueue:db-queue>
 
         <jeda-core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="8"/>
-        <jeda-core:event-processor class="com"/>
+        <jeda-core:event-processor class="ru.kwanza.jeda.persistentqueue.db.integration.TestEventProcessor"/>
         <jeda-core:stage-thread-manager threadNamePrefix="testStage"/>
     </jeda-core:stage>
 
-    <jeda-core:stage name="testStage2">
+    <jeda-core:stage name="testStage1" transaction="true">
         <jeda-persistentqueue:db-queue maxSize="1000">
             <jeda-persistentqueue:named-event-queue queueName="test_2"/>
         </jeda-persistentqueue:db-queue>
 
         <jeda-core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="8"/>
-        <jeda-core:event-processor class="com"/>
+        <jeda-core:event-processor class="ru.kwanza.jeda.persistentqueue.db.integration.TestEventProcessorNext"/>
         <jeda-core:stage-thread-manager threadNamePrefix="testStage"/>
     </jeda-core:stage>
 
-    <jeda-core:stage name="testStage2">
+    <jeda-core:stage name="testStage2" transaction="true">
         <jeda-persistentqueue:db-queue maxSize="1000">
             <jeda-persistentqueue:named-event-queue queueName="test_3"/>
         </jeda-persistentqueue:db-queue>
 
         <jeda-core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="8"/>
-        <jeda-core:event-processor class="com"/>
+        <jeda-core:event-processor class="ru.kwanza.jeda.persistentqueue.db.integration.TestEventProcessorNext"/>
         <jeda-core:stage-thread-manager threadNamePrefix="testStage"/>
     </jeda-core:stage>
 

@@ -108,13 +108,19 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 takeLock.unlock();
             }
 
-        } else {
+        } else {//tod aguzanov wrong
             clusterService.markRepaired(this, node);
         }
     }
 
     public void handleStopRepair(Node node) {
-        final AbstractTransactionalMemoryQueue<E> remove = repairableNodes.remove(node);
+        final AbstractTransactionalMemoryQueue<E> remove;
+        takeLock.lock();
+        try {
+            remove = repairableNodes.remove(node);
+        }finally {
+            takeLock.unlock();
+        }
         if (remove != null) {
             notifyChange(size() - remove.size(), -remove.size());
         }
@@ -246,7 +252,6 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 restCount -= take.size();
             } else {
                 clusterService.markRepaired(this, node);
-                iterator.remove();
             }
 
             takeCount = Math.max(1, restCount / i);
@@ -254,8 +259,9 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             if (restCount <= 0) break;
         }
         if (restCount > 0) {
-            take = memoryCache.take(count);
+            take = memoryCache.take(restCount);
             if (take != null && !take.isEmpty()) {
+                result.addAll(take);
                 persistenceController.delete(take, clusterService.getCurrentNode());
             }
         }

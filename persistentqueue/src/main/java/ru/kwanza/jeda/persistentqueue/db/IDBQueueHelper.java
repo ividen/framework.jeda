@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.db;
 
 import ru.kwanza.jeda.persistentqueue.IPersistableEvent;
+import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 
 /**
  * @author Alexander Guzanov
@@ -11,6 +12,8 @@ public interface IDBQueueHelper<R extends IEventRecord, E extends IPersistableEv
 
     R buildRecord(E event, int nodeId);
 
+    FieldHelper.Field<R,E> getEvent();
+
     String getQueueNameField();
 
     String getQueueNameValue();
@@ -18,4 +21,5 @@ public interface IDBQueueHelper<R extends IEventRecord, E extends IPersistableEv
     String getIdField();
 
     String getNodeIdField();
+
 }
