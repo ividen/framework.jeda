@@ -24,13 +24,13 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
     };
 
     private final IEntityManager em;
-    private final IEventRecordHelper<R, E> builder;
+    private final IDBQueueHelper<R, E> builder;
     private final If determinator;
     private final IQuery loadQuery;
 
 
     public DBQueuePersistenceController(IEntityManager em,
-                                        IEventRecordHelper<R, E> builder) {
+                                        IDBQueueHelper<R, E> builder) {
         this.builder = builder;
         this.em = em;
         initFields();

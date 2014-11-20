@@ -2,7 +2,6 @@ package ru.kwanza.jeda.persistentqueue.db.integration;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import ru.kwanza.jeda.clusterservice.IClusterService;
 
 /**
  * @author Alexander Guzanov
@@ -10,11 +9,9 @@ import ru.kwanza.jeda.clusterservice.IClusterService;
 public class TestPersistentQueue {
 
     public static void main(String[] args) throws InterruptedException {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-integration-config.xml", NodeMonitorTest.class);
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-integration-config.xml", TestPersistentQueue.class);
 
 
-
-        IClusterService bean = ctx.getBean(IClusterService.class);
 
         Thread.currentThread().join();
     }

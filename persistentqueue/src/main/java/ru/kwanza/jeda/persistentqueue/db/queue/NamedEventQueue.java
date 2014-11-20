@@ -1,9 +1,7 @@
 package ru.kwanza.jeda.persistentqueue.db.queue;
 
 import ru.kwanza.dbtool.orm.annotations.Entity;
-import ru.kwanza.dbtool.orm.api.If;
 import ru.kwanza.jeda.persistentqueue.DefaultPersistableEvent;
-import ru.kwanza.jeda.persistentqueue.db.IEventRecordHelper;
 import ru.kwanza.jeda.persistentqueue.db.base.BaseNamedEventQueue;
 import ru.kwanza.toolbox.SerializationHelper;
 

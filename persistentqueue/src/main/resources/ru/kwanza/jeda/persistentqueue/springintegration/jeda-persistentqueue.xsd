@@ -62,7 +62,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="priority-named-event-queue" substitutionGroup="db-queue-helper">
+    <xsd:element name="named-priority-event-queue" substitutionGroup="db-queue-helper">
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="jeda-db-queue-helper-type">

@@ -6,14 +6,14 @@ import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.persistentqueue.PersistentQueue;
 import ru.kwanza.jeda.persistentqueue.db.DBQueuePersistenceController;
-import ru.kwanza.jeda.persistentqueue.db.IEventRecordHelper;
+import ru.kwanza.jeda.persistentqueue.db.IDBQueueHelper;
 
 /**
  * @author Guzanov Alexander
  */
 class DBQueueFactory implements SmartFactoryBean<PersistentQueue> {
     private int maxSize;
-    private IEventRecordHelper recordHelper;
+    private IDBQueueHelper recordHelper;
     private IJedaManager manager;
     private IEntityManager em;
     private IClusterService clusterService;
@@ -27,11 +27,11 @@ class DBQueueFactory implements SmartFactoryBean<PersistentQueue> {
         this.maxSize = maxSize;
     }
 
-    public IEventRecordHelper getRecordHelper() {
+    public IDBQueueHelper getRecordHelper() {
         return recordHelper;
     }
 
-    public void setRecordHelper(IEventRecordHelper recordHelper) {
+    public void setRecordHelper(IDBQueueHelper recordHelper) {
         this.recordHelper = recordHelper;
     }
 
