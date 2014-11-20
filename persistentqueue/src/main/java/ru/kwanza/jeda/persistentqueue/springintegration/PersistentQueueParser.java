@@ -28,6 +28,8 @@ class PersistentQueueParser extends JedaBeanDefinitionParser {
         definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
         definitionBuilder.addConstructorArgValue(element.getAttribute("maxSize"));
+        definitionBuilder.addConstructorArgReference(element.getAttribute("clusterService"));
+
 
 
         XmlReaderContext readerContext = parserContext.getReaderContext();
@@ -53,7 +55,6 @@ class PersistentQueueParser extends JedaBeanDefinitionParser {
                 }
             }
         }
-
 
         return createJedaDefinition(definitionBuilder.getBeanDefinition(), IQueue.class, element, parserContext);
 

@@ -15,76 +15,23 @@
                 schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 
-    <xsd:element name="jdbc-queue"
+    <xsd:element name="db-queue"
                  substitutionGroup="jeda-core:jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="jeda-core:jeda-queue-type">
-                    <xsd:attribute name="dbtool">
+                    <xsd:attribute name="recordHelper">
                         <xsd:annotation>
                             <xsd:appinfo>
                                 <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.dbtool.core.DBTool"/>
+                                    <tool:expected-type type="ru.kwanza.jeda.persistentqueue.db.IEventRecordHelper"/>
                                 </tool:annotation>
                             </xsd:appinfo>
                         </xsd:annotation>
                     </xsd:attribute>
-                    <xsd:attribute name="autoKey">
-                        <xsd:annotation>
-                            <xsd:appinfo>
-                                <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.autokey.api.IAutoKey"/>
-                                </tool:annotation>
-                            </xsd:appinfo>
-                        </xsd:annotation>
-                    </xsd:attribute>
-                    <xsd:attribute name="idColumn" type="xsd:string"/>
-                    <xsd:attribute name="eventColumn" type="xsd:string"/>
-                    <xsd:attribute name="queueNameColumn" type="xsd:string"/>
-                    <xsd:attribute name="tableName" type="xsd:string"/>
-                    <xsd:attribute name="nodeIdColumn" type="xsd:string"/>
                     <xsd:attribute name="maxSize" type="xsd:string" use="required"/>
-                    <xsd:attribute name="timerName" type="xsd:string"/>
                 </xsd:extension>
             </xsd:complexContent>
-        </xsd:complexType>
-    </xsd:element>
-
-
-    <xsd:element name="berkeley-connection-factory">
-        <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:ID" use="required">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:exports
-                                    type="ru.kwanza.jeda.jeconnection.JEConnectionFactory"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="path" type="xsd:string" use="required"/>
-            <xsd:attribute name="lockingTimeout" type="xsd:long"/>
-            <xsd:attribute name="evnConfig">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:expected-type
-                                    type="com.sleepycat.je.EnvironmentConfig"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
-            <xsd:attribute name="txConfig">
-                <xsd:annotation>
-                    <xsd:appinfo>
-                        <tool:annotation kind="ref">
-                            <tool:expected-type
-                                    type="com.sleepycat.je.TransactionConfig"/>
-                        </tool:annotation>
-                    </xsd:appinfo>
-                </xsd:annotation>
-            </xsd:attribute>
         </xsd:complexType>
     </xsd:element>
 
@@ -132,10 +79,18 @@
                         </xsd:element>
                     </xsd:sequence>
                     <xsd:attribute name="maxSize" type="xsd:long" use="required"/>
+                    <xsd:attribute name="clusterService">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type type="ru.kwanza.jeda.clusterservice.IClusterService"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>
     </xsd:element>
-
 
 </xsd:schema>

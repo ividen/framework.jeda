@@ -10,6 +10,6 @@ public class JedaPersistentQueueNamespaceHandler extends NamespaceHandlerSupport
     public void init() {
         registerBeanDefinitionParser("queue", new PersistentQueueParser());
         registerBeanDefinitionParser("berkeley-queue", new BerkeleyQueueParser());
-        registerBeanDefinitionParser("db-queue", new JDBCQueueParser());
+        registerBeanDefinitionParser("db-queue", new DBQueueParser());
     }
 }
