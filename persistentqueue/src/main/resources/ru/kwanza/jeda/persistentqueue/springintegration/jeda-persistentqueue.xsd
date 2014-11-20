@@ -15,20 +15,72 @@
                 schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd"/>
 
 
+    <xsd:complexType name="jeda-db-queue-helper-type">
+    </xsd:complexType>
+
+    <xsd:element abstract="true" name="db-queue-helper" type="jeda-db-queue-helper-type">
+    </xsd:element>
+
+    <xsd:element name="helperBean" substitutionGroup="db-queue-helper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="jeda-db-queue-helper-type">
+                    <xsd:group ref="beans:beanElements"/>
+                    <xsd:attribute name="id" type="xsd:ID"/>
+                    <xsd:attributeGroup ref="beans:beanAttributes"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="event-queue" substitutionGroup="db-queue-helper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="jeda-db-queue-helper-type">
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="named-event-queue" substitutionGroup="db-queue-helper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="jeda-db-queue-helper-type">
+                    <xsd:attribute name="queueName" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="priority-event-queue" substitutionGroup="db-queue-helper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="jeda-db-queue-helper-type">
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="priority-named-event-queue" substitutionGroup="db-queue-helper">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="jeda-db-queue-helper-type">
+                    <xsd:attribute name="queueName" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="db-queue"
                  substitutionGroup="jeda-core:jeda-queue">
         <xsd:complexType>
             <xsd:complexContent>
                 <xsd:extension base="jeda-core:jeda-queue-type">
-                    <xsd:attribute name="recordHelper">
-                        <xsd:annotation>
-                            <xsd:appinfo>
-                                <tool:annotation kind="ref">
-                                    <tool:expected-type type="ru.kwanza.jeda.persistentqueue.db.IEventRecordHelper"/>
-                                </tool:annotation>
-                            </xsd:appinfo>
-                        </xsd:annotation>
-                    </xsd:attribute>
+                    <xsd:sequence>
+                        <xsd:element ref="db-queue-helper" minOccurs="1" maxOccurs="1"/>
+                    </xsd:sequence>
                     <xsd:attribute name="maxSize" type="xsd:string" use="required"/>
                 </xsd:extension>
             </xsd:complexContent>

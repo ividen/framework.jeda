@@ -134,7 +134,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public int getEstimatedCount() {
-        return active ? memoryCache.getEstimatedCount() : 0;
+        return active ? size() : 0;
     }
 
     public boolean isReady() {

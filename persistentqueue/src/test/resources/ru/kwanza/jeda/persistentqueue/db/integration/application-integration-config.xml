@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xmlns:jeda-persistentqueue="http://www.kwanza-systems.ru/schema/jeda-persistentqueue"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd     http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd http://www.kwanza-systems.ru/schema/jeda-persistentqueue http://www.kwanza-systems.ru/schema/jeda-persistentqueue.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="classpath:dbtool-config.xml"/>
+    <import resource="classpath:dbtool-orm-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
+    <import resource="classpath:jeda-clusterservice-db-config.xml"/>
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+    <import resource="classpath:jeda-persistentqueue-default-db-queue-config.xml"/>
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:integation.properties</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <jeda-core:stage name="testStage">
+        <jeda-persistentqueue:db-queue maxSize="1000">
+            <jeda-persistentqueue:event-queue/>
+        </jeda-persistentqueue:db-queue>
+
+        <jeda-core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="8"/>
+        <jeda-core:event-processor class="com"/>
+        <jeda-core:stage-thread-manager threadNamePrefix="testStage"/>
+    </jeda-core:stage>
+
+</beans>
