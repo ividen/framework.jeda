@@ -9,11 +9,21 @@ import ru.kwanza.jeda.api.internal.SourceException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.Node;
-import ru.kwanza.jeda.core.queue.*;
+import ru.kwanza.jeda.clusterservice.impl.db.ComponentInActiveExcetion;
+import ru.kwanza.jeda.core.queue.AbstractTransactionalMemoryQueue;
+import ru.kwanza.jeda.core.queue.ObjectCloneType;
+import ru.kwanza.jeda.core.queue.QueueObserverChain;
+import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Guzanov Alexander
@@ -24,10 +34,8 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private IClusterService clusterService;
     private IJedaManager manager;
     private QueueObserverChain observer;
-    private ReentrantLock putLock = new ReentrantLock();
-    private ReentrantLock takeLock = new ReentrantLock();
-    private Map<Node, AbstractTransactionalMemoryQueue<E>> repairableNodes
-            = new LinkedHashMap<Node, AbstractTransactionalMemoryQueue<E>>();
+    private ConcurrentMap<Node, AbstractTransactionalMemoryQueue<E>> repairableNodes
+            = new ConcurrentHashMap<Node, AbstractTransactionalMemoryQueue<E>>();
     private volatile boolean active = false;
     private int maxSize;
     private AtomicInteger size = new AtomicInteger(0);
@@ -49,42 +57,27 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void handleStart() {
-        takeLock.lock();
-        putLock.lock();
+        memoryCache = createCache();
+        ITransactionManagerInternal tm = manager.getTransactionManager();
+        tm.begin();
         try {
-            memoryCache = createCache();
-            ITransactionManagerInternal tm = manager.getTransactionManager();
-            tm.begin();
-            try {
 
-                Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
-                if (load != null && !load.isEmpty()) {
-                    memoryCache.put(load);
-                }
-                tm.commit();
-            } catch (Throwable e) {
-                tm.rollback();
-                throw new RuntimeException(e);
+            Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
+            if (load != null && !load.isEmpty()) {
+                memoryCache.put(load);
             }
-            active = true;
-        } finally {
-            putLock.unlock();
-            takeLock.unlock();
+            tm.commit();
+        } catch (Throwable e) {
+            tm.rollback();
+            throw new RuntimeException(e);
         }
+        active = true;
     }
 
     public void handleStop() {
-        takeLock.lock();
-        putLock.lock();
-        try {
-            active = false;
-            memoryCache = null;
-            repairableNodes.clear();
-            size.set(0);
-        } finally {
-            putLock.unlock();
-            takeLock.unlock();
-        }
+        active = false;
+        repairableNodes.clear();
+        size.set(0);
     }
 
     public int getMaxSize() {
@@ -101,26 +94,16 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             } catch (SinkException e) {
             }
 
-            takeLock.lock();
-            try {
-                repairableNodes.put(node, queue);
-            } finally {
-                takeLock.unlock();
-            }
+            repairableNodes.put(node, queue);
 
-        } else {//tod aguzanov wrong
+        } else {//todo aguzanov wrong
             clusterService.markRepaired(this, node);
         }
     }
 
     public void handleStopRepair(Node node) {
         final AbstractTransactionalMemoryQueue<E> remove;
-        takeLock.lock();
-        try {
-            remove = repairableNodes.remove(node);
-        }finally {
-            takeLock.unlock();
-        }
+        remove = repairableNodes.remove(node);
         if (remove != null) {
             notifyChange(size() - remove.size(), -remove.size());
         }
@@ -151,85 +134,105 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         size.addAndGet(delta);
     }
 
-    public void put(Collection<E> events) throws SinkException {
+    public void put(final Collection<E> events) throws SinkException {
         if (!manager.getTransactionManager().hasTransaction()) {
             throw new SinkException("Use persistent queue only on transaction!");
         }
 
+        if (!active) {
+            throw new SinkException.Closed("Sink closed!");
+        }
+
         try {
-            putLock.lockInterruptibly();
-        } catch (InterruptedException e) {
+            clusterService.criticalSection(this, new Callable<Object>() {
+                public Object call() throws Exception {
+                    doPut(events);
+                    return null;
+                }
+            });
+        } catch (InvocationTargetException e) {
+            throw new SinkException(e.getCause());
+        } catch (ComponentInActiveExcetion e) {
             throw new SinkException.Closed(e);
         }
-        try {
-            if (!active) {
-                throw new SinkException.Closed("Sink closed!");
-            }
 
-            memoryCache.put(events);
-            persistenceController.persist(events, clusterService.getCurrentNode());
-        } finally {
-            putLock.unlock();
-        }
     }
 
-    public Collection<E> tryPut(Collection<E> events) throws SinkException {
+
+    public Collection<E> tryPut(final Collection<E> events) throws SinkException {
         if (!manager.getTransactionManager().hasTransaction()) {
             throw new SinkException("Use persistent queue only on transaction!");
         }
 
-        try {
-            putLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            throw new SinkException.Closed(e);
+        if (!active) {
+            throw new SinkException.Closed("Sink closed!");
         }
-        try {
-            if (!active) {
-                throw new SinkException.Closed("Sink closed!");
-            }
 
-            ArrayList<E> copy = new ArrayList<E>(events);
-            Collection<E> decline = memoryCache.tryPut(copy);
-            if (decline != null) {
-                copy.removeAll(decline);
-            }
-            persistenceController.persist(copy, clusterService.getCurrentNode());
-            return decline;
-        } finally {
-            putLock.unlock();
+        try {
+            return clusterService.criticalSection(this, new Callable<Collection<E>>() {
+                public Collection<E> call() throws Exception {
+                    return doTryPut(events);
+                }
+            });
+        } catch (InvocationTargetException e) {
+            throw new SinkException(e.getCause());
+        } catch (ComponentInActiveExcetion e) {
+            throw new SinkException.Closed(e);
         }
     }
 
-    public Collection<E> take(int count) throws SourceException {
+
+    public Collection<E> take(final int count) throws SourceException {
         if (!manager.getTransactionManager().hasTransaction()) {
             throw new SourceException("Use persistent queue only on transaction!");
         }
+
+        if (!active) {
+            return null;
+        }
+
         try {
-            takeLock.lockInterruptibly();
-        } catch (InterruptedException e) {
+            return clusterService.criticalSection(this, new Callable<Collection<E>>() {
+                public Collection<E> call() throws Exception {
+                    return doTake(count);
+                }
+            });
+        } catch (InvocationTargetException e) {
+            throw new SourceException(e.getCause());
+        } catch (ComponentInActiveExcetion e) {
             throw new SourceException(e);
         }
-        try {
+    }
 
-            if (!active) {
-                return null;
-            }
-
-            Collection<E> result;
-
-            if (!repairableNodes.isEmpty()) {
-                result = repairTake(count);
-            } else {
-                result = memoryCache.take(count);
-                if (result != null && !result.isEmpty()) {
-                    persistenceController.delete(result, clusterService.getCurrentNode());
-                }
-            }
-
-            return result;
-        } finally {
-            takeLock.unlock();
+    private Collection<E> doTryPut(Collection<E> events) throws SinkException {
+        ArrayList<E> copy = new ArrayList<E>(events);
+        Collection<E> decline = memoryCache.tryPut(copy);
+        if (decline != null) {
+            copy.removeAll(decline);
         }
+        persistenceController.persist(copy, clusterService.getCurrentNode());
+        return decline;
+    }
+
+    private void doPut(Collection<E> events) throws SinkException {
+        memoryCache.put(events);
+        persistenceController.persist(events, clusterService.getCurrentNode());
+    }
+
+
+    private Collection<E> doTake(int count) throws SourceException {
+        Collection<E> result;
+
+        if (!repairableNodes.isEmpty()) {
+            result = repairTake(count);
+        } else {
+            result = memoryCache.take(count);
+            if (result != null && !result.isEmpty()) {
+                persistenceController.delete(result, clusterService.getCurrentNode());
+            }
+        }
+
+        return result;
     }
 
     private Collection<E> repairTake(int count) throws SourceException {
@@ -254,9 +257,9 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 clusterService.markRepaired(this, node);
             }
 
+            if (restCount <= 0 || i <= 0) break;
             takeCount = Math.max(1, restCount / i);
 
-            if (restCount <= 0) break;
         }
         if (restCount > 0) {
             take = memoryCache.take(restCount);

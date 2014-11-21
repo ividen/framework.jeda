@@ -311,24 +311,27 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void leaseAlien() {
-        if (!repository.getAlienEntities().isEmpty()) {
-            Collection<ComponentEntity> items = dao.loadComponentsByKey(repository.getAlienEntities().keySet());
+        final Map<String, AlienComponent> alienEntities = repository.getAlienEntities();
+
+        if (!alienEntities.isEmpty()) {
+            Collection<ComponentEntity> items = dao.loadComponentsByKey(alienEntities.keySet());
             for (ComponentEntity item : items) {
-                if (item.getWaitForReturn() != null && item.getWaitForReturn() > System.currentTimeMillis()) {
+                if ((item.getWaitForReturn() != null && item.getWaitForReturn() > System.currentTimeMillis()) ||
+                        (alienEntities.get(item.getId()).isMarkRepaired())) {
                     if (!repository.getStopigRepairEntities().containsKey(item.getId())) {
-                        repository.addStopingRepair(repository.getAlienEntities().get(item.getId()));
+                        repository.addStopingRepair(alienEntities.get(item.getId()));
                         workers.stopRepair(item.getId(), new ComponentHandler(repository, item.getName()), item.getNode());
                     }
                 }
             }
 
-            for (AlienComponent o : repository.getAlienEntities().values()) {
+            for (AlienComponent o : alienEntities.values()) {
                 o.setLastActivity(lastActivityTs);
                 o.setHoldNodeId(currentNode.getId());
             }
 
             try {
-                dao.updateAlienComponents(repository.getAlienEntities().values());
+                dao.updateAlienComponents(alienEntities.values());
             } catch (UpdateException e) {
             }
         }
