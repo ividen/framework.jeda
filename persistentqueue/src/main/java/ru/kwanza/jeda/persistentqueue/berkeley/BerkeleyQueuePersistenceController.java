@@ -110,6 +110,10 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
         }
     }
 
+    public void closePersistentStore(Node node) {
+        jeFactory.closeConnection(node.getId());
+    }
+
     protected Cursor openCursor(Database database) {
         return database.openCursor(null, cursorConfig);
     }

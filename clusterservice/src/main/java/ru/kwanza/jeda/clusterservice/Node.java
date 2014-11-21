@@ -35,18 +35,18 @@ public class Node {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || !(o instanceof Node)) return false;
 
         Node node = (Node) o;
 
-        if (!id.equals(node.id)) return false;
+        if (!getId().equals(node.getId())) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return getId().hashCode();
     }
 
     @Override

@@ -31,7 +31,7 @@ public interface IClusterService {
     <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
             throws InvocationTargetException, ComponentInActiveExcetion;
 
-    boolean markRepaired(IClusteredComponent component, Node node);
+    void markRepaired(IClusteredComponent component, Node node);
 
     void registerComponent(IClusteredComponent module);
 }

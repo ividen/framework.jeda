@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TestPersistentQueue {
 
     public static void main(String[] args) throws InterruptedException {
-        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-integration-config.xml", TestPersistentQueue.class);
+        ApplicationContext ctx = new ClassPathXmlApplicationContext("application-integration-config_1.xml", TestPersistentQueue.class);
         AtomicLong id = new AtomicLong(0l);
 
 
@@ -36,9 +36,14 @@ public class TestPersistentQueue {
             try {
                 sink.tryPut(events);
             } catch (SinkException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }finally {
-                tm.commit();
+                try {
+                    tm.commit();
+                }catch (Throwable t){
+                    t.printStackTrace();
+                }
+
             }
         }
 

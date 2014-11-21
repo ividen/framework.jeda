@@ -14,6 +14,6 @@ public class TestEventProcessorNext implements IEventProcessor {
     private IJedaManager manager;
 
     public void process(Collection events) {
-        System.out.println(manager.getCurrentStage().getName() + ":" + events.size());
+//        System.out.println(manager.getCurrentStage().getName() + ":" + events.size());
     }
 }

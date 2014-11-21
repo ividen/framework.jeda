@@ -23,8 +23,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Alexander Guzanov
@@ -51,8 +49,6 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
 
     private volatile boolean started = false;
     private Thread supervisor;
-
-    private Lock repairLock = new ReentrantLock();
 
 
     @PostConstruct
@@ -195,18 +191,11 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         }
     }
 
-    public boolean markRepaired(IClusteredComponent component, Node node) {
-        repairLock.lock();
-        try {
-            AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node, component));
-            if (componentEntity != null) {
-                componentEntity.setMarkRepaired(true);
-                workers.stopRepair(componentEntity.getId(), new ComponentHandler(repository, component), node);
-            }
-        } finally {
-            repairLock.unlock();
+    public void markRepaired(IClusteredComponent component, Node node) {
+        AlienComponent componentEntity = repository.getAlienEntities().get(ComponentEntity.createId(node, component));
+        if (componentEntity != null) {
+            componentEntity.setMarkRepaired(true);
         }
-        return true;
     }
 
     public void registerComponent(IClusteredComponent component) {
@@ -272,14 +261,9 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void handleAlienComponents() {
-        repairLock.lock();
-        try {
-            leaseAlien();
-            finishStop();
-            findStaleAlien();
-        } finally {
-            repairLock.unlock();
-        }
+        leaseAlien();
+        finishStop();
+        findStaleAlien();
     }
 
     private void finishStop() {

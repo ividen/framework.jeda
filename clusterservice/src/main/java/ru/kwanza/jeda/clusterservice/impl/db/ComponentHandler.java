@@ -41,6 +41,7 @@ public class ComponentHandler implements IClusteredComponent {
         delegate.handleStopRepair(node);
         final AlienComponent alienComponent = repository.getAlienEntities().get(BaseComponentEntity.createId(node, this));
         if(alienComponent!=null) {
+            repository.removeAlienComponent(alienComponent.getId());
             repository.addStopRepair(alienComponent);
         }
     }

@@ -1,11 +1,10 @@
 package ru.kwanza.jeda.jeconnection;
 
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
+import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
 import javax.transaction.Synchronization;
-import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import java.util.HashSet;
 import java.util.Set;
@@ -144,8 +143,8 @@ public class JEConnection {
 
                 try {
                     transaction.rollback();
-                } catch (SystemException e) {
-                    e.printStackTrace();
+                } catch (Throwable e) {
+//                    e.printStackTrace();
                 }
 
             }

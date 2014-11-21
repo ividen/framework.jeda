@@ -15,11 +15,10 @@ import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.QueueObserverChain;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -78,6 +77,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         active = false;
         repairableNodes.clear();
         size.set(0);
+//        persistenceController.closePersistentStore(clusterService.getCurrentNode());
     }
 
     public int getMaxSize() {
@@ -87,27 +87,37 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     public void handleStartRepair(Node node) {
         final AbstractTransactionalMemoryQueue<E> queue = createCache();
 
-        final Collection<E> elements = persistenceController.load(maxSize, node);
-        if (elements != null && !elements.isEmpty()) {
-            try {
-                queue.put(elements);
-            } catch (SinkException e) {
+        manager.getTransactionManager().begin();
+
+        try {
+            final Collection<E> elements = persistenceController.load(maxSize, node);
+            if (elements != null && !elements.isEmpty()) {
+                try {
+                    queue.put(elements);
+                } catch (SinkException e) {
+                }
+
+                repairableNodes.put(node, queue);
+
+            } else {
+                clusterService.markRepaired(this, node);
             }
-
-            repairableNodes.put(node, queue);
-
-        } else {//todo aguzanov wrong
-            clusterService.markRepaired(this, node);
+        }finally {
+            manager.getTransactionManager().commit();
         }
     }
 
     public void handleStopRepair(Node node) {
+        removeQueue(node);
+        persistenceController.closePersistentStore(node);
+    }
+
+    private void removeQueue(Node node) {
         final AbstractTransactionalMemoryQueue<E> remove;
         remove = repairableNodes.remove(node);
         if (remove != null) {
             notifyChange(size() - remove.size(), -remove.size());
         }
-
     }
 
     public String getName() {
@@ -242,8 +252,8 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         int restCount = count;
         result = new ArrayList<E>(count);
         Collection<E> take;
-        for (Iterator<Map.Entry<Node, AbstractTransactionalMemoryQueue<E>>> iterator = repairableNodes.entrySet().iterator();
-             iterator.hasNext(); ) {
+        Iterator<Map.Entry<Node, AbstractTransactionalMemoryQueue<E>>> iterator = new HashMap(repairableNodes).entrySet().iterator();
+        while (iterator.hasNext()) {
             Map.Entry<Node, AbstractTransactionalMemoryQueue<E>> e = iterator.next();
             AbstractTransactionalMemoryQueue<E> queue = e.getValue();
             Node node = e.getKey();
@@ -254,7 +264,12 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
                 persistenceController.delete(take, node);
                 restCount -= take.size();
             } else {
-                clusterService.markRepaired(this, node);
+                removeQueue(node);
+                try {
+                    manager.getTransactionManager().getTransaction().registerSynchronization(new MarkRepairedSynchronization(node));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             if (restCount <= 0 || i <= 0) break;
@@ -291,4 +306,21 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
 
+    private class MarkRepairedSynchronization implements Synchronization {
+        private final Node node;
+
+        public MarkRepairedSynchronization(Node node) {
+            this.node = node;
+        }
+
+        public void beforeCompletion() {
+
+        }
+
+        public void afterCompletion(int status) {
+            if (status == Status.STATUS_COMMITTED) {
+                clusterService.markRepaired(PersistentQueue.this, node);
+            }
+        }
+    }
 }

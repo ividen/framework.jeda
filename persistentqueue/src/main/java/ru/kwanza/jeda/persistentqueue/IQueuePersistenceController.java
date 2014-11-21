@@ -16,4 +16,6 @@ public interface IQueuePersistenceController<E extends IPersistableEvent> {
     void delete(Collection<E> result, Node node);
 
     void persist(Collection<E> events, Node node);
+
+    void closePersistentStore(Node node);
 }

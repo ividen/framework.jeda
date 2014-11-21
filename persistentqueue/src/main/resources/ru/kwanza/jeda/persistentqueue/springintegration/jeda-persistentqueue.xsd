@@ -104,6 +104,16 @@
                             </xsd:appinfo>
                         </xsd:annotation>
                     </xsd:attribute>
+                    <xsd:attribute name="clusterService" use="required">
+                        <xsd:annotation>
+                            <xsd:appinfo>
+                                <tool:annotation kind="ref">
+                                    <tool:expected-type
+                                            type="ru.kwanza.jeda.clusterservice.IClusterService"/>
+                                </tool:annotation>
+                            </xsd:appinfo>
+                        </xsd:annotation>
+                    </xsd:attribute>
                 </xsd:extension>
             </xsd:complexContent>
         </xsd:complexType>

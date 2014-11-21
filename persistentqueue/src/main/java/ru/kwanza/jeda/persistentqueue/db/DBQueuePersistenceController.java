@@ -72,4 +72,8 @@ public class DBQueuePersistenceController<E extends IPersistableEvent, R extends
             e.printStackTrace();
         }
     }
+
+    public void closePersistentStore(Node node) {
+
+    }
 }
