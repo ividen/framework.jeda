@@ -13,8 +13,11 @@ import java.io.File;
  */
 public class JEEnvironment extends XAEnvironment {
 
+    private final File envHome;
+
     public JEEnvironment(File envHome, EnvironmentConfig configuration) throws EnvironmentNotFoundException, EnvironmentLockedException {
         super(envHome, configuration);
+        this.envHome = envHome;
     }
 
     @Override
@@ -75,15 +78,18 @@ public class JEEnvironment extends XAEnvironment {
             throw new XAException("Resource closed!");
         }
 
-        if (!super.isSameRM(rm)) {
-            return false;
-        }
-
         if (envImpl == null) {
             return false;
         }
 
-        return true;
+        final JEEnvironment ev = (JEEnvironment) rm;
+
+        if(envHome.equals(ev.envHome)){
+            return true;
+        }
+
+        return false;
+
     }
 
     @Override

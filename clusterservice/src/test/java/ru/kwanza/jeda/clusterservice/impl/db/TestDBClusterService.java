@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import mockit.*;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -10,6 +9,8 @@ import ru.kwanza.jeda.clusterservice.IClusteredComponent;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.ComponentEntity;
 import ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -34,7 +35,7 @@ public class TestDBClusterService  {
     private ApplicationContext context;
 
 
-    @Before()
+    @PostConstruct()
     public void setUp() {
 
         new NonStrictExpectations() {{
@@ -47,6 +48,11 @@ public class TestDBClusterService  {
             dao.findOrCreateNode((ru.kwanza.jeda.clusterservice.impl.db.orm.NodeEntity) any);
             result = currentNode;
         }};
+    }
+
+    @PreDestroy
+    public void destroy(){
+
     }
 
     private void start() {

@@ -27,10 +27,15 @@
         </property>
     </bean>
 
+    <!--<bean id="jtaTransactionManager"-->
+          <!--class="com.atomikos.icatch.jta.AtomikosTransactionManager"-->
+          <!--init-method="init" destroy-method="close">-->
+        <!--<property name="forceShutdown" value="true"/>-->
+    <!--</bean>-->
+
     <bean id="jtaTransactionManager"
-          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
-          init-method="init" destroy-method="close">
-        <property name="forceShutdown" value="true"/>
+          class="com.arjuna.ats.internal.jta.transaction.arjunacore.JBossTransactionManager">
+        <constructor-arg index="0" value="true" type="boolean"/>
     </bean>
 
 

@@ -4,6 +4,7 @@ import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 
+import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 import java.util.HashSet;
@@ -70,7 +71,7 @@ public class JEConnection {
                         transaction.enlistResource(this.getEnvironment());
                         transaction.registerSynchronization(new CleanupAfterCompletion(transaction));
                     } catch (Exception e) {
-                        enlistment.remove(transaction);
+                        delistTransaction(enlistment.remove(transaction),Status.STATUS_NO_TRANSACTION);
                         throw new JEConnectionException(e);
                     }
                 }
@@ -99,6 +100,10 @@ public class JEConnection {
 
     }
 
+    private void delistTransaction(Transaction transaction, int status) {
+        enlistment.remove(transaction);
+    }
+
     private class CleanupAfterCompletion implements Synchronization {
         private Transaction transaction;
 
@@ -110,7 +115,7 @@ public class JEConnection {
         }
 
         public void afterCompletion(int status) {
-            enlistment.remove(transaction);
+            delistTransaction(transaction,status);
         }
     }
 
@@ -126,7 +131,7 @@ public class JEConnection {
         }
 
         public void afterCompletion(int status) {
-            enlistment.remove(transaction);
+            delistTransaction(transaction,status);
             factory.closeConnection(nodeId);
         }
     }
@@ -144,7 +149,6 @@ public class JEConnection {
                 try {
                     transaction.rollback();
                 } catch (Throwable e) {
-//                    e.printStackTrace();
                 }
 
             }

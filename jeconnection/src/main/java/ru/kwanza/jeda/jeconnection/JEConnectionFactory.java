@@ -1,13 +1,12 @@
 package ru.kwanza.jeda.jeconnection;
 
-import ru.kwanza.filelock.FileLockHelper;
 import com.sleepycat.je.Durability;
 import com.sleepycat.je.EnvironmentConfig;
 import com.sleepycat.je.TransactionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.filelock.FileLockHelper;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,11 +141,11 @@ public class JEConnectionFactory {
                     Lock fileLock = FileLockHelper.getFileLock(file.getAbsolutePath());
 
                     try {
-                        if (!fileLock.tryLock(lockingTimeout,TimeUnit.MILLISECONDS)) {
+                        if (!fileLock.tryLock(lockingTimeout, TimeUnit.MILLISECONDS)) {
                             throw new JEConnectionException("Can't lock file!");
                         }
                     } catch (InterruptedException e) {
-                        throw new JEConnectionException("Can't lock file!",e);
+                        throw new JEConnectionException("Can't lock file!", e);
                     }
 
 

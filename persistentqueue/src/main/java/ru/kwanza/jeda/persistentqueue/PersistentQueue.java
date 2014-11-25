@@ -15,7 +15,6 @@ import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.QueueObserverChain;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
-import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -77,7 +76,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         active = false;
         repairableNodes.clear();
         size.set(0);
-//        persistenceController.closePersistentStore(clusterService.getCurrentNode());
+        persistenceController.closePersistentStore(clusterService.getCurrentNode());
     }
 
     public int getMaxSize() {
@@ -102,7 +101,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             } else {
                 clusterService.markRepaired(this, node);
             }
-        }finally {
+        } finally {
             manager.getTransactionManager().commit();
         }
     }
@@ -318,9 +317,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         }
 
         public void afterCompletion(int status) {
-            if (status == Status.STATUS_COMMITTED) {
-                clusterService.markRepaired(PersistentQueue.this, node);
-            }
+            clusterService.markRepaired(PersistentQueue.this, node);
         }
     }
 }

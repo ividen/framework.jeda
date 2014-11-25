@@ -6,7 +6,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <org.springframework.version>3.2.0.RELEASE</org.springframework.version>
-        <aspectj.version>1.5.4</aspectj.version>
+        <aspectj.version>1.7.4</aspectj.version>
         <slf4j.version>1.6.3</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <cglib.version>3.1</cglib.version>
@@ -32,7 +32,7 @@
         <maven.surefire.plugin.version>2.12</maven.surefire.plugin.version>
         <javax.transaction.version>1.1</javax.transaction.version>
         <javax.resource.version>1.5</javax.resource.version>
-        <je.version>5.0.34</je.version>
+        <je.version>6.2.7</je.version>
         <targetJdk>1.6</targetJdk>
     </properties>
 
@@ -63,8 +63,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiller.plugin.version}</version>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
                 <executions>
                     <execution>
@@ -342,13 +342,13 @@
             </dependency>
 
             <dependency>
-                <groupId>aspectj</groupId>
+                <groupId>org.aspectj</groupId>
                 <artifactId>aspectjrt</artifactId>
                 <version>${aspectj.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>aspectj</groupId>
+                <groupId>org.aspectj</groupId>
                 <artifactId>aspectjweaver</artifactId>
                 <version>${aspectj.version}</version>
             </dependency>
@@ -409,11 +409,6 @@
                 <version>${je.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.sleepycat</groupId>
-                <artifactId>jejca</artifactId>
-                <version>${je.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.glassfish.grizzly</groupId>
                 <artifactId>grizzly-framework</artifactId>

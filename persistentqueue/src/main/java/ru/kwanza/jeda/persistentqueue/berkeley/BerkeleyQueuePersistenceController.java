@@ -51,7 +51,7 @@ public class BerkeleyQueuePersistenceController<E extends IPersistableEvent> imp
     }
 
     public String getQueueName() {
-        return BerkeleyQueuePersistenceController.class.getSimpleName() + databaseName;
+        return BerkeleyQueuePersistenceController.class.getSimpleName() +"."+ databaseName;
     }
 
     public Collection<E> load(int count, Node node) {

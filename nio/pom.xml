@@ -77,11 +77,6 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.atomikos</groupId>
-            <artifactId>atomikos-extention</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>
