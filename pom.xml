@@ -49,10 +49,8 @@
     <modules>
         <module>api</module>
         <module>core</module>
-        <module>mock</module>
         <module>clusterservice</module>
         <module>persistentqueue</module>
-        <module>timer</module>
         <module>jeconnection</module>
         <module>nio</module>
         <module>context</module>
