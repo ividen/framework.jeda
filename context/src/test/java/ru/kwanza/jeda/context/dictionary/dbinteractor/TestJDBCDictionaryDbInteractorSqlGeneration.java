@@ -7,7 +7,7 @@ import junit.framework.TestCase;
 public class TestJDBCDictionaryDbInteractorSqlGeneration extends TestCase {
 
     private ContextDictionaryController ctxDictionary = new ContextDictionaryController();
-    private JDBCDictionaryDbInteractor dbInteractor = new JDBCDictionaryDbInteractor();
+    private JDBCDictionaryDbController dbInteractor = new JDBCDictionaryDbController();
 
     public void testInsertSqlFormat() {
         Assert.assertEquals("INSERT INTO ctx_dictionary (name, id) VALUES (?,?)",

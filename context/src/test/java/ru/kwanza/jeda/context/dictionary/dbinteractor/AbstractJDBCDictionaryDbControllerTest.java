@@ -5,11 +5,11 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import java.sql.Connection;
 
-public abstract class AbstractJDBCDictionaryDbInteractorTest extends AbstractDictionaryDbInteractorTest {
+public abstract class AbstractJDBCDictionaryDbControllerTest extends AbstractDictionaryDbControllerTest {
 
     @Override
     protected String getDbInteractorBeanName() {
-        return JDBCDictionaryDbInteractor.class.getName();
+        return JDBCDictionaryDbController.class.getName();
     }
 
     @Override

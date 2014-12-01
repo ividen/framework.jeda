@@ -1,12 +1,12 @@
 package ru.kwanza.jeda.context.springintegration;
 
 import ru.kwanza.jeda.api.IContextController;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbController;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextControllerWithDictionary;
 
 class JDBCBlobContextControllerWithDictFactory extends AbstractJDBCContextControllerFactory {
 
-    private JDBCDictionaryDbInteractor dbInteractor;
+    private JDBCDictionaryDbController dbInteractor;
     private String dictionaryTableName;
     private String dictionaryPropertyColumnName;
     private String dictionaryIdColumnName;
@@ -45,7 +45,7 @@ class JDBCBlobContextControllerWithDictFactory extends AbstractJDBCContextContro
         return JDBCBlobContextControllerWithDictionary.class;
     }
 
-    public void setDbInteractor(JDBCDictionaryDbInteractor dbInteractor) {
+    public void setDbInteractor(JDBCDictionaryDbController dbInteractor) {
         this.dbInteractor = dbInteractor;
     }
 

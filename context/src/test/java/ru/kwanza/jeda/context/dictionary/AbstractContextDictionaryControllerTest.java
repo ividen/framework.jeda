@@ -1,20 +1,17 @@
 package ru.kwanza.jeda.context.dictionary;
 
-import org.dbunit.database.QueryDataSet;
-import org.dbunit.dataset.xml.FlatXmlDataSet;
 import ru.kwanza.autokey.api.IAutoKey;
 import ru.kwanza.autokey.mock.MockAutoKeyImpl;
 import ru.kwanza.dbtool.core.DBTool;
 import ru.kwanza.jeda.context.DBUnitUtil;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.DictionaryDbInteractor;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.DictionaryDbController;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbController;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -30,7 +27,7 @@ public abstract class AbstractContextDictionaryControllerTest extends TestCase {
     protected DBUnitUtil dbUnitUtil;
 
     DBTool dbTool;
-    DictionaryDbInteractor dbInteractor;
+    DictionaryDbController dbInteractor;
 
     protected ContextDictionaryController dictionaryController;
 
@@ -49,7 +46,7 @@ public abstract class AbstractContextDictionaryControllerTest extends TestCase {
         IAutoKey autoKey = ctx.getBean("autokey.IAutoKey", IAutoKey.class);
         ((MockAutoKeyImpl) autoKey).resetSequences();
 
-        dbInteractor = ctx.getBean("ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor", JDBCDictionaryDbInteractor.class);
+        dbInteractor = ctx.getBean("ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor", JDBCDictionaryDbController.class);
         dictionaryController = new ContextDictionaryController(dbInteractor, "ctx_dictionary", "name", "id");
     }
 

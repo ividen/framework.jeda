@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.dictionary.dbinteractor;
 
-public class MSSQLDictionaryDbInteractorTest extends AbstractJDBCDictionaryDbInteractorTest {
+public class MSSQLDictionaryDbControllerTest extends AbstractJDBCDictionaryDbControllerTest {
 
     @Override
     protected String getContextFileName() {

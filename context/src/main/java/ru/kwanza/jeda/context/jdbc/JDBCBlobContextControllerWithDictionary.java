@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.context.jdbc;
 
 import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbController;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ public class JDBCBlobContextControllerWithDictionary extends JDBCBlobContextCont
     public JDBCBlobContextControllerWithDictionary() {
     }
 
-    public JDBCBlobContextControllerWithDictionary(JDBCDictionaryDbInteractor dbInteractor,
+    public JDBCBlobContextControllerWithDictionary(JDBCDictionaryDbController dbInteractor,
                                                    String dictionaryTableName,
                                                    String dictionaryPropertyColumnName,
                                                    String dictionaryIdColumnName) {

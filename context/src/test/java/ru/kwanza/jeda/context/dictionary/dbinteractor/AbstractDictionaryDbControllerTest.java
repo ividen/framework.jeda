@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AbstractDictionaryDbInteractorTest extends TestCase {
+public abstract class AbstractDictionaryDbControllerTest extends TestCase {
 
     protected static final String[] PROPERTY_NAMES = new String[]{"prop1", "prop2", "prop3"};
     protected static final String DICTIONARY_TABLE_NAME = "ctx_dictionary";
@@ -18,7 +18,7 @@ public abstract class AbstractDictionaryDbInteractorTest extends TestCase {
     protected static final String DICTIONARY_NAME_COLUMN = "id";
 
     protected ApplicationContext ctx;
-    protected DictionaryDbInteractor dbInteractor;
+    protected DictionaryDbController dbInteractor;
     protected ContextDictionaryController dictionaryController;
 
     protected abstract String getContextFileName();
@@ -27,7 +27,7 @@ public abstract class AbstractDictionaryDbInteractorTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextFileName(), this.getClass());
-        dbInteractor = ctx.getBean(getDbInteractorBeanName(), DictionaryDbInteractor.class);
+        dbInteractor = ctx.getBean(getDbInteractorBeanName(), DictionaryDbController.class);
     }
 
     @Override

@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextController;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbController;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -11,7 +10,7 @@ import org.w3c.dom.Element;
 
 public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobContextControllerParser {
 
-    private static final String DB_INTERACTOR = "dbInteractor";
+    private static final String DB_INTERACTOR = "dictionaryController";
     private static final String DICT_TABLE_NAME = "dictionaryTableName";
 
     @Override
@@ -21,7 +20,7 @@ public class BerkeleyBlobContextControllerWithDictParser extends BerkeleyBlobCon
 
         definitionBuilder.addPropertyReference(MANAGER, "jeda.IJedaManager");
 
-        definitionBuilder.addPropertyReference(DB_INTERACTOR, BerkeleyDictionaryDbInteractor.class.getName());
+        definitionBuilder.addPropertyReference(DB_INTERACTOR, BerkeleyDictionaryDbController.class.getName());
 
         setSimplePropertyValue(definitionBuilder, element, DICT_TABLE_NAME);
 

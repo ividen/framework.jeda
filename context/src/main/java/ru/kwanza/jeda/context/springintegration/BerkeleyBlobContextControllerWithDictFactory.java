@@ -2,11 +2,11 @@ package ru.kwanza.jeda.context.springintegration;
 
 import ru.kwanza.jeda.api.IContextController;
 import ru.kwanza.jeda.context.berkeley.BerkeleyBlobContextControllerWithDictionary;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbController;
 
 class BerkeleyBlobContextControllerWithDictFactory extends AbstractBerkeleyBlobContextControllerFactory {
 
-    private BerkeleyDictionaryDbInteractor dbInteractor;
+    private BerkeleyDictionaryDbController dbInteractor;
     private String dictionaryTableName;
 
     public IContextController getObject() throws Exception {
@@ -36,7 +36,7 @@ class BerkeleyBlobContextControllerWithDictFactory extends AbstractBerkeleyBlobC
         return BerkeleyBlobContextControllerWithDictionary.class;
     }
 
-    public void setDbInteractor(BerkeleyDictionaryDbInteractor dbInteractor) {
+    public void setDbInteractor(BerkeleyDictionaryDbController dbInteractor) {
         this.dbInteractor = dbInteractor;
     }
 

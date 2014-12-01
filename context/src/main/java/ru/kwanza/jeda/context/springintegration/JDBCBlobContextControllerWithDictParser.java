@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.context.springintegration;
 
-import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.JDBCDictionaryDbController;
 import ru.kwanza.jeda.context.jdbc.JDBCBlobContextControllerWithDictionary;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -14,14 +13,14 @@ class JDBCBlobContextControllerWithDictParser extends JDBCBlobContextControllerP
     private static final String DICT_TABLE_NAME = "dictionaryTableName";
     private static final String DICT_PROPERTY_COLUMN_NAME = "dictionaryPropertyColumnName";
     private static final String DICT_ID_COLUMN_NAME = "dictionaryIdColumnName";
-    private static final String DB_INTERACTOR = "dbInteractor";
+    private static final String DB_INTERACTOR = "dictionaryController";
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(JDBCBlobContextControllerWithDictFactory.class);
 
-        definitionBuilder.addPropertyReference(DB_INTERACTOR, JDBCDictionaryDbInteractor.class.getName());
+        definitionBuilder.addPropertyReference(DB_INTERACTOR, JDBCDictionaryDbController.class.getName());
 
         addSimplePropertyValue(definitionBuilder, element, DICT_TABLE_NAME);
         addSimplePropertyValue(definitionBuilder, element, DICT_PROPERTY_COLUMN_NAME);

@@ -3,6 +3,7 @@ package ru.kwanza.jeda.context.berkeley;
 import ru.kwanza.dbtool.core.VersionGenerator;
 import ru.kwanza.jeda.api.ContextStoreException;
 import ru.kwanza.jeda.api.IContextController;
+import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.context.MapContextImpl;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.txn.api.Transactional;
@@ -12,7 +13,6 @@ import com.sleepycat.je.*;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static ru.kwanza.jeda.clusterservice.old.ClusterService.getNodeId;
 import static ru.kwanza.toolbox.SerializationHelper.bytesToObject;
 import static ru.kwanza.toolbox.SerializationHelper.objectToBytes;
 
@@ -27,9 +27,18 @@ public class BerkeleyBlobContextController implements IContextController<String,
     private VersionGenerator versionGenerator;
 
     protected String terminator = null;
+    private IClusterService service;
 
     public MapContextImpl createEmptyValue(String contextId) {
         return new MapContextImpl(contextId, terminator, null);
+    }
+
+    public IClusterService getService() {
+        return service;
+    }
+
+    public void setService(IClusterService service) {
+        this.service = service;
     }
 
     @Transactional(value = TransactionalType.REQUIRED, applicationExceptions = ContextStoreException.class)
@@ -231,8 +240,7 @@ public class BerkeleyBlobContextController implements IContextController<String,
     }
 
     private Database getDatabase() {
-        int nodeId = (int) getNodeId();
-        return connectionFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
+        return connectionFactory.getConnection(service.getCurrentNode().getId()).openDatabase(databaseName, databaseConfig);
     }
 
     private ContextKey getCtxKey(MapContextImpl ctx) {

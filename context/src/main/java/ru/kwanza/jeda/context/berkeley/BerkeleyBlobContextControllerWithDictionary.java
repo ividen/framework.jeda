@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.context.berkeley;
 
 import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
-import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class BerkeleyBlobContextControllerWithDictionary extends BerkeleyBlobCon
     public BerkeleyBlobContextControllerWithDictionary() {
     }
 
-    public BerkeleyBlobContextControllerWithDictionary(BerkeleyDictionaryDbInteractor dbInteractor, String dictionaryTableName) {
+    public BerkeleyBlobContextControllerWithDictionary(BerkeleyDictionaryDbController dbInteractor, String dictionaryTableName) {
         dictionaryController = new ContextDictionaryController(dbInteractor, dictionaryTableName, null, null);
     }
 

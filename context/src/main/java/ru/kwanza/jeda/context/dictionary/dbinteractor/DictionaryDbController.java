@@ -4,7 +4,7 @@ import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 
 import java.util.Map;
 
-public interface DictionaryDbInteractor {
+public interface DictionaryDbController {
 
     Long storeNewProperty(String propertyName, ContextDictionaryController dictCtrl);
 

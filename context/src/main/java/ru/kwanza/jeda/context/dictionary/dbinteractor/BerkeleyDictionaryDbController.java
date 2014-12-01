@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.dictionary.dbinteractor;
 
-import ru.kwanza.jeda.clusterservice.old.ClusterService;
+import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import ru.kwanza.jeda.jeconnection.JEConnectionFactory;
 import ru.kwanza.toolbox.SerializationHelper;
@@ -18,15 +18,25 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static ru.kwanza.toolbox.SerializationHelper.bytesToLong;
 
-public class BerkeleyDictionaryDbInteractor implements DictionaryDbInteractor {
+public class BerkeleyDictionaryDbController implements DictionaryDbController {
 
-    private static final Logger log = LoggerFactory.getLogger(BerkeleyDictionaryDbInteractor.class);
+    private static final Logger log = LoggerFactory.getLogger(BerkeleyDictionaryDbController.class);
     private static final DatabaseConfig databaseConfig = new DatabaseConfig().setAllowCreate(true).setTransactional(true);
     private static final CursorConfig cursorConfig = new CursorConfig().setReadCommitted(true);
 
     private AtomicLong counter = new AtomicLong(0l);
 
     private JEConnectionFactory jeFactory;
+
+    private IClusterService service;
+
+    public IClusterService getService() {
+        return service;
+    }
+
+    public void setService(IClusterService service) {
+        this.service = service;
+    }
 
     @Transactional(value = TransactionalType.REQUIRES_NEW)
     public Long storeNewProperty(String propertyName, ContextDictionaryController dictCtrl) {
@@ -102,7 +112,7 @@ public class BerkeleyDictionaryDbInteractor implements DictionaryDbInteractor {
     }
 
     private Database getDatabase(String databaseName) {
-        int nodeId = (int) ClusterService.getNodeId();
+        int nodeId = service.getCurrentNode().getId();
         return jeFactory.getConnection(nodeId).openDatabase(databaseName, databaseConfig);
     }
 

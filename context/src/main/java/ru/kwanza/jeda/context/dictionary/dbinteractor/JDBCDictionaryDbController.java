@@ -15,7 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-public class JDBCDictionaryDbInteractor implements DictionaryDbInteractor {
+public class JDBCDictionaryDbController implements DictionaryDbController {
 
     private static final String SEQUENCE_NAME = MapContextImpl.class.getName();
 

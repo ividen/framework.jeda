@@ -5,7 +5,7 @@ import ru.kwanza.jeda.context.dictionary.ContextDictionaryController;
 import java.io.File;
 import java.io.IOException;
 
-public class TestBerkeleyDictionaryDbInteractor extends AbstractDictionaryDbInteractorTest {
+public class TestBerkeleyDictionaryDbInteractor extends AbstractDictionaryDbControllerTest {
 
     @Override
     protected String getContextFileName() {
@@ -14,7 +14,7 @@ public class TestBerkeleyDictionaryDbInteractor extends AbstractDictionaryDbInte
 
     @Override
     protected String getDbInteractorBeanName() {
-        return BerkeleyDictionaryDbInteractor.class.getName();
+        return BerkeleyDictionaryDbController.class.getName();
     }
 
     @Override

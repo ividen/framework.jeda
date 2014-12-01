@@ -5,7 +5,7 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor"
-          class="ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbInteractor">
+          class="ru.kwanza.jeda.context.dictionary.dbinteractor.BerkeleyDictionaryDbController">
         <property name="jeFactory" ref="jeConnectionFactory"/>
     </bean>
 

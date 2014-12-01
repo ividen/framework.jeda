@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.context.dictionary;
 
-import ru.kwanza.jeda.context.dictionary.dbinteractor.DictionaryDbInteractor;
+import ru.kwanza.jeda.context.dictionary.dbinteractor.DictionaryDbController;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ContextDictionaryController {
 
-    public DictionaryDbInteractor dbInteractor;
+    public DictionaryDbController dictionaryController;
     private ContextDictionaryCache dictionaryCache = new ContextDictionaryCache();
 
     private String dictionaryTableName = "ctx_dictionary";
@@ -18,16 +18,16 @@ public class ContextDictionaryController {
     public ContextDictionaryController() {
     }
 
-    public ContextDictionaryController(DictionaryDbInteractor dbInteractor,
+    public ContextDictionaryController(DictionaryDbController dictionaryController,
                                        String dictionaryTableName,
                                        String dictionaryPropertyColumnName,
                                        String dictionaryIdColumnName) {
 
-        this.dbInteractor = dbInteractor;
+        this.dictionaryController = dictionaryController;
         this.dictionaryTableName = dictionaryTableName;
         this.dictionaryPropertyColumnName = dictionaryPropertyColumnName;
         this.dictionaryIdColumnName = dictionaryIdColumnName;
-        dictionaryCache.putIdByName(dbInteractor.readAllDictionary(this));
+        dictionaryCache.putIdByName(dictionaryController.readAllDictionary(this));
     }
 
     public Map<String, Long> getPropertyIds(final Collection<String> propertyNames) {
@@ -65,7 +65,7 @@ public class ContextDictionaryController {
     }
 
     private Long readIdFromDb(String propertyName) {
-        Long id = dbInteractor.readIdFromDb(propertyName, this);
+        Long id = dictionaryController.readIdFromDb(propertyName, this);
         if (id != null) {
             dictionaryCache.put(propertyName, id);
         }
@@ -73,7 +73,7 @@ public class ContextDictionaryController {
     }
 
     private String readNameFromDb(Long propertyId) {
-        String name = dbInteractor.readNameFromDb(propertyId, this);
+        String name = dictionaryController.readNameFromDb(propertyId, this);
         if (name != null) {
             dictionaryCache.put(name, propertyId);
         }
@@ -81,7 +81,7 @@ public class ContextDictionaryController {
     }
 
     public Long storeNewProperty(String propertyName) {
-        Long id = dbInteractor.storeNewProperty(propertyName, this);
+        Long id = dictionaryController.storeNewProperty(propertyName, this);
         if (id != null) {
             dictionaryCache.put(propertyName, id);
         }
