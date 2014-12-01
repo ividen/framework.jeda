@@ -1,11 +1,5 @@
 package ru.kwanza.jeda.persistentqueue.springintegration;
 
-import ru.kwanza.jeda.api.internal.IQueue;
-import ru.kwanza.jeda.core.springintegration.CustomBeanDefinitionParserDelegate;
-import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
-import ru.kwanza.jeda.persistentqueue.old.IQueuePersistenceController;
-import ru.kwanza.jeda.persistentqueue.old.PersistentQueue;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.NamespaceHandler;
@@ -14,6 +8,12 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
+import ru.kwanza.jeda.api.internal.IQueue;
+import ru.kwanza.jeda.core.springintegration.CustomBeanDefinitionParserDelegate;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
+import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
+import ru.kwanza.jeda.persistentqueue.IQueuePersistenceController;
+import ru.kwanza.jeda.persistentqueue.PersistentQueue;
 
 import java.util.List;
 
