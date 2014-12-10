@@ -15,7 +15,6 @@
         <junit.version>4.10</junit.version>
         <jmockit.version>1.13</jmockit.version>
         <dbunit.version>2.5.0</dbunit.version>
-        <txn.version>1.0</txn.version>
         <dbtool.version>1.1-SNAPSHOT</dbtool.version>
         <autokey.version>1.0</autokey.version>
         <filelock.version>1.0</filelock.version>
@@ -369,12 +368,6 @@
                 <artifactId>commons-dbcp</artifactId>
                 <version>${commons-dbcp.version}</version>
                 <scope>test</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>ru.kwanza.txn</groupId>
-                <artifactId>txn</artifactId>
-                <version>${txn.version}</version>
             </dependency>
 
             <dependency>

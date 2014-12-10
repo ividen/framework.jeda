@@ -73,11 +73,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
         </dependency>

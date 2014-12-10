@@ -69,11 +69,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>ru.kwanza.autokey</groupId>
             <artifactId>autokey</artifactId>
         </dependency>
