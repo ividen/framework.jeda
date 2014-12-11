@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.core.resourcecontroller;
 
-import ru.kwanza.jeda.api.internal.AbstractResourceController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.api.internal.AbstractResourceController;
 
 /**
  * @author Guzanov Alexander
@@ -14,16 +14,21 @@ public class FixedBatchSizeResourceController extends AbstractResourceController
     private ThroughputRateHelper throughputRateHelper;
     private volatile int batchSize;
     private volatile int threadCount;
-    private int maxThreadCount = Runtime.getRuntime().availableProcessors();
+    private int maxThreadCount;
     private RateAdjustInfo adjustInfo;
     private long waitForFillingTimeout;
 
-    public FixedBatchSizeResourceController(int batchSize) {
+    public FixedBatchSizeResourceController(int batchSize, int maxThreadCount) {
         this.batchSize = batchSize;
         this.adjustInfo = new RateAdjustInfo(1000, 1000);
         this.inputRateHelper = new InputRateHelper(this.adjustInfo);
         this.throughputRateHelper = new ThroughputRateHelper(this.adjustInfo);
         this.waitForFillingTimeout = -1;
+        this.maxThreadCount = maxThreadCount;
+    }
+
+    public FixedBatchSizeResourceController(int batchSize) {
+        this(batchSize, Runtime.getRuntime().availableProcessors());
     }
 
     public final void throughput(int count, int batchSize, long millis, boolean success) {
@@ -107,10 +112,10 @@ public class FixedBatchSizeResourceController extends AbstractResourceController
     private void traceState(int batchSize) {
         if (logger.isTraceEnabled()) {
             logger.trace("Stage {} , batchSize= {}, input={}, thoughput={},"
-                    + " realThroughput={}, queueSize={} , threadCount={}",
+                            + " realThroughput={}, queueSize={} , threadCount={}",
                     new Object[]{getStage().getName(), batchSize, inputRateHelper.getRate(),
-                        throughputRateHelper.getRate(), throughputRateHelper.getRealRate(),
-                        getStage().getQueue().getEstimatedCount(), this.threadCount});
+                            throughputRateHelper.getRate(), throughputRateHelper.getRealRate(),
+                            getStage().getQueue().getEstimatedCount(), this.threadCount});
         }
     }
 }
