@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ComponentRepository {
     private ConcurrentMap<String, IClusteredComponent> components = new ConcurrentHashMap<String, IClusteredComponent>();
+    private ConcurrentMap<String, IClusteredComponent> startedComponents = new ConcurrentHashMap<String, IClusteredComponent>();
     private ConcurrentMap<String, ComponentEntry> activeComponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, ComponentEntry> passiveCoomponents = new ConcurrentHashMap<String, ComponentEntry>();
     private ConcurrentMap<String, AlienComponent> alienComponent = new ConcurrentHashMap<String, AlienComponent>();
@@ -36,9 +37,16 @@ public class ComponentRepository {
     public Map<String, IClusteredComponent> getActiveComponents() {
         return FieldHelper.getValueFieldMap(activeComponents, ComponentEntry.componentField);
     }
+    public Map<String, IClusteredComponent> getStartedComponents() {
+        return Collections.unmodifiableMap(startedComponents);
+    }
 
     public boolean isActive(String name) {
         return activeComponents.containsKey(name);
+    }
+
+    public boolean isStarted(String name) {
+        return startedComponents.containsKey(name);
     }
 
     public Map<String, IClusteredComponent> getPassiveComponents() {
@@ -69,6 +77,10 @@ public class ComponentRepository {
         activeComponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
 
+    public void addStartedComponent(IClusteredComponent component) {
+        startedComponents.put(component.getName(), component );
+    }
+
     public void addPassiveComponent(ComponentEntity componentEntity) {
         passiveCoomponents.put(componentEntity.getName(), new ComponentEntry(components.get(componentEntity.getName()), componentEntity));
     }
@@ -87,6 +99,10 @@ public class ComponentRepository {
 
     public boolean removeActiveComponent(String name) {
         return activeComponents.remove(name) != null;
+    }
+
+    public boolean removeStartedComponent(String name) {
+        return startedComponents.remove(name) != null;
     }
 
     public boolean removePassiveComponent(String name) {

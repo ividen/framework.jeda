@@ -9,6 +9,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * //todo aguzanov переделать на ScheduleExecutorService
+ *
  * @author Guzanov Alexander
  */
 class WaitingForBatchFilling {

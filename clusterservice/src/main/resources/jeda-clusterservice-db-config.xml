@@ -27,9 +27,8 @@
 
     <bean class="ru.kwanza.jeda.clusterservice.impl.db.WorkerController">
         <constructor-arg index="0" value="${jeda.clusterservice.worker.threadCount:10}"/>
-        <constructor-arg index="1" value="${jeda.clusterservice.worker.attemptCount:10}"/>
-        <constructor-arg index="2" value="${jeda.clusterservice.worker.attemptInterval:5000}"/>
-        <constructor-arg index="3" value="${jeda.clusterservice.worker.keepAlive:60000}"/>
+        <constructor-arg index="1" value="${jeda.clusterservice.worker.attemptInterval:5000}"/>
+        <constructor-arg index="2" value="${jeda.clusterservice.worker.keepAlive:60000}"/>
     </bean>
 
 </beans>

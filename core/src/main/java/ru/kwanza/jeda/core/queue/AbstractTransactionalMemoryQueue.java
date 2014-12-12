@@ -100,7 +100,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
 
     protected void doPut(Collection<E> events) throws SinkException.Clogged {
         Tx tx = getCurrentTx();
-
+        //todo aguzanov txPuts: volatile vs AtomicInteger
         int s = size.get() + getTxPutsCount();
         if (events.size() + s > maxSize) {
             throw new SinkException.Clogged("Sink maxSize=" + maxSize
@@ -119,6 +119,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     }
 
     protected Collection<E> doTake(int count) {
+        //todo aguzanov txTakes: volatile vs AtomicInteger
         if (size() - getTxTakesCount() == 0) {
             return null;
         }
@@ -165,7 +166,9 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         if (tx == null) {
             int delta = 0;
             int value = 0;
+            //todo aguzanov цилкы можно оптимизировать, учитывая, что
             for (E e : events) {
+                //todo aguzanov review: в силу того, что мы находимся под putLock - size, может только уменьшится поэтому условие верное
                 if (size() + getTxPutsCount() < maxSize) {
                     addToTail(e);
                     value = size.incrementAndGet();

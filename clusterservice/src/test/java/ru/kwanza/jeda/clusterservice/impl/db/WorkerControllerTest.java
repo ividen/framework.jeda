@@ -1,7 +1,10 @@
 package ru.kwanza.jeda.clusterservice.impl.db;
 
 import junit.framework.Assert;
-import mockit.*;
+import mockit.Deencapsulation;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +13,7 @@ import ru.kwanza.jeda.clusterservice.Node;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -21,7 +25,7 @@ public class WorkerControllerTest {
 
     @Before
     public void init() {
-        test = new WorkerController(5, 10, 20, 100);
+        test = new WorkerController(5, 20, 100);
 
         test.init();
     }
@@ -33,7 +37,6 @@ public class WorkerControllerTest {
 
     @Test
     public void testParams() {
-        Assert.assertEquals(10, test.getAttemptCount());
         Assert.assertEquals(20, test.getAttemptInterval());
         Assert.assertEquals(5, test.getThreadCount());
         Assert.assertEquals(100, test.getKeepAlive());
@@ -124,6 +127,88 @@ public class WorkerControllerTest {
         Deencapsulation.setField(test, "attemptInterval", 10000000);
         test.startComponent("1_component_1", mockUp.getMockInstance());
         Assert.assertTrue(latch.await(10000, TimeUnit.MILLISECONDS));
+        test.destroy();
+    }
+
+
+    @Test
+    public void testStopingAfterStarting() throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch waitingStopLatch = new CountDownLatch(1);
+        final CountDownLatch stopLatch = new CountDownLatch(1);
+        final MockUp<IClusteredComponent> mockUp = new MockUp<IClusteredComponent>() {
+            @Mock
+            private String getName() {
+                return "component_1";
+            }
+
+            @Mock(invocations = 1)
+            public void handleStart() {
+                startLatch.countDown();
+                try {
+                    waitingStopLatch.await(10000, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Mock(invocations = 1)
+            public void handleStop() {
+                stopLatch.countDown();
+            }
+        };
+
+        Deencapsulation.setField(test, "attemptInterval", 10000000);
+        test.startComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(startLatch.await(10000, TimeUnit.MILLISECONDS));
+        test.stopComponent("1_component_1", mockUp.getMockInstance());
+        waitingStopLatch.countDown();
+        Assert.assertTrue(stopLatch.await(10000, TimeUnit.MILLISECONDS));
+        test.destroy();
+    }
+
+
+    @Test
+    public void testStartingAfterStopping() throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch secondStarting = new CountDownLatch(1);
+        final CountDownLatch waitingStopLatch = new CountDownLatch(1);
+        final CountDownLatch stopLatch = new CountDownLatch(1);
+        final AtomicInteger iteration = new AtomicInteger(0);
+        final MockUp<IClusteredComponent> mockUp = new MockUp<IClusteredComponent>() {
+            @Mock
+            private String getName() {
+                return "component_1";
+            }
+
+            @Mock(invocations = 2)
+            public void handleStart() {
+                if(iteration.compareAndSet(0,1)) {
+                    startLatch.countDown();
+                    try {
+                        waitingStopLatch.await(10000, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }else{
+                    secondStarting.countDown();
+                }
+            }
+
+            @Mock(invocations = 1)
+            public void handleStop() {
+                stopLatch.countDown();
+            }
+        };
+
+        Deencapsulation.setField(test, "attemptInterval", 10000000);
+        test.startComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(startLatch.await(10000, TimeUnit.MILLISECONDS));
+        test.stopComponent("1_component_1", mockUp.getMockInstance());
+        waitingStopLatch.countDown();
+        Assert.assertTrue(stopLatch.await(10000, TimeUnit.MILLISECONDS));
+        test.startComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(secondStarting.await(10000, TimeUnit.MILLISECONDS));
         test.destroy();
     }
 
@@ -241,6 +326,51 @@ public class WorkerControllerTest {
         test.startComponent("1_component_1", mockUp.getMockInstance());
         Assert.assertTrue(latch1.await(10000, TimeUnit.MILLISECONDS));
         test.stopComponent("1_component_1", mockUp.getMockInstance());
+    }
+
+
+    @Test
+    public void tesNoStartingIfNotStopped() throws InterruptedException {
+        final CountDownLatch latch1 = new CountDownLatch(1);
+        final CountDownLatch latch2 = new CountDownLatch(1);
+        final CountDownLatch latch3 = new CountDownLatch(1);
+        final CountDownLatch latch4 = new CountDownLatch(1);
+        final MockUp<IClusteredComponent> mockUp = new MockUp<IClusteredComponent>() {
+            @Mock
+            private String getName() {
+                return "component_1";
+            }
+
+            @Mock(invocations = 1)
+            public void handleStart() {
+                latch1.countDown();
+            }
+
+            @Mock(invocations = 1)
+            public void handleStop() {
+                if(latch2.getCount()>0) {
+                    latch2.countDown();
+                    try {
+                        Assert.assertTrue(latch3.await(10000, TimeUnit.MILLISECONDS));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    latch4.countDown();
+                    throw new RuntimeException();
+                }
+
+            }
+
+        };
+
+        test.startComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(latch1.await(10000, TimeUnit.MILLISECONDS));
+        test.stopComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(latch2.await(10000, TimeUnit.MILLISECONDS));
+        latch3.countDown();
+        test.startComponent("1_component_1", mockUp.getMockInstance());
+        Assert.assertTrue(latch4.await(10000, TimeUnit.MILLISECONDS));
     }
 
     @Test

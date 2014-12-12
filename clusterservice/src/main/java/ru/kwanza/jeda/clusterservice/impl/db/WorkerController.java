@@ -5,19 +5,17 @@ import ru.kwanza.jeda.clusterservice.Node;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ru.kwanza.jeda.clusterservice.impl.db.DBClusterService.logger;
+import static ru.kwanza.jeda.clusterservice.impl.db.WorkerController.Status.*;
 
 /**
  * @author Alexander Guzanov
  */
 public class WorkerController {
-    private int attemptCount;
     private int attemptInterval;
     private int threadCount;
     private int keepAlive;
@@ -25,18 +23,13 @@ public class WorkerController {
     private ExecutorService workerExecutor;
     private AtomicLong counter = new AtomicLong(0);
 
-    private final Map<String, ChangeComponentStatusTask> tasks = new HashMap<String, ChangeComponentStatusTask>();
+    private final ConcurrentMap<String, AbstractTask> tasks = new ConcurrentHashMap<String, AbstractTask>();
 
 
-    public WorkerController(int threadCount, int attemptCount, int attemptInterval, int keepAlive) {
+    public WorkerController(int threadCount, int attemptInterval, int keepAlive) {
         this.threadCount = threadCount;
-        this.attemptCount = attemptCount;
         this.attemptInterval = attemptInterval;
         this.keepAlive = keepAlive;
-    }
-
-    public int getAttemptCount() {
-        return attemptCount;
     }
 
     public int getAttemptInterval() {
@@ -52,50 +45,42 @@ public class WorkerController {
     }
 
     public void startComponent(String id, IClusteredComponent component) {
-        ChangeComponentStatusTask task;
-        synchronized (tasks) {
-            task = tasks.get(id);
-            if (task == null) {
-                task = new ChangeComponentStatusTask(id, component);
-                tasks.put(id, task);
-            }
-        }
-        task.scheduleStart();
+        createComponentTask(id, component).scheduleStart();
     }
 
     public void stopComponent(String id, IClusteredComponent component) {
-        ChangeComponentStatusTask task = tasks.get(id);
-        synchronized (tasks) {
-            if (task == null) {
-                task = new ChangeComponentStatusTask(id, component);
-                tasks.put(id, task);
-            }
-        }
-        task.scheduleStop();
+        createComponentTask(id, component).scheduleStop();
     }
 
     public void startRepair(String id, IClusteredComponent component, Node node) {
-        ChangeComponentStatusTask task = tasks.get(id);
-        synchronized (tasks) {
-            if (task == null) {
-                task = new ChangeComponentRepairStatusTask(id, node, component);
-                tasks.put(id, task);
-            }
-        }
-        task.scheduleStart();
+        createComponentRepairTask(id, component, node).scheduleStart();
     }
 
     public void stopRepair(String id, IClusteredComponent component, Node node) {
-        ChangeComponentStatusTask task = tasks.get(id);
-        synchronized (tasks) {
-            if (task == null) {
-                task = new ChangeComponentRepairStatusTask(id, node, component);
-                tasks.put(id, task);
-            }
-        }
-        task.scheduleStop();
+        createComponentRepairTask(id, component, node).scheduleStop();
     }
 
+    private AbstractTask createComponentRepairTask(String id, IClusteredComponent component, Node node) {
+        AbstractTask task = tasks.get(id);
+        if (task == null) {
+            task = new ChangeComponentRepairStatusTask(id, node, component);
+            if (tasks.putIfAbsent(id, task) != null) {
+                task = tasks.get(id);
+            }
+        }
+        return task;
+    }
+
+    private AbstractTask createComponentTask(String id, IClusteredComponent component) {
+        AbstractTask task = tasks.get(id);
+        if (task == null) {
+            task = new ChangeComponentStatusTask(id, component);
+            if (tasks.putIfAbsent(id, task) != null) {
+                task = tasks.get(id);
+            }
+        }
+        return task;
+    }
 
     @PostConstruct
     public void init() {
@@ -115,12 +100,18 @@ public class WorkerController {
     }
 
 
-    public abstract class AbstractTask extends ReentrantLock implements Runnable {
+    public enum Status {
+        SCHEDULE_START,
+        SCHEDULE_STOP,
+        STARTING,
+        STOPPING,
+        COMPLETE
+    }
+
+    public abstract class AbstractTask implements Runnable {
         protected final IClusteredComponent component;
         private final String id;
-        private volatile int start_or_stop;
-        private volatile boolean complete = false;
-        private volatile boolean scheduled = false;
+        private AtomicReference<Status> status = new AtomicReference<Status>();
 
 
         public AbstractTask(String id, IClusteredComponent component) {
@@ -129,16 +120,11 @@ public class WorkerController {
         }
 
         public void run() {
-            boolean success = false;
-            int attemptCount = WorkerController.this.attemptCount;
-            while (attemptCount > 0 && !success) {
+            while (isComplete()) {
                 try {
                     work();
-                    success = true;
                 } catch (Throwable ex) {
                     logger.error("Error executing task for component " + component.getName(), ex);
-
-                    attemptCount--;
                     try {
                         Thread.sleep(attemptInterval);
                     } catch (InterruptedException e) {
@@ -147,27 +133,43 @@ public class WorkerController {
                     continue;
                 }
             }
+        }
 
-            if (!success) {
-                workerExecutor.execute(this);
-            } else {
-                synchronized (tasks) {
-                    tasks.remove(id);
-                }
-            }
+        private boolean isComplete() {
+            return status.get() != COMPLETE;
         }
 
         protected void work() {
-            lock();
+            if (changeStatus(SCHEDULE_STOP, STOPPING)) {
+                stopping();
+            } else if (changeStatus(SCHEDULE_START, STARTING)) {
+                starting();
+            } else {
+                logger.debug("Skip working for {}, current status", this.component.getName(), status.get());
+            }
+        }
+
+        private void starting() {
             try {
-                if (start_or_stop > 0) {
-                    handleStart();
-                } else if (start_or_stop < 0) {
-                    handleStop();
+                handleStart();
+                completeIf(STARTING);
+            } catch (Throwable ex) {
+                if (changeStatus(STARTING, SCHEDULE_START)) {
+                    throw ex;
                 }
-                complete = true;
-            } finally {
-                unlock();
+                completeIf(SCHEDULE_STOP);
+            }
+        }
+
+        private void stopping() {
+            try {
+                handleStop();
+                completeIf(STOPPING);
+            } catch (Throwable ex) {
+                if (changeStatus(STOPPING, SCHEDULE_STOP)) {
+                    throw ex;
+                }
+                completeIf(SCHEDULE_START);
             }
         }
 
@@ -176,36 +178,46 @@ public class WorkerController {
         protected abstract void handleStart();
 
         void scheduleStart() {
-            lock();
-            try {
-                if (start_or_stop <= 0) {
-                    start_or_stop = start_or_stop + 1;
-                    trySchedule();
-                }
-            } finally {
-                unlock();
+            completeIf(SCHEDULE_STOP);
+
+            if (changeStatus(null, SCHEDULE_START)) {
+                schedule();
+            } else if (changeStatus(STOPPING, SCHEDULE_START)) {
+                logger.debug("Component {} is stopping now . Schedule it for start",id);
+            } else if (changeStatus(COMPLETE, SCHEDULE_START)) {
+                tasks.put(id, this);
+                schedule();
+                logger.debug("Component  {} was completed . Schedule it for start",id);
             }
         }
 
         void scheduleStop() {
-            lock();
-            try {
-                if (start_or_stop >= 0) {
-                    start_or_stop = start_or_stop - 1;
-                    trySchedule();
-                }
-            } finally {
-                unlock();
+            completeIf(SCHEDULE_START);
+
+            if (changeStatus(null, SCHEDULE_STOP)) {
+                schedule();
+            } else if (changeStatus(STARTING, SCHEDULE_STOP)) {
+                logger.debug("Component {} is starting now. Schedule it for start",id);
+            } else if (changeStatus(COMPLETE, SCHEDULE_STOP)) {
+                tasks.put(id, this);
+                schedule();
+                logger.debug("Component {} was completed . Schedule it for stop",id);
             }
         }
 
-        void trySchedule() {
-            if (complete || !scheduled) {
-                scheduled = true;
-                workerExecutor.execute(this);
+        private void schedule() {
+            workerExecutor.execute(this);
+        }
+
+        private void completeIf(Status status) {
+            if (this.status.compareAndSet(status, COMPLETE)) {
+                tasks.remove(id);
             }
         }
 
+        private boolean changeStatus(Status from, Status to) {
+            return status.compareAndSet(from, to);
+        }
     }
 
     private class ChangeComponentStatusTask extends AbstractTask {

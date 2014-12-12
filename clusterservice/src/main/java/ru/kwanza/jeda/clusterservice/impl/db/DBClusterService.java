@@ -171,6 +171,10 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
         return repository.getPassiveComponents();
     }
 
+    public Map<String, IClusteredComponent> getStartedComponents() {
+        return repository.getStartedComponents();
+    }
+
     public <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
             throws InvocationTargetException, ComponentInActiveExcetion {
         checkActivity(component);
@@ -186,8 +190,8 @@ public class DBClusterService implements IClusterService, ApplicationListener<Co
     }
 
     private void checkActivity(IClusteredComponent component) throws ComponentInActiveExcetion {
-        if (!repository.isActive(component.getName())) {
-            throw new ComponentInActiveExcetion("Component " + component.getName() + " is inactive!");
+        if (!repository.isActive(component.getName()) || !repository.isStarted(component.getName())) {
+            throw new ComponentInActiveExcetion("Component " + component.getName() + " is inactive or stopped!");
         }
     }
 

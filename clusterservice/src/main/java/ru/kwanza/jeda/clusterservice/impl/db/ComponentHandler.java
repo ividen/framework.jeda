@@ -17,8 +17,8 @@ public class ComponentHandler implements IClusteredComponent {
         this.delegate = delegate;
     }
 
-    public ComponentHandler(ComponentRepository repository,String name) {
-        this(repository,repository.getComponent(name));
+    public ComponentHandler(ComponentRepository repository, String name) {
+        this(repository, repository.getComponent(name));
     }
 
     public String getName() {
@@ -27,10 +27,12 @@ public class ComponentHandler implements IClusteredComponent {
 
     public void handleStart() {
         delegate.handleStart();
+        repository.addStartedComponent(delegate);
     }
 
     public void handleStop() {
         delegate.handleStop();
+        repository.removeStartedComponent(delegate.getName());
     }
 
     public void handleStartRepair(Node node) {
@@ -40,7 +42,7 @@ public class ComponentHandler implements IClusteredComponent {
     public void handleStopRepair(Node node) {
         delegate.handleStopRepair(node);
         final AlienComponent alienComponent = repository.getAlienEntities().get(BaseComponentEntity.createId(node, this));
-        if(alienComponent!=null) {
+        if (alienComponent != null) {
             repository.removeAlienComponent(alienComponent.getId());
             repository.addStopRepair(alienComponent);
         }

@@ -38,7 +38,7 @@
         </constructor-arg>
     </bean>
 
-    <bean class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
+    <bean id = "critical" class="ru.kwanza.jeda.clusterservice.impl.db.TestComponent">
         <constructor-arg index="0" value="component_1"/>
     </bean>
 

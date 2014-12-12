@@ -160,6 +160,7 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
             int estimateCount = 0;
 
             while (true) {
+                //todo aguzanov while(true) и isReady - Убрать, количество потоков въявную регулируется IThreadManager
                 if (!stage.getQueue().isReady()) {
                     break;
                 }

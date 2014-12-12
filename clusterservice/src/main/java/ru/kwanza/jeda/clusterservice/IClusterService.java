@@ -26,6 +26,8 @@ public interface IClusterService {
 
     Map<String, IClusteredComponent> getActiveComponents();
 
+    Map<String, IClusteredComponent> getStartedComponents();
+
     Map<String, IClusteredComponent> getPassiveComponents();
 
     <R> R criticalSection(IClusteredComponent component, Callable<R> callable)
