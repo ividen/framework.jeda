@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.timerservice.pushtimer.manual;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,6 +22,7 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "node2-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Ignore
 public class ManualTestNode2 extends AbstractJUnit4SpringContextTests {
 
     @Resource
@@ -40,6 +42,7 @@ public class ManualTestNode2 extends AbstractJUnit4SpringContextTests {
     private static final long NODE_ID = 2;
 
     @Test
+    @Ignore
     public void multiThreadedTest() throws Exception {
         Thread.sleep(1000);
         long startTime = System.currentTimeMillis();

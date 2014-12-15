@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 
 @ContextConfiguration(locations = "test1-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TestPOJOTimerManager extends AbstractJUnit4SpringContextTests {
+public class TestEntityTimerManager extends AbstractJUnit4SpringContextTests {
 
     private static final long SLEEP = 1000;
 

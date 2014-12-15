@@ -31,7 +31,7 @@ public class TimersRegistry implements ITimersRegistry {
 
             TimerMapping timerMapping = classTimers.get(timerName);
             if (timerMapping == null) {
-                throw new RuntimeException("@TimerField with name = '" + timerName + "' must be declared in " + current.getClass().getName());
+                throw new RuntimeException("@EntityTimer with name = '" + timerName + "' must be declared in " + current.getClass().getName());
             }
             result.add(timerMapping);
         }
@@ -56,13 +56,13 @@ public class TimersRegistry implements ITimersRegistry {
                 Property entityProperty = FieldHelper.constructProperty(clazz, propertyName);
                 String timerName = current.getAnnotation(EntityTimer.class).name();
                 if (entityPropertySet.contains(propertyName)) {
-                    throw new RuntimeException("Property '" + propertyName +  "' has duplicate @Timer annotation for class '" + startClass.getName() + "'");
+                    throw new RuntimeException("Property '" + propertyName +  "' has duplicate @EntityTimer annotation for class '" + startClass.getName() + "'");
                 }
                 if (classTimers.containsKey(timerName)) {
-                    throw new RuntimeException("@Timer with name '" + timerName +"' already defined for class '" + startClass.getName() + "'");
+                    throw new RuntimeException("@EntityTimer with name '" + timerName +"' already defined for class '" + startClass.getName() + "'");
                 }
                 if (!entityProperty.getType().equals(Long.class)) {
-                    throw new RuntimeException("Property '" + propertyName + "' must have java.lang.Long type to be used with @Timer annotation");
+                    throw new RuntimeException("Property '" + propertyName + "' must have java.lang.Long type to be used with @EntityTimer annotation");
                 }
                 entityPropertySet.add(propertyName);
                 classTimers.put(timerName, new TimerMapping(timerName, propertyName, entityProperty));
