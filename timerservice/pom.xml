@@ -1,0 +1,85 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ru.kwanza.jeda</groupId>
+        <artifactId>jeda</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <relativePath>../</relativePath>
+    </parent>
+
+    <artifactId>jeda-timerservice</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>ru.kwanza.toolbox</groupId>
+            <artifactId>toolbox</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.jeda</groupId>
+            <artifactId>jeda-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.jeda</groupId>
+            <artifactId>jeda-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.jeda</groupId>
+            <artifactId>jeda-clusterservice</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.dbtool</groupId>
+            <artifactId>dbtool-orm</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.kwanza.dbtool</groupId>
+            <artifactId>dbtool-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc6</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

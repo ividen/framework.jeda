@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <import resource="timerservice-config.xml"/>
+
+    <bean id="timerservice.default.TimerHandleMapper"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper">
+        <!--provided by client -->
+        <property name="compatibleTimerNames" ref="timerservice.default.TimerNames"/>
+    </bean>
+
+    <!-- user add class to repository manually -->
+    <bean id="timerservice.default.DefaultTimerClass"
+          class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass">
+        <property name="timerClassName"  value="DEFAULT_TIMER_CLASS" />
+        <property name="dbTimerDAO" ref="timerservice.default.DBTimerDAO" />
+        <property name="consumerConfig" ref="timerservice.default.DefaultConsumerConfig" />
+    </bean>
+
+    <bean id="timerservice.default.liquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <!-- provided by client -->
+        <property name="dataSource" ref="dataSource" />
+        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+    </bean>
+
+
+    <bean id="timerservice.default.DefaultConsumerConfig"
+          class="ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerConfig">
+        <property name="workerCount" value="6" />
+        <property name="borderGain" value="10000" />
+        <property name="idealWorkingInterval" value="300000" />
+        <property name="firedTimersMaxLimit" value="1000000" />
+        <property name="firedTimersSingleConsumerModeLimit" value="800000" />
+        <property name="firedTimersAgainMultiConsumerBorder" value="300000" />
+    </bean>
+
+    <bean id="timerservice.default.DBTimerDAO"
+          class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertMultiUpdateDBTimerDAO">
+        <property name="mapping" ref="timerservice.default.TimerMapping"/>
+        <property name="handleMapper" ref="timerservice.default.TimerHandleMapper" />
+        <property name="useOracleOptimizedFetchCursor" value="true"/>
+        <property name="fetchSize" value="1000" />
+    </bean>
+
+
+    <bean id="timerservice.default.TimerMapping"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.TimerMapping">
+        <property name="tableName" value="TIMERS"/>
+        <property name="idField" value="id" />
+        <property name="stateField" value="state" />
+        <property name="bucketIdField" value="bucket_id" />
+        <property name="expireTimeField" value="expire_time" />
+        <property name="creationPointCountField"  value="creation_point_count" />
+    </bean>
+
+
+</beans>

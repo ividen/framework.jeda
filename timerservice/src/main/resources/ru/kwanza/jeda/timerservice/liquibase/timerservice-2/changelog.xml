@@ -1,0 +1,33 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-1">
+        <createTable tableName="JEDA_TIMERS">
+            <column name="id" type="BIGINT"/>
+            <column name="state" type="BIGINT"/>
+            <column name="bucket_id" type="BIGINT"/>
+            <column name="expire_time" type="BIGINT"/>
+            <column name="creation_point_count" type="BIGINT"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-2">
+        <addPrimaryKey tableName="JEDA_TIMERS"
+                       columnNames="id"
+                       constraintName="PK_JEDA_TIMERS"/>
+    </changeSet>
+
+
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-3">
+        <createIndex tableName="JEDA_TIMERS"
+                     indexName="IDX_JEDA_TIMERS_SEARCH"
+                     unique="false">
+            <column name="bucket_id" type="BIGINT"/>
+            <column name="expire_time" type="BIGINT"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

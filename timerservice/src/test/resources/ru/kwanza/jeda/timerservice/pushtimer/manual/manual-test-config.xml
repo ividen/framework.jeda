@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="classpath:dbtool-config.xml" />
+    <import resource="classpath:dbtool-orm-config.xml" />
+    <import resource="classpath:jeda-core-config.xml" />
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
+
+    <import resource="classpath:jeda-clusterservice-db-config.xml"/>
+
+    <import resource="classpath:timerservice-default-timer-config.xml"/>
+
+    <context:property-placeholder location="classpath:db.properties, classpath:test.properties"/>
+
+    <!--
+   <import resource="classpath:txn-jta-config.xml"/>
+    <bean id="jtaTransactionManager"
+          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+    -->
+   <!--
+    <import resource="classpath:txn-ds-config.xml"/>
+    <bean id="dataSource"
+          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+
+        <property name="driverClassName" value="oracle.jdbc.OracleDriver" />
+        <property name="url" value="jdbc:oracle:thin:@192.168.2.151:1521:wdb" />
+        <property name="username" value="SCOTT" />
+        <property name="password" value="TIGER" />
+    </bean>
+    -->
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <!--<property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>-->
+                <property name="maxActive" value="70" />
+                <property name="maxIdle" value="70" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="timerservice.default.Processor" class="ru.kwanza.jeda.timerservice.pushtimer.manual.Processor" />
+
+
+    <core:stage name="DEFAULT_TIMER" transaction="true">
+        <core:tx-memory-queue cloneType="SERIALIZE" maxSize="1000000"/>
+        <core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="15"/>
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.processor.ExpireTimeProcessor">
+            <property name="delegate" ref="timerservice.default.Processor"/>
+        </core:event-processor>
+        <core:stage-thread-manager threadNamePrefix="default_timer" idleTimeout="50000" maxThreadCount="15"/>
+    </core:stage>
+
+
+</beans>

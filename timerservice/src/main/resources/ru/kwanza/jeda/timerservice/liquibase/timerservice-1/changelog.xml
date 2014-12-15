@@ -1,0 +1,22 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet author="myeskov" id="TIMER_SERVICE-1-1">
+        <createTable tableName="JEDA_TIMERS_FAILOVER">
+            <column name="timer_class" type="VARCHAR(255)"/>
+            <column name="current_node_id" type="BIGINT"/>
+            <column name="working_as_node_id" type="BIGINT"/>
+            <column name="failover_left_border" type="BIGINT"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet author="myeskov" id="TIMER_SERVICE-1-2">
+        <addPrimaryKey tableName="JEDA_TIMERS_FAILOVER"
+                       columnNames="timer_class, current_node_id, working_as_node_id"
+                       constraintName="PK_JEDA_TIMERS_FAILOVER"/>
+    </changeSet>
+
+</databaseChangeLog>

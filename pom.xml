@@ -34,6 +34,7 @@
         <javax.resource.version>1.5</javax.resource.version>
         <je.version>6.2.7</je.version>
         <targetJdk>1.6</targetJdk>
+        <oracle.jdbc.version>11.2.0.2.0</oracle.jdbc.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -54,6 +55,7 @@
         <module>jeconnection</module>
         <module>nio</module>
         <module>context</module>
+        <module>timerservice</module>
     </modules>
     <build>
         <plugins>
@@ -448,6 +450,14 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc6</artifactId>
+                <version>${oracle.jdbc.version}</version>
                 <scope>test</scope>
             </dependency>
 

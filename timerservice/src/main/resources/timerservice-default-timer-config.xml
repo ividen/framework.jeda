@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
+
+    <util:set id="timerservice.default.TimerNames" set-class="java.util.HashSet">
+        <value>DEFAULT_TIMER</value>
+    </util:set>
+
+    <util:set id="timerservice.ClassesForRepository" set-class="java.util.HashSet">
+        <ref bean="timerservice.default.DefaultTimerClass"/>
+    </util:set>
+
+    <!--provide stage with name DEFAULT_TIMER-->
+
+    <import resource="timerservice-default-base-config.xml" />
+    <!--dataSource must be provided -->
+</beans>
