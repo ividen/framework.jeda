@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xmlns:timers="http://www.kwanza-systems.ru/schema/jeda-timers"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd
+       http://www.kwanza-systems.ru/schema/jeda-timers http://www.kwanza-systems.ru/schema/jeda-timers.xsd ">
+
+    <context:annotation-config/>
+
+    <import resource="classpath:dbtool-config.xml" />
+    <import resource="classpath:dbtool-orm-config.xml" />
+    <import resource="classpath:jeda-core-config.xml" />
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+    <import resource="classpath:txn-ds-config.xml"/>
+
+    <import resource="classpath:jeda-clusterservice-db-config.xml"/>
+
+    <import resource="classpath:timerservice-default-timer-config.xml"/>
+
+    <context:property-placeholder location="classpath:db.properties, classpath:test.properties"/>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <!--<property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>-->
+                <property name="maxActive" value="70" />
+                <property name="maxIdle" value="70" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <timers:timer name="TIMER_1">
+
+        <timers:timer-class-ref ref="test3"/>
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+
+    </timers:timer>
+
+    <timers:timer name="TIMER_2">
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+    </timers:timer>
+
+    <timers:timer name="TIMER_3">
+        <timers:timer-class-ref ref=""/>
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+    </timers:timer>
+
+    <bean id="test" class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertDeleteDBTimerDAO" >
+        <property name="handleMapper" ref="timerservice.default.TimerHandleMapper"/>
+        <property name="mapping" ref="timerservice.default.TimerMapping"/>
+    </bean>
+
+    <timers:timer name="TIMER_4">
+        <timers:timer-class>
+            <timers:dao-custom ref="test" />
+        </timers:timer-class>
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+    </timers:timer>
+
+
+
+
+
+
+
+
+
+
+
+
+</beans>

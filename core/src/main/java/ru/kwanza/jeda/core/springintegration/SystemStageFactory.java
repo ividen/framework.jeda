@@ -15,15 +15,15 @@ import org.springframework.beans.factory.SmartFactoryBean;
 /**
  * @author Guzanov Alexander
  */
-class SystemStageFactory implements SmartFactoryBean<IStage>, BeanNameAware {
-    private IAdmissionController admissionController;
-    private IEventProcessor eventProcessor;
-    private IQueue queue;
-    private IResourceController resourceController;
-    private AbstractThreadManager threadManager;
-    private IJedaManagerInternal manager;
-    private boolean hasTransaction = true;
-    private String name;
+public class SystemStageFactory implements SmartFactoryBean<IStage>, BeanNameAware {
+    protected IAdmissionController admissionController;
+    protected IEventProcessor eventProcessor;
+    protected IQueue queue;
+    protected IResourceController resourceController;
+    protected AbstractThreadManager threadManager;
+    protected IJedaManagerInternal manager;
+    protected boolean hasTransaction = true;
+    protected String name;
 
 
     public void setHasTransaction(boolean hasTransaction) {

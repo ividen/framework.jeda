@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+        xmlns="http://www.kwanza-systems.ru/schema/jeda-timers"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jeda-core="http://www.kwanza-systems.ru/schema/jeda-core"
+        xmlns:tool="http://www.springframework.org/schema/tool"
+        xsi:schemaLocation="
+            http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd
+            http://www.springframework.org/schema/tool   http://www.springframework.org/schema/tool/spring-tool.xsd"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        targetNamespace="http://www.kwanza-systems.ru/schema/jeda-timers">
+
+
+    <xsd:import namespace="http://www.kwanza-systems.ru/schema/jeda-core"
+                schemaLocation="http://www.kwanza-systems.ru/schema/jeda-core.xsd"/>
+
+    <!-- stage -->
+
+    <xsd:group name="thread-manager">
+        <xsd:choice>
+            <xsd:element ref="jeda-core:thread-manager" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="jeda-core:stage-thread-manager" minOccurs="0" maxOccurs="1"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <xsd:group name="resource-controller">
+        <xsd:choice>
+            <xsd:element ref="jeda-core:resource-controller" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="jeda-core:static-resource-controller" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="jeda-core:fixed-batch-size-resource-controller" minOccurs="0" maxOccurs="1"/>
+            <xsd:element ref="jeda-core:smart-resource-controller" minOccurs="0" maxOccurs="1"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <!-- stage -->
+
+    <!-- DAO -->
+    <xsd:complexType name="dao-custom-type">
+
+        <xsd:attribute name="ref" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type
+                                type="ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+
+    </xsd:complexType>
+
+    <xsd:complexType name="empty-type">
+    </xsd:complexType>
+
+    <xsd:complexType name="dao-base-type">
+        <xsd:sequence>
+            <xsd:element name="mapping" minOccurs="0" maxOccurs="1">
+                <xsd:complexType>
+                    <xsd:all>
+                        <xsd:element name="id_field" type="xsd:string"/>
+                        <xsd:element name="state_field" type="xsd:string"/>
+                        <xsd:element name="bucket_id_field" type="xsd:string"/>
+                        <xsd:element name="expire_time_field" type="xsd:string"/>
+                        <xsd:element name="creation_point_count_field" type="xsd:string"/>
+                    </xsd:all>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="handleMapper" use="required">
+            <xsd:simpleType>
+                <xsd:restriction base="xsd:string">
+                    <xsd:enumeration value="LongConstantName"/>
+                    <xsd:enumeration value="LongNameSet"/>
+                    <xsd:enumeration value="StringUniversal"/>
+                </xsd:restriction>
+            </xsd:simpleType>
+        </xsd:attribute>
+        <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:group name="dao">
+        <xsd:choice>
+            <xsd:element name="dao-custom" type="dao-custom-type" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="dao-insert-delete" type="dao-base-type" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="dao-insert-single-update" type="dao-base-type" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="dao-insert-multi-update" type="dao-base-type" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="dao-updating" type="dao-base-type" minOccurs="1" maxOccurs="1"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <!-- DAO -->
+
+    <!--consumer-config-->
+
+    <xsd:group name="consumer-config">
+        <xsd:choice>
+            <xsd:element name="consumer-config-ref" type="consumer-config-ref-type" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="consumer-config" type="consumer-config-type" minOccurs="0" maxOccurs="1"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <xsd:complexType name="consumer-config-ref-type">
+        <xsd:attribute name="ref" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type
+                                type="ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerConfig"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="consumer-config-type">
+        <xsd:attribute name="workerCount" type="xsd:positiveInteger"/>
+        <xsd:attribute name="borderGain" type="xsd:positiveInteger"/>
+        <xsd:attribute name="idealWorkingInterval" type="xsd:positiveInteger"/>
+        <xsd:attribute name="firedTimersMaxLimit" type="xsd:positiveInteger"/>
+        <xsd:attribute name="firedTimersSingleConsumerModeLimit" type="xsd:positiveInteger"/>
+        <xsd:attribute name="firedTimersAgainMultiConsumerBorder" type="xsd:positiveInteger"/>
+    </xsd:complexType>
+
+    <!--consumer-config-->
+
+
+    <!-- timer-class -->
+    <xsd:group name="timer-class">
+        <xsd:choice>
+            <xsd:element name="timer-class-ref" type="ref-timer-class-type" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="timer-class" type="inline-timer-class-type" minOccurs="0" maxOccurs="1"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <xsd:complexType name="ref-timer-class-type">
+        <xsd:attribute name="ref" type="xsd:string" use="required">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <tool:annotation kind="ref">
+                        <tool:expected-type
+                                type="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass"/>
+                    </tool:annotation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
+    </xsd:complexType>
+
+    <xsd:complexType name="external-timer-class-type">
+        <xsd:complexContent>
+            <xsd:restriction base="inline-timer-class-type">
+                <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:restriction>
+        </xsd:complexContent>
+    </xsd:complexType>
+
+    <xsd:complexType name="inline-timer-class-type">
+        <xsd:sequence>
+            <xsd:group ref="dao"/>
+            <xsd:group ref="consumer-config"/>
+        </xsd:sequence>
+    </xsd:complexType>
+    <!-- timer-class -->
+
+
+    <!-- elements -->
+
+    <xsd:element name="timer">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="jeda-core:event-processor" minOccurs="1" maxOccurs="1"/>
+                <xsd:group ref="thread-manager"/>
+                <xsd:group ref="resource-controller"/>
+                <xsd:group ref="timer-class"/>
+            </xsd:sequence>
+            <xsd:attribute name="name" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="timer-class" type="external-timer-class-type"/>
+
+    <!-- elements -->
+
+
+</xsd:schema>
+

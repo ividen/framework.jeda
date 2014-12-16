@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.timerservice.pushtimer.config;
 
+import org.springframework.context.Phased;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
 
@@ -8,7 +9,7 @@ import java.util.*;
 /**
  * @author Michael Yeskov
  */
-public class TimerClassRepository {
+public class TimerClassRepository{
     private Set<TimerClass> registeredTimerClasses;
     private Map<String, TimerClass> timerNameToClass = new HashMap<String, TimerClass>();
 
@@ -72,5 +73,9 @@ public class TimerClassRepository {
         }
 
         return (Map)result;
+    }
+
+    public void registerNameToClassBinding(String name, TimerClass timerClass) {
+        //TODO: implement
     }
 }
