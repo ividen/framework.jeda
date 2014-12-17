@@ -5,15 +5,11 @@ import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
 
-import javax.transaction.Transaction;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,7 +19,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends AbstractObservableMemoryQueue<E> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTransactionalMemoryQueue.class);
 
-    protected ConcurrentMap<Transaction, Tx> transactions = new ConcurrentHashMap<Transaction, Tx>();
     protected int maxSize;
 
     private IJedaManager manager;
@@ -44,7 +39,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
 
     protected abstract void addToTail(E e);
 
-    protected abstract void processTake(Tx tx, int c, ArrayList<E> result, ObjectOutputStreamEx oos);
+    protected abstract void processTake(TxSync txSync, int c, ArrayList<E> result, ObjectOutputStreamEx oos);
 
     public int getEstimatedCount() {
         return size.get() - getTxTakesCount() + getTxPutsCount();
@@ -99,21 +94,21 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     }
 
     protected void doPut(Collection<E> events) throws SinkException.Clogged {
-        Tx tx = getCurrentTx();
+        TxSync txSync = getCurrentTx();
 
         int s = size.get() + getTxPutsCount();
         if (events.size() + s > maxSize) {
             throw new SinkException.Clogged("Sink maxSize=" + maxSize
                     + ",currentSize=" + s + ", try to put " + events.size() + " elements!");
         }
-        if (tx == null) {
+        if (txSync == null) {
             for (E e : events) {
                 addToTail(e);
             }
             int value = size.addAndGet(events.size());
             notify(value, events.size());
         } else {
-            tx.logUndoPut(events);
+            txSync.logUndoPut(events);
             txPuts.addAndGet(events.size());
         }
     }
@@ -122,7 +117,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         if (size() - getTxTakesCount() == 0) {
             return null;
         }
-        Tx tx = getCurrentTx();
+        TxSync txSync = getCurrentTx();
 
         int c = Math.min(size.get() - getTxTakesCount(), count);
         ArrayList<E> result = new ArrayList<E>(c);
@@ -135,7 +130,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
             throw new RuntimeException(e);
         }
 
-        processTake(tx, c, result, oos);
+        processTake(txSync, c, result, oos);
 
         if (oos.getObjCount() > 0) {
             try {
@@ -143,7 +138,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
             } catch (IOException e) {
                 logger.error("Error flushing stream", e);
             }
-            tx.logUndoTake(baos.toByteArray(), oos.getObjCount());
+            txSync.logUndoTake(baos.toByteArray(), oos.getObjCount());
 
             try {
                 oos.close();
@@ -152,7 +147,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
             }
         }
 
-        if (tx == null) {
+        if (txSync == null) {
             notify(size.get(), -result.size());
         }
 
@@ -160,9 +155,9 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     }
 
     protected Collection<E> doTryPut(Collection<E> events) {
-        Tx tx = getCurrentTx();
+        TxSync txSync = getCurrentTx();
         MutableEventCollection result = new MutableEventCollection();
-        if (tx == null) {
+        if (txSync == null) {
             int delta = 0;
             int value = 0;
             for (E e : events) {
@@ -178,7 +173,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         } else {
             for (E e : events) {
                 if (size.get() + getTxPutsCount() < maxSize) {
-                    tx.logUndoPut(e);
+                    txSync.logUndoPut(e);
                     txPuts.incrementAndGet();
                 } else {
                     result.add(e);
@@ -191,25 +186,8 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         return result;
     }
 
-    public Tx getCurrentTx() {
-        Transaction transaction = getJTATransaction();
-        if (transaction == null) {
-            return null;
-        }
-        Tx tx = transactions.get(transaction);
-        if (tx == null) {
-            tx = new Tx(this, transaction);
-            if (transactions.putIfAbsent(transaction, tx) != tx) {
-                tx = transactions.get(transaction);
-                try {
-                    transaction.registerSynchronization(tx);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        return tx;
+    public TxSync getCurrentTx() {
+        return TxSync.getTxSync(this);
     }
 
     protected int getTxPutsCount() {
@@ -220,25 +198,25 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         return txTakes.get();
     }
 
-    protected Node iterateOverNodeAndTake(Node last, Tx tx, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
+    protected Node iterateOverNodeAndTake(Node last, TxSync txSync, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
         while (result.size() < c && last.next != null) {
             last = last.next;
             E event = (E) last.event;
             result.add(event);
-            if (tx != null) {
+            if (txSync != null) {
                 try {
                     if (objectCloneType == ObjectCloneType.SERIALIZE) {
                         oos.writeObjectAndCount(event);
                     } else if (objectCloneType == ObjectCloneType.CLONE) {
-                        tx.logUndoTake((E) event.getClass().getMethod("clone").invoke(event));
+                        txSync.logUndoTake((E) event.getClass().getMethod("clone").invoke(event));
                     } else {
-                        tx.logUndoTake(event);
+                        txSync.logUndoTake(event);
                     }
                 } catch (Exception e) {
                     if (logger.isWarnEnabled()) {
                         logger.warn("Can't clone object! Use reference.", e);
                     }
-                    tx.logUndoTake(event);
+                    txSync.logUndoTake(event);
                 }
                 txTakes.incrementAndGet();
             } else {
@@ -326,11 +304,6 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         } finally {
             takeLock.unlock();
         }
-    }
-
-    private Transaction getJTATransaction() {
-        ITransactionManagerInternal tm = manager.getTransactionManager();
-        return tm == null ? null : tm.getTransaction();
     }
 
     private void restoreFromBuffer(byte[] o) throws IOException, ClassNotFoundException {

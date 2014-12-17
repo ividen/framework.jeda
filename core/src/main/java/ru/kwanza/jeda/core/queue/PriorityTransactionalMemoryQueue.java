@@ -50,11 +50,11 @@ public class PriorityTransactionalMemoryQueue<E extends IPriorityEvent> extends 
         tails.put(e.getPriority(), lastNode);
     }
 
-    protected void processTake(Tx tx, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
+    protected void processTake(TxSync txSync, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
         for (IPriorityEvent.Priority p : IPriorityEvent.Priority.values()) {
             Node<E> first = heads.get(p);
             Node<E> last = first;
-            last = iterateOverNodeAndTake(last, tx, c, result, oos);
+            last = iterateOverNodeAndTake(last, txSync, c, result, oos);
 
             if (first != last) {
                 heads.put(p, last);

@@ -2139,7 +2139,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().begin();
         Event event = new Event("1");
         queue.put(Arrays.asList(new IEvent[]{event}));
-        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+        queue.getCurrentTx().registerCallback(new TxSync.Callback() {
             public void beforeCompletion(boolean success) {
                 assertTrue(success);
             }
@@ -2159,7 +2159,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         Collection take = queue.take(1);
         assertEquals("Evnt count", 1, take.size());
 
-        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+        queue.getCurrentTx().registerCallback(new TxSync.Callback() {
             public void beforeCompletion(boolean success) {
                 assertFalse(success);
             }
@@ -2181,7 +2181,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         Event event = new Event("1");
         queue.put(Arrays.asList(new IEvent[]{event}));
 
-        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+        queue.getCurrentTx().registerCallback(new TxSync.Callback() {
             public void beforeCompletion(boolean success) {
                 assertTrue(success);
                 beforeCounter.incrementAndGet();
@@ -2194,7 +2194,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 throw new RuntimeException("Test with Exception");
             }
         });
-        queue.getCurrentTx().registerCallback(new Tx.Callback() {
+        queue.getCurrentTx().registerCallback(new TxSync.Callback() {
             public void beforeCompletion(boolean success) {
                 assertTrue(success);
                 beforeCounter.incrementAndGet();

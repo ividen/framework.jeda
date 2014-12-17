@@ -11,12 +11,8 @@
 
     <bean id="jeda.IJedaManager"
           class="ru.kwanza.jeda.core.manager.DefaultJedaManager" scope="singleton">
-        <property name="transactionManager" ref="jeda.ITransactionManagerInternal"/>
+        <property name="transactionManager" ref="jeda.PlatformTransactionManager"/>
         <property name="pendingStore" ref="pendingStore"/>
-    </bean>
-
-    <bean id="jeda.ITransactionManagerInternal" class="ru.kwanza.jeda.core.tm.BaseTransactionManager" scope="singleton">
-        <constructor-arg ref="txn.ITransactionManager"/>
     </bean>
 
 </beans>

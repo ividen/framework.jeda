@@ -2,48 +2,75 @@ package ru.kwanza.jeda.core.queue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.Transaction;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Guzanov Alexander
  */
-public class Tx<E extends IEvent> implements Synchronization {
+public class TxSync<E extends IEvent> implements TransactionSynchronization {
     private static final Logger logger = LoggerFactory.getLogger(TransactionalMemoryQueue.class);
-    private Transaction jtaTx;
-    private AbstractTransactionalMemoryQueue memoryQueue;
-    private LinkedList putEvents = new LinkedList();
+    private AbstractTransactionalMemoryQueue<E> memoryQueue;
+    private List putEvents = new ArrayList();
     private int undoTakeSize;
-    private LinkedList undoTake = new LinkedList();
-    private LinkedList<Callback> callbacks = new LinkedList<Callback>();
+    private List undoTake = new ArrayList();
 
-    Tx(AbstractTransactionalMemoryQueue memoryQueue, Transaction jtaTx) {
+    TxSync(AbstractTransactionalMemoryQueue<E> memoryQueue) {
         this.memoryQueue = memoryQueue;
-        this.jtaTx = jtaTx;
     }
 
 
-    public interface Callback {
-        public void beforeCompletion(boolean success);
+    public static <E extends IEvent> TxSync<E> getTxSync(AbstractTransactionalMemoryQueue<E> memoryQueue) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TxSync<E> result = (TxSync<E>) TransactionSynchronizationManager.getResource(memoryQueue);
+            if (result == null) {
+                result = new TxSync<E>(memoryQueue);
+                TransactionSynchronizationManager.registerSynchronization(result);
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
 
-        public void afterCompletion(boolean success);
+    @Override
+    public void suspend() {
+        System.out.println("suspend");
+    }
+
+    @Override
+    public void resume() {
+        System.out.println("resume");
+    }
+
+    @Override
+    public void flush() {
+        System.out.println("flush");
+    }
+
+    @Override
+    public void beforeCommit(boolean readOnly) {
     }
 
     public void beforeCompletion() {
+        TransactionSynchronizationManager.unbindResource(memoryQueue);
+    }
+
+    @Override
+    public void afterCommit() {
     }
 
     public void afterCompletion(int i) {
         if (logger.isTraceEnabled()) {
             logger.trace("Tx for MemoryQueue status={}", i);
         }
-        if (i == Status.STATUS_COMMITTED) {
-            beforeCompletion(true);
+        if (i == TransactionSynchronization.STATUS_COMMITTED) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Commit MemoryQueue takeEventSize={}, putEventSize={}", undoTake.size(), putEvents.size());
             }
@@ -62,16 +89,13 @@ public class Tx<E extends IEvent> implements Synchronization {
                     logger.error("MemoryQueue closed!", e);
                 }
             }
-            memoryQueue.transactions.remove(jtaTx);
-            afterCompletion(true);
         }
 
-        if (i == Status.STATUS_ROLLEDBACK) {
+        if (i == TransactionSynchronization.STATUS_ROLLED_BACK) {
             if (logger.isTraceEnabled()) {
                 logger.trace("Rollback MemoryQueue takeEventSize={}, putEventSize={}", undoTake.size(), putEvents.size());
             }
 
-            beforeCompletion(false);
             if (!putEvents.isEmpty()) {
                 try {
                     memoryQueue.rollbackPut(putEvents);
@@ -87,33 +111,7 @@ public class Tx<E extends IEvent> implements Synchronization {
                     logger.error("MemoryQueue closed!", e);
                 }
             }
-            memoryQueue.transactions.remove(jtaTx);
-            afterCompletion(false);
         }
-    }
-
-    private void beforeCompletion(boolean success) {
-        for (Callback c : callbacks) {
-            try {
-                c.beforeCompletion(success);
-            } catch (Exception e) {
-                logger.error("Error invoking callback!", e);
-            }
-        }
-    }
-
-    private void afterCompletion(boolean success) {
-        for (Callback c : callbacks) {
-            try {
-                c.afterCompletion(success);
-            } catch (Exception e) {
-                logger.error("Error invoking callback!", e);
-            }
-        }
-    }
-
-    public void registerCallback(Callback callback) {
-        callbacks.add(callback);
     }
 
     void logUndoPut(IEvent e) {

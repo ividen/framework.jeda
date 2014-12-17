@@ -1,9 +1,9 @@
 package ru.kwanza.jeda.core.manager;
 
+import org.springframework.transaction.PlatformTransactionManager;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.core.stage.SystemQueue;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,10 +22,10 @@ public class DefaultJedaManager implements IJedaManagerInternal {
     private ConcurrentMap<String, Object> objects = new ConcurrentHashMap<String, Object>();
     private ConcurrentMap<Object, String> names = new ConcurrentHashMap<Object, String>();
     private IPendingStore pendingStore;
-    private ITransactionManagerInternal tm;
+    private PlatformTransactionManager tm;
 
 
-    public ITransactionManagerInternal getTransactionManager() {
+    public PlatformTransactionManager getTransactionManager() {
         return tm;
     }
 
@@ -153,7 +153,7 @@ public class DefaultJedaManager implements IJedaManagerInternal {
         this.pendingStore = pendingStore;
     }
 
-    public void setTransactionManager(ITransactionManagerInternal tm) {
+    public void setTransactionManager(PlatformTransactionManager tm) {
         this.tm = tm;
     }
 

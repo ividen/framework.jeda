@@ -1,12 +1,15 @@
 package ru.kwanza.jeda.core.threadmanager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.MarkTransactionRollbackException;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IResourceController;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -91,10 +94,14 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
         }
     }
 
-    private void beginTx(IStageInternal stage) {
+    private TransactionStatus beginTx(IStageInternal stage) {
         if (stage.hasTransaction()) {
-            manager.getTransactionManager().begin();
+            return getTransactionManager()
+                    .getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         }
+
+
+        return null;
     }
 
     private boolean checkEvents(IStageInternal stage, Collection events, boolean findError) {
@@ -124,9 +131,9 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
         return true;
     }
 
-    private void commitTx(IStageInternal stage) {
+    private void commitTx(IStageInternal stage, TransactionStatus txStatus) {
         if (stage.hasTransaction()) {
-            manager.getTransactionManager().commit();
+            getTransactionManager().commit(txStatus);
         }
     }
 
@@ -163,7 +170,7 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                 if (!stage.getQueue().isReady()) {
                     break;
                 }
-                beginTx(stage);
+                final TransactionStatus txStatus = beginTx(stage);
                 Collection<IEvent> events = getEvents(stage, batchSize);
                 boolean execute = checkEvents(stage, events, findError);
                 if (execute) {
@@ -176,13 +183,13 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                         stage.getProcessor().process(events);
                     } catch (Throwable e) {
                         logger.error(MessageFormat.format("Error events(count={0}) for Stage({1}), thread({2})",
-                                stage.getName(),
-                                events.size(), this.getName()),e);
+                                events.size(), stage.getName(), this.getName()));
 
-                        logger.error("Error occured!",e);
+                        logger.error("Error occured!", e);
 
+                        getTransactionManager().rollback(txStatus);
                         resourceController.throughput(events.size(), batchSize, System.currentTimeMillis() - ts, false);
-                        rollbackAll(stage, e);
+
                         if (!stage.hasTransaction()) {
                             if (logger.isTraceEnabled()) {
                                 logger.trace("Stage({}) doesn't support transactional execution. Skip failed events({})",
@@ -191,10 +198,6 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                                 logger.warn("Stage({}) doesn't support transactional execution. Skip failed events(count={})",
                                         stage.getName(), events.size());
                             }
-                            break;
-                        }
-                        if ((e instanceof MarkTransactionRollbackException)) {
-                            logger.warn("Transaction was marked for rollback.");
                             break;
                         }
                         if (!findError) {
@@ -245,7 +248,7 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
                     }
                 }
 
-                commitTx(stage);
+                commitTx(stage, txStatus);
                 calculateThroughput(resourceController, ts, batchSize, events);
                 threadManager.adjustThreadCount(stage, resourceController.getThreadCount());
                 if (execute && findError) {
@@ -258,6 +261,10 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
         }
 
         return true;
+    }
+
+    private PlatformTransactionManager getTransactionManager() {
+        return manager.getTransactionManager();
     }
 
     private void calculateThroughput(IResourceController resourceController, long ts, int batchSize, Collection<IEvent> events) {
@@ -273,12 +280,6 @@ public abstract class AbstractProcessingThread<TM extends AbstractThreadManager>
             logger.error("Error taking events", e);
             return null;
         }
-    }
-
-    private void rollbackAll(IStageInternal stage, Throwable e) {
-        logger.error("Error processing events for Stage({})", stage.getName());
-        logger.error("Error processing events", e);
-        manager.getTransactionManager().rollbackAllActive();
     }
 
     private IStageInternal waitForStage() {
