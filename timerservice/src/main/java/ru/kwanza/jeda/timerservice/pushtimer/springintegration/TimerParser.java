@@ -24,29 +24,13 @@ import java.util.List;
  */
 class TimerParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        BeanDefinitionBuilder definitionBuilderStageFactory = BeanDefinitionBuilder.genericBeanDefinition(TimerStageFactory.class);
-        List<Element> childElements = DomUtils.getChildElements(element);
-        XmlReaderContext readerContext = parserContext.getReaderContext();
-        NamespaceHandlerResolver namespaceHandlerResolver = readerContext.getNamespaceHandlerResolver();
         String name = element.getAttribute("name");
 
-
         TimerBeanBuilder beanBuilder = new TimerBeanBuilder(name, parserContext);
-        for (Element e : childElements) {
-            String namespaceURI = e.getNamespaceURI();
-            NamespaceHandler handler = namespaceHandlerResolver.resolve(namespaceURI);
-            if (handler == null) {
-                readerContext.error("Unable to locate Spring NamespaceHandler" +
-                        " for XML schema namespace [" + namespaceURI + "]", e);
-            } else {
-                BeanDefinition bean = handler.parse(e, parserContext);
 
-                if (bean instanceof JedaBeanDefinition) {
-                    beanBuilder.addBean((JedaBeanDefinition) bean);
-                }
-            }
-        }
+        ParseHelper.parseChildren(element, parserContext, beanBuilder);
 
+        BeanDefinitionBuilder definitionBuilderStageFactory = BeanDefinitionBuilder.genericBeanDefinition(TimerStageFactory.class);
         beanBuilder.build(definitionBuilderStageFactory);
         return createJedaDefinition(name, definitionBuilderStageFactory.getBeanDefinition(), IStage.class, element, parserContext);
     }

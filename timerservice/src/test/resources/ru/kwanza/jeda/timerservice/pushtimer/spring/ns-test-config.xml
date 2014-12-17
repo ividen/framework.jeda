@@ -97,19 +97,20 @@
     </timers:timer-class>
 
 
-
+    <!--
     <timers:timer name="TIMER_6">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass1" />
     </timers:timer>
-
-
+     -->
+     <!--
     <timers:timer name="TIMER_7">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass2" />
     </timers:timer>
+    -->
 </beans>

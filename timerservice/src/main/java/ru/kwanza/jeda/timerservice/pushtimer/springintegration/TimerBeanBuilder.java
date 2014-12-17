@@ -20,7 +20,7 @@ import ru.kwanza.jeda.timerservice.pushtimer.processor.ExpireTimeProcessor;
 /**
  * @author Michael Yeskov
  */
-class TimerBeanBuilder {
+class TimerBeanBuilder implements BeanBuilder{
     private JedaBeanDefinition eventProcessorDef = null;
     private JedaBeanDefinition resourceControllerDef = null;
     private JedaBeanDefinition threadManagerDef = null;
