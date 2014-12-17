@@ -128,7 +128,7 @@
 
 
     <!-- timer-class -->
-    <xsd:group name="timer-class">
+    <xsd:group name="timer-class-gr">
         <xsd:choice>
             <xsd:element name="timer-class-ref" type="ref-timer-class-type" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="timer-class" type="inline-timer-class-type" minOccurs="0" maxOccurs="1"/>
@@ -150,9 +150,9 @@
 
     <xsd:complexType name="external-timer-class-type">
         <xsd:complexContent>
-            <xsd:restriction base="inline-timer-class-type">
+            <xsd:extension base="inline-timer-class-type">
                 <xsd:attribute name="name" type="xsd:string" use="required"/>
-            </xsd:restriction>
+            </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
 
@@ -173,7 +173,7 @@
                 <xsd:element ref="jeda-core:event-processor" minOccurs="1" maxOccurs="1"/>
                 <xsd:group ref="thread-manager"/>
                 <xsd:group ref="resource-controller"/>
-                <xsd:group ref="timer-class"/>
+                <xsd:group ref="timer-class-gr"/>
             </xsd:sequence>
             <xsd:attribute name="name" type="xsd:string" use="required"/>
         </xsd:complexType>

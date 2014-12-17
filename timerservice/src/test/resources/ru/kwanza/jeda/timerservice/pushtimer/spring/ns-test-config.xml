@@ -41,10 +41,7 @@
 
 
     <timers:timer name="TIMER_1">
-
-        <timers:timer-class-ref ref="test3"/>
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-
     </timers:timer>
 
     <timers:timer name="TIMER_2">
@@ -54,35 +51,65 @@
     </timers:timer>
 
     <timers:timer name="TIMER_3">
-        <timers:timer-class-ref ref=""/>
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
+        <timers:timer-class-ref ref="timerservice.default.DefaultTimerClass"/>
     </timers:timer>
-
-    <bean id="test" class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertDeleteDBTimerDAO" >
-        <property name="handleMapper" ref="timerservice.default.TimerHandleMapper"/>
-        <property name="mapping" ref="timerservice.default.TimerMapping"/>
-    </bean>
 
     <timers:timer name="TIMER_4">
-        <timers:timer-class>
-            <timers:dao-custom ref="test" />
-        </timers:timer-class>
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
+        <timers:timer-class>
+            <timers:dao-custom ref="timerservice.default.DBTimerDAO" />
+            <timers:consumer-config-ref ref="timerservice.default.DefaultConsumerConfig" />
+        </timers:timer-class>
     </timers:timer>
 
 
+    <timers:timer name="TIMER_5">
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+        <timers:timer-class>
+            <timers:dao-insert-delete handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" />
+            <timers:consumer-config firedTimersMaxLimit="1000001" workerCount="3"/>
+        </timers:timer-class>
+    </timers:timer>
+
+    <timers:timer-class name="test.custom.timerclass1">
+        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" />
+        <timers:consumer-config workerCount="7" borderGain="20000" />
+    </timers:timer-class>
+
+    <timers:timer-class name="test.custom.timerclass2">
+        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" >
+            <timers:mapping>
+                <timers:id_field>id</timers:id_field>
+                <timers:state_field>state</timers:state_field>
+                <timers:bucket_id_field>bucket_id</timers:bucket_id_field>
+                <timers:expire_time_field>expire_time</timers:expire_time_field>
+                <timers:creation_point_count_field>creation_point_count</timers:creation_point_count_field>
+            </timers:mapping>
+        </timers:dao-insert-multi-update>
+        <timers:consumer-config workerCount="7" borderGain="20000" />
+    </timers:timer-class>
 
 
 
+    <timers:timer name="TIMER_6">
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+        <timers:timer-class-ref ref="test.custom.timerclass1" />
+    </timers:timer>
 
 
-
-
-
-
-
+    <timers:timer name="TIMER_7">
+        <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="timer-thread" />
+        <core:fixed-batch-size-resource-controller batchSize="1000" />
+        <timers:timer-class-ref ref="test.custom.timerclass2" />
+    </timers:timer>
 </beans>
