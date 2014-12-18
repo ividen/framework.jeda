@@ -4,10 +4,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
-    <import resource="classpath:txn-jta-config.xml"/>
-
-
     <bean id="jtaTransactionManager"
           class="com.atomikos.icatch.jta.AtomikosTransactionManager"
           init-method="init" destroy-method="close">
