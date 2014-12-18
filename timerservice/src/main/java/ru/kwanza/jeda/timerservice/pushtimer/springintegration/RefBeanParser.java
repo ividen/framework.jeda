@@ -14,7 +14,7 @@ public class RefBeanParser extends JedaBeanDefinitionParser {
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 
         String ref = element.getAttribute("ref");
-        if (ref != null && !ref.isEmpty()) {
+        if (!ref.isEmpty()) {
             return (AbstractBeanDefinition) parserContext.getRegistry().getBeanDefinition(ref);
         }
 

@@ -32,12 +32,12 @@ public class TimerClassParser  extends JedaBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
         String name = element.getAttribute("name");
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty()) {
             String timerName = ((Element)element.getParentNode()).getAttribute(name);
-            name = "CLASS" + "_" + timerName.toUpperCase(); //use timerName part of timerClassName for inline class definitions
+            name = "CLASS_"  + timerName.toUpperCase(); //use timerName part of timerClassName for inline class definitions
         }
 
-        Map<Class, JedaBeanDefinition> childBeanDef = ParseHelper.parseChildren(element, parserContext, Arrays.asList(IDBTimerDAO.class, ConsumerConfig.class));
+        Map<Class, JedaBeanDefinition> childBeanDef = ParseHelper.parseChildren(element, parserContext, (List)Arrays.asList(IDBTimerDAO.class, ConsumerConfig.class));
 
         JedaBeanDefinition daoDef = childBeanDef.get(IDBTimerDAO.class);
         JedaBeanDefinition consumerConfigDef = childBeanDef.get(ConsumerConfig.class);

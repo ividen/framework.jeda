@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Required;
  */
 public class TimerMapping {
 
-    private String tableName;
+    private String tableName;  //required field
 
-    private String idField; //не константный тип поля зависит от имплементации делаем get Object Mapper пусть разбирается
-    private String stateField;   //!active === (bucketId ==null && expire_time == null )//fired // interrupted
-    private String bucketIdField;   // тип тот же
-    private String expireTimeField;
-    private String creationPointCountField;
+    private String idField = "id"; //не константный тип поля зависит от имплементации делаем get Object Mapper пусть разбирается
+    private String stateField = "state";   //!active === (bucketId ==null && expire_time == null )//fired // interrupted
+    private String bucketIdField = "bucket_id";   // тип тот же
+    private String expireTimeField = "expire_time";
+    private String creationPointCountField = "creation_point_count";
 
     public String getListOfAll5Fields(){
         return idField + "," + stateField + "," + bucketIdField + "," + expireTimeField + "," + creationPointCountField;
@@ -31,7 +31,7 @@ public class TimerMapping {
     public String getIdField() {
         return idField;
     }
-    @Required
+
     public void setIdField(String idField) {
         this.idField = idField;
     }
@@ -39,7 +39,7 @@ public class TimerMapping {
     public String getStateField() {
         return stateField;
     }
-    @Required
+
     public void setStateField(String stateField) {
         this.stateField = stateField;
     }
@@ -47,7 +47,7 @@ public class TimerMapping {
     public String getBucketIdField() {
         return bucketIdField;
     }
-    @Required
+
     public void setBucketIdField(String bucketIdField) {
         this.bucketIdField = bucketIdField;
     }
@@ -55,7 +55,7 @@ public class TimerMapping {
     public String getExpireTimeField() {
         return expireTimeField;
     }
-    @Required
+
     public void setExpireTimeField(String expireTimeField) {
         this.expireTimeField = expireTimeField;
     }
@@ -63,7 +63,7 @@ public class TimerMapping {
     public String getCreationPointCountField() {
         return creationPointCountField;
     }
-    @Required
+
     public void setCreationPointCountField(String creationPointCountField) {
         this.creationPointCountField = creationPointCountField;
     }

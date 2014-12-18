@@ -41,7 +41,7 @@ public class ParseHelper {
         }
     }
 
-    public static Map<Class, JedaBeanDefinition> parseChildren(Element element, ParserContext parserContext, final List<Class<? extends Object>> acceptedClasses){
+    public static Map<Class, JedaBeanDefinition> parseChildren(Element element, ParserContext parserContext, final List<Class> acceptedClasses){
         final Map<Class, JedaBeanDefinition> result = new HashMap<Class,JedaBeanDefinition>();
 
         parseChildren(element, parserContext, new BeanBuilder() {

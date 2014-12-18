@@ -18,10 +18,10 @@ public class JedaTimersNamespaceHandler extends NamespaceHandlerSupport {
 
 
         registerBeanDefinitionParser("dao-custom", new RefBeanParser());
-        registerBeanDefinitionParser("dao-insert-delete", DAOParser());
-        registerBeanDefinitionParser("dao-insert-single-update", DAOParser());
-        registerBeanDefinitionParser("dao-insert-multi-update", DAOParser());
-        registerBeanDefinitionParser("dao-updating", DAOParser());
+        registerBeanDefinitionParser("dao-insert-delete", new DAOParser());
+        registerBeanDefinitionParser("dao-insert-single-update", new DAOParser());
+        registerBeanDefinitionParser("dao-insert-multi-update", new DAOParser());
+        registerBeanDefinitionParser("dao-updating", new DAOParser());
 
         registerBeanDefinitionParser("mapping", new MappingParser());
 

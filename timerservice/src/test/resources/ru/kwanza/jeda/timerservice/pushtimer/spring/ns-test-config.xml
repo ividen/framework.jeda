@@ -84,7 +84,7 @@
     </timers:timer-class>
 
     <timers:timer-class name="test.custom.timerclass2">
-        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" >
+        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" useOracleOptimizedFetchCursor="true" fetchSize="1001">
             <timers:mapping>
                 <timers:id_field>id</timers:id_field>
                 <timers:state_field>state</timers:state_field>

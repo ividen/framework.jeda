@@ -28,7 +28,7 @@ public class ConsumerConfigParser extends JedaBeanDefinitionParser {
 
         for (String current : attributes) {
             String value = element.getAttribute(current);
-            if (value != null && !value.isEmpty()) {
+            if (!value.isEmpty()) {
                 definitionBuilder.addPropertyValue(current, value);
             }
         }
