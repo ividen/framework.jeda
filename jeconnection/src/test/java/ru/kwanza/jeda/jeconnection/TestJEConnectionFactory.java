@@ -1,12 +1,14 @@
 package ru.kwanza.jeda.jeconnection;
 
 
-import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
-import ru.kwanza.toolbox.SerializationHelper;
 import com.sleepycat.je.*;
 import junit.framework.TestCase;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.toolbox.SerializationHelper;
 
 import javax.transaction.RollbackException;
 import java.io.File;
@@ -30,7 +32,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -41,9 +43,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -63,7 +65,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status2);
 
         ctx.close();
     }
@@ -129,7 +131,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getTxConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -140,13 +142,13 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
 
         FileLock lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 
         lock0.release();
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getTxConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -166,7 +168,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status2);
         lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 
         lock0.release();
@@ -183,7 +185,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         Database db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
@@ -192,9 +194,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -214,7 +216,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status2);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
@@ -227,7 +229,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -238,9 +240,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().rollback();
+        sm.getTransactionManager().rollback(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -256,7 +258,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor1.getNext(key1, value1, LockMode.DEFAULT));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status2);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
@@ -268,7 +270,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -276,18 +278,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            sm.getTransactionManager().begin();
+            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().commit();
+            sm.getTransactionManager().commit(status2);
         }
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -303,7 +305,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         cursor.close();
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
@@ -315,7 +317,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -323,18 +325,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            sm.getTransactionManager().begin();
+            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().rollback();
+            sm.getTransactionManager().rollback(status2);
         }
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -346,7 +348,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor.getNext(key, value, LockMode.DEFAULT));
         cursor.close();
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
@@ -358,7 +360,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
         IJedaManager sm = ctx.getBean(IJedaManager.class);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -366,18 +368,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            sm.getTransactionManager().begin();
+            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().commit();
+            sm.getTransactionManager().commit(status2);
         }
 
-        sm.getTransactionManager().rollback();
+        sm.getTransactionManager().rollback(status1);
 
-        sm.getTransactionManager().begin();
+        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -389,7 +391,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor.getNext(key, value, LockMode.DEFAULT));
         cursor.close();
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
@@ -440,14 +442,14 @@ public abstract class TestJEConnectionFactory extends TestCase {
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
-        sm.getTransactionManager().begin();
+        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
 
-        sm.getTransactionManager().commit();
+        sm.getTransactionManager().commit(status1);
     }
 
     public void testGetTxConection() throws Exception, RollbackException {
