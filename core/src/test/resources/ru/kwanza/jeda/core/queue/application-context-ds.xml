@@ -6,10 +6,9 @@
 
     <import resource="classpath:txn-ds-config.xml"/>
 
-    <bean id="transactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager">
-        <constructor-arg ref="txn.ITransactionManager"/>
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
     </bean>
-
 
     <bean id="propertyPlaceholderConfigurer1"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -20,12 +19,14 @@
         </property>
     </bean>
 
-
-    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${jdbc.driverClass}"/>
-        <property name="url" value="${jdbc.connectionUrl}"/>
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource">
+            <bean id="targetDataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </bean>
+        </property>
     </bean>
-
 </beans>

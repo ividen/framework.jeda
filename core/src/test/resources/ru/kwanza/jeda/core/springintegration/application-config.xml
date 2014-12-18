@@ -6,14 +6,17 @@
                http://www.springframework.org/schema/beans/spring-beans.xsd
                http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
-    <bean id="jtaTransactionManager"
-          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
-          init-method="init" destroy-method="close">
-        <property name="forceShutdown" value="true"/>
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <constructor-arg index="0">
+            <bean id="jtaTransactionManager"
+                  class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+                  init-method="init" destroy-method="close">
+                <property name="forceShutdown" value="true"/>
+            </bean>
+        </constructor-arg>
     </bean>
 
     <jeda-core:stage name="TestStage1">

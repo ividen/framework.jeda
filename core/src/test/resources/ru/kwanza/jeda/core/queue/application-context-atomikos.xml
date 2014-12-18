@@ -14,9 +14,7 @@
         <property name="forceShutdown" value="true"/>
     </bean>
 
-
-    <bean id="transactionManager" class="ru.kwanza.jeda.core.tm.BaseTransactionManager">
-        <constructor-arg ref="txn.ITransactionManager"/>
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <constructor-arg ref="jtaTransactionManager"/>
     </bean>
-
 </beans>

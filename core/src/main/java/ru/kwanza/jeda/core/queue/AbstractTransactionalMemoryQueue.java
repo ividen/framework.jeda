@@ -94,7 +94,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     }
 
     protected void doPut(Collection<E> events) throws SinkException.Clogged {
-        TxSync txSync = getCurrentTx();
+        TxSync txSync = getTxSync();
 
         int s = size.get() + getTxPutsCount();
         if (events.size() + s > maxSize) {
@@ -117,7 +117,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         if (size() - getTxTakesCount() == 0) {
             return null;
         }
-        TxSync txSync = getCurrentTx();
+        TxSync txSync = getTxSync();
 
         int c = Math.min(size.get() - getTxTakesCount(), count);
         ArrayList<E> result = new ArrayList<E>(c);
@@ -155,7 +155,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
     }
 
     protected Collection<E> doTryPut(Collection<E> events) {
-        TxSync txSync = getCurrentTx();
+        TxSync txSync = getTxSync();
         MutableEventCollection result = new MutableEventCollection();
         if (txSync == null) {
             int delta = 0;
@@ -186,7 +186,7 @@ public abstract class AbstractTransactionalMemoryQueue<E extends IEvent> extends
         return result;
     }
 
-    public TxSync getCurrentTx() {
+    public TxSync getTxSync() {
         return TxSync.getTxSync(this);
     }
 

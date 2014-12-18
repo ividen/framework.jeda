@@ -1,10 +1,9 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.springframework.transaction.PlatformTransactionManager;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import junit.framework.TestSuite;
 
 /**
@@ -12,7 +11,7 @@ import junit.framework.TestSuite;
  */
 public class TestTransactionalMemoryQueueWithoutTrx extends TestEventQueue {
     public static class NonTransactionalJedaManager implements IJedaManager {
-        public ITransactionManagerInternal getTransactionManager() {
+        public PlatformTransactionManager getTransactionManager() {
             return null;
         }
 

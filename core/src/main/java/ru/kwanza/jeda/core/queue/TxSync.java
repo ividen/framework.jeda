@@ -31,6 +31,7 @@ public class TxSync<E extends IEvent> implements TransactionSynchronization {
             TxSync<E> result = (TxSync<E>) TransactionSynchronizationManager.getResource(memoryQueue);
             if (result == null) {
                 result = new TxSync<E>(memoryQueue);
+                TransactionSynchronizationManager.bindResource(memoryQueue,result);
                 TransactionSynchronizationManager.registerSynchronization(result);
             }
             return result;
@@ -41,12 +42,12 @@ public class TxSync<E extends IEvent> implements TransactionSynchronization {
 
     @Override
     public void suspend() {
-        System.out.println("suspend");
+        TransactionSynchronizationManager.unbindResourceIfPossible(memoryQueue);
     }
 
     @Override
     public void resume() {
-        System.out.println("resume");
+        TransactionSynchronizationManager.bindResource(memoryQueue,this);
     }
 
     @Override
@@ -59,7 +60,7 @@ public class TxSync<E extends IEvent> implements TransactionSynchronization {
     }
 
     public void beforeCompletion() {
-        TransactionSynchronizationManager.unbindResource(memoryQueue);
+        TransactionSynchronizationManager.unbindResourceIfPossible(memoryQueue);
     }
 
     @Override
