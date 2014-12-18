@@ -8,6 +8,7 @@ import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
+import ru.kwanza.jeda.timerservice.pushtimer.common.Inserter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersMemoryStorage;
 import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersStorageRepository;
@@ -22,7 +23,6 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "node2-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Ignore
 public class ManualTestNode2 extends AbstractJUnit4SpringContextTests {
 
     @Resource
@@ -42,7 +42,6 @@ public class ManualTestNode2 extends AbstractJUnit4SpringContextTests {
     private static final long NODE_ID = 2;
 
     @Test
-    @Ignore
     public void multiThreadedTest() throws Exception {
         Thread.sleep(1000);
         long startTime = System.currentTimeMillis();

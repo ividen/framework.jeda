@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.timerservice.pushtimer.manual;
+package ru.kwanza.jeda.timerservice.pushtimer.spring;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -21,9 +21,9 @@ import java.util.concurrent.*;
  * @author Michael Yeskov
  */
 
-@ContextConfiguration(locations = "node1-test-config.xml")
+@ContextConfiguration(locations = "ns-test-node2-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ManualTestNode1 extends AbstractJUnit4SpringContextTests {
+public class NSPerfTestNode2 extends AbstractJUnit4SpringContextTests {
 
     @Resource
     private IJedaManager jedaManager;
@@ -37,9 +37,7 @@ public class ManualTestNode1 extends AbstractJUnit4SpringContextTests {
     @Resource
     private TimerClassRepository timerClassRepository;
 
-    private static final String timerName = "DEFAULT_TIMER";
-
-    private static final long NODE_ID = 1;
+    private static final long NODE_ID = 2;
 
     @Test
     public void multiThreadedTest() throws Exception {
@@ -48,24 +46,15 @@ public class ManualTestNode1 extends AbstractJUnit4SpringContextTests {
         System.out.println("MultiThreadedTest start");
 
         BlockingQueue q = new ArrayBlockingQueue(1000);
-        Executor executor = new ThreadPoolExecutor(10, 10, 10000, TimeUnit.MILLISECONDS , q);
+        Executor executor = new ThreadPoolExecutor(20, 20, 10000, TimeUnit.MILLISECONDS , q);
 
-        StatisticsCalculator.insert.firstStart();
-        StatisticsCalculator.process.firstStart();
-
-        for (int i =0 ; i < 4; i++) {
-            executor.execute(new Inserter(jedaManager, timerManager, i * 10 + NODE_ID));
+        for (int i =1 ; i <= 7; i++) {
+            executor.execute(new Inserter("TIMER_" + i ,jedaManager, timerManager, i * 10 + NODE_ID));
         }
 
-        FiredTimersMemoryStorage storage = firedTimersStorageRepository.getFiredTimersStorage(timerClassRepository.getClassByTimerName(timerName));
 
-        for (int i=0; i<100000000; i++) {
-            StatisticsCalculator.insert.start();
-            StatisticsCalculator.process.start();
-            Thread.sleep(10000);
-          //  StatisticsCalculator.insert.stopAndPrint();
-          //  StatisticsCalculator.process.stopAndPrint();
-        }
+        Thread.sleep(1000000000);
+
 
         System.out.println("MultiThreadedTest end. Time=" + (System.currentTimeMillis() - startTime));
     }

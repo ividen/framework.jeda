@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.timerservice.pushtimer.manual;
+package ru.kwanza.jeda.timerservice.pushtimer.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ import java.util.List;
 public class Inserter implements Runnable{
     private static final Logger logger = LoggerFactory.getLogger(Inserter.class);
     private static final long ID_SHIFT = 1000;
-    private static final String timerName = "DEFAULT_TIMER";
+    private String timerName = "DEFAULT_TIMER";
 
     private IJedaManager jedaManager;
     private ITimerManager timerManager;
@@ -29,6 +29,11 @@ public class Inserter implements Runnable{
         this.jedaManager = jedaManager;
         this.timerManager = timerManager;
         this.runnerId = runnerId;
+    }
+
+    public Inserter(String timerName, IJedaManager jedaManager, ITimerManager timerManager, long runnerId) {
+        this(jedaManager, timerManager, runnerId);
+        this.timerName = timerName;
     }
 
     @Override
@@ -54,7 +59,7 @@ public class Inserter implements Runnable{
         List<NewTimer> timers = new ArrayList<NewTimer>(1000);
         ITransactionManagerInternal tm = jedaManager.getTransactionManager();
 
-        for (int step = 1; step <= 10; step++) {
+        for (int step = 1; step <= 3; step++) {
             timers.clear();
             for (int i=0; i<1000; i++) {
                 currentId++;

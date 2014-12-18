@@ -11,6 +11,8 @@ import java.util.Set;
  */
 public interface ITimerHandleMapper {
     public static final  String NOT_CONFIGURED_ERROR = "This handle is not configured to work with timerName = ";
+    public static final  String FIX_DB_ERROR = "Unknown timer name. Timer was reconfigured without database migration. Please fix database.";
+
 
     public Object toId(TimerHandle timerHandle);
     public TimerHandle fromRs(ResultSet rs, int pz) throws SQLException;

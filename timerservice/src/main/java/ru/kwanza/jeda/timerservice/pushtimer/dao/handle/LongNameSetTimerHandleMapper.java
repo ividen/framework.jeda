@@ -28,7 +28,11 @@ public class LongNameSetTimerHandleMapper implements ITimerHandleMapper {
     @Override
     public Object toId(TimerHandle timerHandle) {
         lazyLoad();
-        return  (Long.valueOf(timerHandle.getTimerId()) * SHIFT) + timerNameToKey.get(timerHandle.getTimerName());
+        Long timerNameKey = timerNameToKey.get(timerHandle.getTimerName());
+        if (timerNameKey == null) {
+            throw new RuntimeException(FIX_DB_ERROR);
+        }
+        return  (Long.valueOf(timerHandle.getTimerId()) * SHIFT) + timerNameKey;
     }
 
     @Override
@@ -38,6 +42,9 @@ public class LongNameSetTimerHandleMapper implements ITimerHandleMapper {
 
         String timerId = String.valueOf(id / SHIFT);
         String timerName = timerKeyToName.get(id % SHIFT);
+        if (timerName == null) {
+            throw new RuntimeException(FIX_DB_ERROR);
+        }
         return new TimerHandle(timerName, timerId );
     }
 

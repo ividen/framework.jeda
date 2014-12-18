@@ -17,9 +17,18 @@
 
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
 
-    <import resource="classpath:timerservice-default-timer-config.xml"/>
+    <import resource="classpath:timerservice-config-with-defaults.xml"/>
 
     <context:property-placeholder location="classpath:db.properties, classpath:test.properties"/>
+
+    <bean id="repository.configurator" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepositoryConfigurator" >
+        <property name="timerNameToClass">
+            <map>
+                <entry key="DEFAULT_TIMER" value-ref="timerservice.default.DefaultTimerClass" />
+            </map>
+        </property>
+
+    </bean>
 
     <!--
    <import resource="classpath:txn-jta-config.xml"/>
