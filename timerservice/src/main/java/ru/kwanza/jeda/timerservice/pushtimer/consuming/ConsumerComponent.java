@@ -2,6 +2,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.consuming;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.Phased;
 import org.springframework.stereotype.Component;
 import ru.kwanza.jeda.clusterservice.IClusterService;
 import ru.kwanza.jeda.clusterservice.IClusteredComponent;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Michael Yeskov
  */
 @Component
-public class ConsumerComponent implements IClusteredComponent {
+public class ConsumerComponent implements IClusteredComponent, Phased {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerComponent.class);
 
@@ -134,10 +135,10 @@ public class ConsumerComponent implements IClusteredComponent {
         logger.info("Component stop exit");
     }
 
-    /*
+
     @Override
-    public int getPhase() { //after FiredTimersStorageRepository //todo: may be remove this
-        return 11;
+    public int getPhase() { //after all timer classes register
+        return 100;
     }
-    */
+
 }

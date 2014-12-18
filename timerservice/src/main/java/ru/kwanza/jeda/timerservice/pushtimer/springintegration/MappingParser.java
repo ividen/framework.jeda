@@ -7,7 +7,7 @@ import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
-import ru.kwanza.jeda.timerservice.entitytimer.TimerMapping;
+import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.TimerMapping;
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ public class MappingParser  extends JedaBeanDefinitionParser {
 
         List<Element> childElements = DomUtils.getChildElements(element);
         for (Element e : childElements) {
-            String tagName = e.getNodeName();
+            String tagName = e.getLocalName();
             String fieldValue = e.getTextContent();
 
             definitionBuilder.addPropertyValue(toPropertyName(tagName), fieldValue);

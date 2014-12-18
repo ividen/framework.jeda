@@ -3,8 +3,8 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <changeSet author="myeskov" id="TIMER_SERVICE-2-1">
-        <createTable tableName="JEDA_TIMERS">
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-${table.name}-1">
+        <createTable tableName="${table.name}">
             <column name="id" type="BIGINT"/>
             <column name="state" type="BIGINT"/>
             <column name="bucket_id" type="BIGINT"/>
@@ -14,16 +14,16 @@
 
     </changeSet>
 
-    <changeSet author="myeskov" id="TIMER_SERVICE-2-2">
-        <addPrimaryKey tableName="JEDA_TIMERS"
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-${table.name}-2">
+        <addPrimaryKey tableName="${table.name}"
                        columnNames="id"
-                       constraintName="PK_JEDA_TIMERS"/>
+                       constraintName="PK_${table.name}"/>
     </changeSet>
 
 
-    <changeSet author="myeskov" id="TIMER_SERVICE-2-3">
-        <createIndex tableName="JEDA_TIMERS"
-                     indexName="IDX_JEDA_TIMERS_SEARCH"
+    <changeSet author="myeskov" id="TIMER_SERVICE-2-${table.name}-3">
+        <createIndex tableName="${table.name}"
+                     indexName="IDX_${table.name}_SEARCH"
                      unique="false">
             <column name="bucket_id" type="BIGINT"/>
             <column name="expire_time" type="BIGINT"/>

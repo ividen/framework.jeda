@@ -19,9 +19,9 @@
 
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
 
-    <import resource="classpath:timerservice-default-timer-config.xml"/>
+    <import resource="classpath:timerservice-config-with-defaults.xml"/>
 
-    <context:property-placeholder location="classpath:db.properties, classpath:test.properties"/>
+    <context:property-placeholder location="classpath:db.properties, classpath:node1.properties"/>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <constructor-arg name="targetDataSource">
@@ -37,6 +37,70 @@
                 <property name="maxIdle" value="70" />
             </bean>
         </constructor-arg>
+    </bean>
+
+    <bean id="test.custom.DAO"
+          class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertMultiUpdateDBTimerDAO">
+        <property name="mapping" ref="test.custom.Mapping"/>
+        <property name="handleMapper" ref="test.custom.HandleMapper" />
+        <property name="useOracleOptimizedFetchCursor" value="true"/>
+        <property name="fetchSize" value="1000" />
+    </bean>
+
+    <bean id="test.custom.Mapping"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.TimerMapping">
+        <property name="tableName" value="JEDA_TIMERS_C1"/>
+        <property name="idField" value="id" />
+        <property name="stateField" value="state" />
+        <property name="bucketIdField" value="bucket_id" />
+        <property name="expireTimeField" value="expire_time" />
+        <property name="creationPointCountField"  value="creation_point_count" />
+    </bean>
+
+    <bean id="test.custom.HandleMapper"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper"/>
+
+
+    <bean id="test.custom.liquibase.1" class="liquibase.integration.spring.SpringLiquibase">
+        <!-- provided by client -->
+        <property name="dataSource" ref="dataSource" />
+        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLogParameters">
+            <map>
+                <entry key="table.name" value="JEDA_TIMERS_C1"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="test.custom.liquibase.2" class="liquibase.integration.spring.SpringLiquibase">
+        <!-- provided by client -->
+        <property name="dataSource" ref="dataSource" />
+        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLogParameters">
+            <map>
+                <entry key="table.name" value="JEDA_TIMERS_C2"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="test.custom.liquibase.3" class="liquibase.integration.spring.SpringLiquibase">
+        <!-- provided by client -->
+        <property name="dataSource" ref="dataSource" />
+        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLogParameters">
+            <map>
+                <entry key="table.name" value="JEDA_TIMERS_C3"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="test.custom.liquibase.4" class="liquibase.integration.spring.SpringLiquibase">
+        <!-- provided by client -->
+        <property name="dataSource" ref="dataSource" />
+        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLogParameters">
+            <map>
+                <entry key="table.name" value="JEDA_TIMERS_C4"/>
+            </map>
+        </property>
     </bean>
 
 
@@ -62,29 +126,28 @@
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class>
-            <timers:dao-custom ref="timerservice.default.DBTimerDAO" />
+            <timers:dao-custom ref="test.custom.DAO" />
             <timers:consumer-config-ref ref="timerservice.default.DefaultConsumerConfig" />
         </timers:timer-class>
     </timers:timer>
-
 
     <timers:timer name="TIMER_5">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class>
-            <timers:dao-insert-delete handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" />
+            <timers:dao-insert-delete handleMapper="LongNameSet" tableName="JEDA_TIMERS_C2" />
             <timers:consumer-config firedTimersMaxLimit="1000001" workerCount="3"/>
         </timers:timer-class>
     </timers:timer>
 
     <timers:timer-class name="test.custom.timerclass1">
-        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" />
+        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_C3" />
         <timers:consumer-config workerCount="7" borderGain="20000" />
     </timers:timer-class>
 
     <timers:timer-class name="test.custom.timerclass2">
-        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_CUSTOM" useOracleOptimizedFetchCursor="true" fetchSize="1001">
+        <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_C4" useOracleOptimizedFetchCursor="true" fetchSize="1001">
             <timers:mapping>
                 <timers:id_field>id</timers:id_field>
                 <timers:state_field>state</timers:state_field>
@@ -96,21 +159,18 @@
         <timers:consumer-config workerCount="7" borderGain="20000" />
     </timers:timer-class>
 
-
-    <!--
     <timers:timer name="TIMER_6">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass1" />
     </timers:timer>
-     -->
-     <!--
+
     <timers:timer name="TIMER_7">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="timer-thread" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass2" />
     </timers:timer>
-    -->
+
 </beans>

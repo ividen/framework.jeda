@@ -1,21 +1,19 @@
 package ru.kwanza.jeda.timerservice.pushtimer.springintegration;
 
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import ru.kwanza.jeda.api.IEventProcessor;
-import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.internal.*;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.util.StringUtils;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 import ru.kwanza.jeda.core.resourcecontroller.FixedBatchSizeResourceController;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
-import ru.kwanza.jeda.core.springintegration.SystemStageFactory;
 import ru.kwanza.jeda.core.threadmanager.stage.StageThreadManager;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.processor.ExpireTimeProcessor;
+import ru.kwanza.jeda.timerservice.pushtimer.springintegration.refs.RefHolder;
+import ru.kwanza.jeda.timerservice.pushtimer.springintegration.refs.TimerClassRef;
 
 /**
  * @author Michael Yeskov
@@ -25,6 +23,7 @@ class TimerBeanBuilder implements BeanBuilder{
     private JedaBeanDefinition resourceControllerDef = null;
     private JedaBeanDefinition threadManagerDef = null;
     private JedaBeanDefinition timerClassDef = null;
+    private JedaBeanDefinition timerClassRefHolderDef = null;
     private String name;
     private ParserContext parserContext;
 
@@ -43,8 +42,9 @@ class TimerBeanBuilder implements BeanBuilder{
             threadManagerDef = beanDefinition;
         } else if (TimerClass.class.isAssignableFrom(beanDefinition.getType())) {
             timerClassDef = beanDefinition;
-        }
-        else {
+        } else if (TimerClassRef.class.isAssignableFrom(beanDefinition.getType())) {
+            timerClassRefHolderDef = beanDefinition;
+        } else {
             throw new RuntimeException("Unsupported bean definition!");
         }
     }
@@ -66,6 +66,8 @@ class TimerBeanBuilder implements BeanBuilder{
         String classId = "timerservice.default.DefaultTimerClass";
         if (timerClassDef != null) {
             classId = timerClassDef.getId();
+        } else if (timerClassRefHolderDef != null) {
+            classId = (String)timerClassRefHolderDef.getPropertyValues().getPropertyValue("ref").getValue();
         }
         definitionBuilder.addPropertyReference("timerClass", classId);
     }

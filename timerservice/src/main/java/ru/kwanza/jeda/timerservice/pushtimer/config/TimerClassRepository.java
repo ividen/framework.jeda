@@ -1,6 +1,5 @@
 package ru.kwanza.jeda.timerservice.pushtimer.config;
 
-import org.springframework.context.Phased;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
 
@@ -10,26 +9,10 @@ import java.util.*;
  * @author Michael Yeskov
  */
 public class TimerClassRepository{
-    private Set<TimerClass> registeredTimerClasses;
+    private Set<TimerClass> registeredTimerClasses = new HashSet<TimerClass>();
     private Map<String, TimerClass> timerNameToClass = new HashMap<String, TimerClass>();
 
     private Set<IDBTimerDAO> allDAO = new HashSet<IDBTimerDAO>(); //just to check for duplicate "by reference"
-
-    public TimerClassRepository(Set<TimerClass> registeredTimerClasses) {
-        for  (TimerClass currentClass : registeredTimerClasses) {
-            if (allDAO.contains(currentClass.getDbTimerDAO())) {
-                throw new RuntimeException("One DAO was registered in two TimerClasses. " + currentClass);
-            }
-            allDAO.add(currentClass.getDbTimerDAO());
-            for (String timerName  : currentClass.getCompatibleTimerNames()){
-                if (timerNameToClass.containsKey(timerName)) {
-                    throw new RuntimeException("One TimerName was registered in two TimerDAO. " + currentClass);
-                }
-                timerNameToClass.put(timerName, currentClass);
-            }
-        }
-        this.registeredTimerClasses = registeredTimerClasses;
-    }
 
     public Map<String, TimerClass> getTimerNameToClass() {
         return timerNameToClass;
@@ -37,15 +20,6 @@ public class TimerClassRepository{
 
     public Set<TimerClass> getRegisteredTimerClasses(){
         return registeredTimerClasses;
-    }
-
-    public void check(Collection<? extends TimerHandle> timers) {
-        for (TimerHandle current : timers) {
-            if (timerNameToClass.get(current.getTimerName()) == null) {
-                throw new RuntimeException("Timer with name " + current.getTimerName() + " has no mapping to timer class");
-            }
-        }
-
     }
 
     public TimerClass getClassByTimerName(String timerName) {
@@ -75,7 +49,20 @@ public class TimerClassRepository{
         return (Map)result;
     }
 
-    public void registerNameToClassBinding(String name, TimerClass timerClass) {
-        //TODO: implement
+    public void registerNameToClassBinding(String timerName, TimerClass timerClass) {
+        if (!registeredTimerClasses.contains(timerClass)) {
+            if (allDAO.contains(timerClass.getDbTimerDAO())) {
+                throw new RuntimeException("One DAO was registered in two TimerClasses. TimerClass = " + timerClass);
+            }
+            allDAO.add(timerClass.getDbTimerDAO());
+            registeredTimerClasses.add(timerClass);
+        }
+
+        if (timerNameToClass.containsKey(timerName)) {
+            throw new RuntimeException("Timer with name =   "+ timerName + " already registered");
+        }
+
+        timerClass.registerCompatibleTimer(timerName);
+        timerNameToClass.put(timerName, timerClass);
     }
 }

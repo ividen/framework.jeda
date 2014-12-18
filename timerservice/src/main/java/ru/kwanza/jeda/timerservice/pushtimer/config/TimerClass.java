@@ -72,4 +72,8 @@ public class TimerClass {
     public void setConsumerConfig(ConsumerConfig consumerConfig) {
         this.consumerConfig = consumerConfig;
     }
+
+    public synchronized void registerCompatibleTimer(String timerName) {
+        dbTimerDAO.registerCompatibleTimer(timerName);
+    }
 }

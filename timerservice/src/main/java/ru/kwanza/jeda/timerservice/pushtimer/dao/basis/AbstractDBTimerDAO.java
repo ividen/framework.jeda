@@ -199,6 +199,10 @@ public abstract class AbstractDBTimerDAO implements IDBTimerDAO {
         return handleMapper.getCompatibleTimerNames();
     }
 
+    public void registerCompatibleTimer(String timerName) {
+        handleMapper.registerCompatibleTimer(timerName);
+    }
+
     @Override
     public long getFetchSize() {
         return fetchSize;

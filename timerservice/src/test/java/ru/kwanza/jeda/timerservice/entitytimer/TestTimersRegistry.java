@@ -23,7 +23,7 @@ public class TestTimersRegistry extends Assert {
     }
 
     private void internalSingleTimerTest(Object object) {
-        List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
+        List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
 
         assertEquals(1, result.size());
         assertEquals(IEntityTimerManager.DEFAULT_TIMER, result.get(0).getTimerName());
@@ -59,7 +59,7 @@ public class TestTimersRegistry extends Assert {
         EntityWithTimer4Child entityWithTimer4Child = new EntityWithTimer4Child();
 
         try {
-            List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWithTimer4Child);
+            List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWithTimer4Child);
             fail("Default timer in EntityWithTimer4Child must be undefined");
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("must be declared in")) {
@@ -67,7 +67,7 @@ public class TestTimersRegistry extends Assert {
             }
         }
 
-        List<TimerMapping> result = null;
+        List<EntityTimerMapping> result = null;
 
         result = timersRegistry.getTimerMappings("timer1", entityWithTimer4Child);
         assertEquals("timer1", result.get(0).getPropertyName());
@@ -103,7 +103,7 @@ public class TestTimersRegistry extends Assert {
         EntityWrongTimerType2 entityWrongTimerType2 = new EntityWrongTimerType2();
 
         try {
-            List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWrongTimerType1);
+            List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWrongTimerType1);
             fail();
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("must have java.lang.Long type")) {
@@ -113,7 +113,7 @@ public class TestTimersRegistry extends Assert {
 
 
         try {
-            List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWrongTimerType2);
+            List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityWrongTimerType2);
             fail();
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("must have java.lang.Long type")) {
@@ -125,7 +125,7 @@ public class TestTimersRegistry extends Assert {
     @Test
     public void testEntityDifferentTypesGetSet() throws Exception {
         EntityDifferentTypesGetSet entityDifferentTypesGetSet = new EntityDifferentTypesGetSet();
-        List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityDifferentTypesGetSet);
+        List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, entityDifferentTypesGetSet);
         Property property = result.get(0).getEntityProperty();
         assertEquals(null, property.value(entityDifferentTypesGetSet));
         property.set(entityDifferentTypesGetSet, Long.valueOf(123));
@@ -166,7 +166,7 @@ public class TestTimersRegistry extends Assert {
 
     private void internalTestDuplicateTimerName(Object object, String timerName) {
         try {
-            List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
+            List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
             fail();
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("@EntityTimer with name '" + timerName)) {
@@ -182,7 +182,7 @@ public class TestTimersRegistry extends Assert {
 
     private void internalTestDuplicateTimerOnProperty(Object object, String propertyName) {
         try {
-            List<TimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
+            List<EntityTimerMapping> result = timersRegistry.getTimerMappings(IEntityTimerManager.DEFAULT_TIMER, object);
             fail();
         } catch (RuntimeException e) {
             if (!e.getMessage().contains("Property '" + propertyName +"' has duplicate @EntityTimer annotation for class")) {

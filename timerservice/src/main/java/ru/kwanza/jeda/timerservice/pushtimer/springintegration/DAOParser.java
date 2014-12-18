@@ -1,31 +1,13 @@
 package ru.kwanza.jeda.timerservice.pushtimer.springintegration;
 
-import com.sun.tools.internal.xjc.api.Mapping;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.xml.NamespaceHandler;
-import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.ParserContext;
-import org.springframework.beans.factory.xml.XmlReaderContext;
-import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
-import ru.kwanza.jeda.api.IEventProcessor;
-import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.internal.IResourceController;
-import ru.kwanza.jeda.api.internal.IThreadManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerCreator;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinitionParser;
-import ru.kwanza.jeda.timerservice.entitytimer.TimerMapping;
-import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
-import ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerConfig;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
-import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertDeleteDBTimerDAO;
-import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertMultiUpdateDBTimerDAO;
-import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.InsertSingleUpdateDBTimerDAO;
-import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.UpdatingDBTimerDAO;
+import ru.kwanza.jeda.timerservice.pushtimer.dao.basis.*;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.handle.ITimerHandleMapper;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongConstantNameTimerHandleMapper;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper;
@@ -42,12 +24,18 @@ public class DAOParser  extends JedaBeanDefinitionParser {
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        String timerName = ((Element)element.getParentNode().getParentNode()).getAttribute("name");
+        String name = ((Element)element.getParentNode()).getAttribute("name").toUpperCase();
+        if (name.isEmpty()) {
+            name = ((Element)element.getParentNode().getParentNode()).getAttribute("name").toUpperCase();
+        }
+        if (name.isEmpty()) {
+            throw new RuntimeException("Can't find name");
+        }
 
-        Class daoClass = getDAOClass(element.getNodeName());
+        Class daoClass = getDAOClass(element.getLocalName());
 
-        JedaBeanDefinition handleMapperDef = getHandleMapperDef(element, parserContext, timerName);
-        JedaBeanDefinition timerMappingDef = getTimerMappingDef(element, parserContext, timerName);
+        JedaBeanDefinition handleMapperDef = getHandleMapperDef(element, parserContext, name);
+        JedaBeanDefinition timerMappingDef = getTimerMappingDef(element, parserContext, name);
 
         String fetchSize = element.getAttribute("fetchSize");
         String useOracleOptimizedFetchCursor = element.getAttribute("useOracleOptimizedFetchCursor");
@@ -62,7 +50,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
             defBuilder.addPropertyValue("useOracleOptimizedFetchCursor", useOracleOptimizedFetchCursor);
         }
 
-        return new JedaBeanDefinition("DAO_"  + timerName, IDBTimerDAO.class, defBuilder.getBeanDefinition());
+        return new JedaBeanDefinition("DAO_" + name, IDBTimerDAO.class, defBuilder.getBeanDefinition());
     }
 
     private Class getDAOClass(String nodeName) {
@@ -80,7 +68,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
         }
     }
 
-    private JedaBeanDefinition getTimerMappingDef(Element element, ParserContext parserContext, String timerName) {
+    private JedaBeanDefinition getTimerMappingDef(Element element, ParserContext parserContext, String name) {
         String tableName = element.getAttribute("tableName");
         if (tableName.isEmpty()) {
             throw new RuntimeException("tableName is required property for DAO");
@@ -92,13 +80,13 @@ public class DAOParser  extends JedaBeanDefinitionParser {
         if (timerMappingDef == null) {
             BeanDefinitionBuilder defBuilderMapping= BeanDefinitionBuilder.genericBeanDefinition(TimerMapping.class);
             defBuilderMapping.addPropertyValue("tableName", tableName);
-            timerMappingDef = new JedaBeanDefinition( "TIMER_MAPPING_" + timerName.toUpperCase(), TimerMapping.class, defBuilderMapping.getBeanDefinition());
+            timerMappingDef = new JedaBeanDefinition( "TIMER_MAPPING_" + name, TimerMapping.class, defBuilderMapping.getBeanDefinition());
             parserContext.getRegistry().registerBeanDefinition(timerMappingDef.getId(), timerMappingDef);
         }
         return timerMappingDef;
     }
 
-    private JedaBeanDefinition getHandleMapperDef(Element element, ParserContext parserContext, String timerName) {
+    private JedaBeanDefinition getHandleMapperDef(Element element, ParserContext parserContext, String name) {
         Class handleMapperClass;
         String handleMapper = element.getAttribute("handleMapper");
         if (!handleMapper.isEmpty()) {
@@ -119,7 +107,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
             throw new RuntimeException("handleMapper is required attribute for DAO");
         }
         BeanDefinitionBuilder defBuilderHandleMapper = BeanDefinitionBuilder.genericBeanDefinition(handleMapperClass);
-        JedaBeanDefinition result = new JedaBeanDefinition("HANDLE_MAPPER_" + timerName.toUpperCase() , ITimerHandleMapper.class, defBuilderHandleMapper.getBeanDefinition());
+        JedaBeanDefinition result = new JedaBeanDefinition("HANDLE_MAPPER_" + name , ITimerHandleMapper.class, defBuilderHandleMapper.getBeanDefinition());
         parserContext.getRegistry().registerBeanDefinition(result.getId(), result);
         return result;
     }

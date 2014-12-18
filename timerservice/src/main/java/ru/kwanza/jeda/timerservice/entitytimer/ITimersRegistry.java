@@ -7,6 +7,6 @@ import java.util.List;
  */
 public interface ITimersRegistry {
 
-    public List<TimerMapping> getTimerMappings(String timerName, Object... entityWithTimer);
+    public List<EntityTimerMapping> getTimerMappings(String timerName, Object... entityWithTimer);
 
 }

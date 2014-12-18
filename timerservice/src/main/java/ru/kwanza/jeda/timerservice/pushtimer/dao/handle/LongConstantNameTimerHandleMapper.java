@@ -32,22 +32,21 @@ public class LongConstantNameTimerHandleMapper implements ITimerHandleMapper {
     }
 
     @Override
+    public int getSQLType() {
+        return Types.BIGINT;
+    }
+
+    @Override
     public Set<String> getCompatibleTimerNames() {
         return compatibleTimerNames;
     }
 
-    public String getTimerName() {
-        return timerName;
-    }
-
-    @Required
-    public void setTimerName(String timerName) {
+    @Override
+    public void registerCompatibleTimer(String timerName) {
+        if (this.timerName != null) {
+            throw new RuntimeException("This handle mapper can work only with single timer name");
+        }
         this.timerName = timerName;
         compatibleTimerNames.add(timerName);
-    }
-
-    @Override
-    public int getSQLType() {
-        return Types.BIGINT;
     }
 }

@@ -5,12 +5,12 @@ import ru.kwanza.toolbox.fieldhelper.Property;
 /**
  * @author Michael Yeskov
  */
-public class TimerMapping {
+public class EntityTimerMapping {
     private String timerName;
     private String propertyName;
     private Property<Object, Long> entityProperty;
 
-    public TimerMapping(String timerName, String propertyName, Property<Object, Long> entityProperty) {
+    public EntityTimerMapping(String timerName, String propertyName, Property<Object, Long> entityProperty) {
         this.timerName = timerName;
         this.propertyName = propertyName;
         this.entityProperty = entityProperty;

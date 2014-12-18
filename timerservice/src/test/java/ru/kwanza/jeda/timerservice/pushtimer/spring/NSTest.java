@@ -30,9 +30,10 @@ public class NSTest extends AbstractJUnit4SpringContextTests {
 
     @Test
     public void simpleConfigTest() throws Exception {
-        IStage stage1 = jedaManager.getStage("DEFAULT_TIMER");
+//        IStage stage1 = jedaManager.getStage("DEFAULT_TIMER");
       //  IStage stage2 = jedaManager.getStage("DEFAULT_TIMER_2");
         System.out.println("done");
+        Thread.sleep(10000000);
 
     }
 }

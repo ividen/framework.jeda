@@ -14,10 +14,15 @@ public interface ITimerHandleMapper {
 
     public Object toId(TimerHandle timerHandle);
     public TimerHandle fromRs(ResultSet rs, int pz) throws SQLException;
-    public Set<String> getCompatibleTimerNames ();
-
     /*
      * field java.sql.Types  for update
      */
     public int getSQLType();
+
+
+    public Set<String> getCompatibleTimerNames ();
+    /*
+     * will be called in synchronized block
+     */
+    void registerCompatibleTimer(String timerName);
 }

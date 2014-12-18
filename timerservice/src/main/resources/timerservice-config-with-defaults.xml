@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <import resource="timerservice-config.xml"/>
 
-    <bean id="timerservice.default.TimerHandleMapper"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper">
-        <!--provided by client -->
-        <property name="compatibleTimerNames" ref="timerservice.default.TimerNames"/>
-    </bean>
+    <bean id="timerservice.default.TimerHandleMapper"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper"/>
 
-    <!-- user add class to repository manually -->
+    <!--using as default in timers spring namespace-->
     <bean id="timerservice.default.DefaultTimerClass"
           class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass">
         <property name="timerClassName"  value="DEFAULT_TIMER_CLASS" />
@@ -19,13 +15,20 @@
         <property name="consumerConfig" ref="timerservice.default.DefaultConsumerConfig" />
     </bean>
 
+
+
     <bean id="timerservice.default.liquibase" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
         <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLogParameters">
+            <map>
+                <entry key="table.name" value="JEDA_TIMERS"/>
+            </map>
+        </property>
     </bean>
 
-
+    <!--using as default in timers spring namespace-->
     <bean id="timerservice.default.DefaultConsumerConfig"
           class="ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerConfig">
         <property name="workerCount" value="6" />
@@ -46,7 +49,7 @@
 
 
     <bean id="timerservice.default.TimerMapping"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.basis.TimerMapping">
-        <property name="tableName" value="TIMERS"/>
+        <property name="tableName" value="JEDA_TIMERS"/>
         <property name="idField" value="id" />
         <property name="stateField" value="state" />
         <property name="bucketIdField" value="bucket_id" />

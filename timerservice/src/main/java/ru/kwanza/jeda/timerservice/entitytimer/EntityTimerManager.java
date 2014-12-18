@@ -56,7 +56,7 @@ public class EntityTimerManager implements IEntityTimerManager {
 
     @Override
     public void registerTimerWithExpireTime(String timerName, long expireTime, Object... entityWithTimer) {
-        List<TimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
+        List<EntityTimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
         for (int i=0; i< entityWithTimer.length; i++) {
             timerMappings.get(i).getEntityProperty().set(entityWithTimer[i], expireTime);
         }
@@ -64,7 +64,7 @@ public class EntityTimerManager implements IEntityTimerManager {
 
     @Override
     public void interruptTimer(String timerName, Object... entityWithTimer) {
-        List<TimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
+        List<EntityTimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
         for (int i=0; i< entityWithTimer.length; i++) {
             timerMappings.get(i).getEntityProperty().set(entityWithTimer[i], null);
         }
@@ -72,7 +72,7 @@ public class EntityTimerManager implements IEntityTimerManager {
 
     @Override
     public boolean isActive(String timerName, Object entityWithTimer) {
-        List<TimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
+        List<EntityTimerMapping> timerMappings = timersRegistry.getTimerMappings(timerName, entityWithTimer);
         Property entityProperty = timerMappings.get(0).getEntityProperty();
         Long oldValue = (Long)entityProperty.value(entityWithTimer);
         if (INFINITE_TIMER_VALUE.equals(oldValue)) {

@@ -6,6 +6,7 @@ import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -18,7 +19,7 @@ public class StringUniversalTimerHandleMapper implements ITimerHandleMapper {
     private static final String DELIMETER = "|-|-|";
     private static final String DELIMETER_REGEXP = "\\|-\\|-\\|";
 
-    private Set<String> compatibleTimerNames;
+    private Set<String> compatibleTimerNames = new HashSet<String>();
 
     @Override
     public Object toId(TimerHandle timerHandle) {
@@ -46,9 +47,13 @@ public class StringUniversalTimerHandleMapper implements ITimerHandleMapper {
     public Set<String> getCompatibleTimerNames() {
         return compatibleTimerNames;
     }
-    @Required
-    public void setCompatibleTimerNames (Set<String> timerNames) {
-        this.compatibleTimerNames = timerNames;
+
+    @Override
+    public void registerCompatibleTimer(String timerName) {
+        if (compatibleTimerNames.contains(timerName)) {
+            throw  new RuntimeException("Timer with name " + timerName + " was already registered with this handleMapper");
+        }
+        compatibleTimerNames.add(timerName);
     }
 
     @Override

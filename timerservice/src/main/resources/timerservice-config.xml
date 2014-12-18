@@ -11,11 +11,7 @@
     <!--Entrance point-->
     <bean id="timerservice.DBTimerManager" class="ru.kwanza.jeda.timerservice.pushtimer.DBTimerManager"/>
 
-    <bean id="timerservice.TimerClassRepository" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository" >
-        <!-- provided by client -->
-        <constructor-arg ref="timerservice.ClassesForRepository" />
-    </bean>
-
+    <bean id="timerservice.TimerClassRepository" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository" />
 
     <bean id="timerservice.liquibase" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->

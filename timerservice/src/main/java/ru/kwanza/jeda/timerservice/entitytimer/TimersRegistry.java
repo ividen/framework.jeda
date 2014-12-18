@@ -13,23 +13,23 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TimersRegistry implements ITimersRegistry {
 
-    ConcurrentHashMap<Class, Map<String, TimerMapping>> timerMappingCache = new ConcurrentHashMap<Class, Map<String, TimerMapping>>();
+    ConcurrentHashMap<Class, Map<String, EntityTimerMapping>> timerMappingCache = new ConcurrentHashMap<Class, Map<String, EntityTimerMapping>>();
 
-    public List<TimerMapping>  getTimerMappings(String timerName, Object... entityWithTimer) {
-        List<TimerMapping> result = new ArrayList<TimerMapping>();
+    public List<EntityTimerMapping>  getTimerMappings(String timerName, Object... entityWithTimer) {
+        List<EntityTimerMapping> result = new ArrayList<EntityTimerMapping>();
         for (Object current : entityWithTimer) {
-            Map <String, TimerMapping> classTimers = timerMappingCache.get(current.getClass());
+            Map <String, EntityTimerMapping> classTimers = timerMappingCache.get(current.getClass());
             if (classTimers == null) {
-                classTimers =  new HashMap<String, TimerMapping>();
+                classTimers =  new HashMap<String, EntityTimerMapping>();
                 Set<String> entityPropertySet = new HashSet<String>();
                 fillClassTimers(current.getClass(), classTimers, entityPropertySet, current.getClass());
-                Map<String, TimerMapping> oldValue = timerMappingCache.putIfAbsent(current.getClass(), classTimers);
+                Map<String, EntityTimerMapping> oldValue = timerMappingCache.putIfAbsent(current.getClass(), classTimers);
                 if (oldValue != null) {
                     classTimers = oldValue;
                 }
             }
 
-            TimerMapping timerMapping = classTimers.get(timerName);
+            EntityTimerMapping timerMapping = classTimers.get(timerName);
             if (timerMapping == null) {
                 throw new RuntimeException("@EntityTimer with name = '" + timerName + "' must be declared in " + current.getClass().getName());
             }
@@ -38,7 +38,7 @@ public class TimersRegistry implements ITimersRegistry {
         return result;
     }
 
-    private void fillClassTimers(Class clazz, Map<String, TimerMapping> classTimers, Set<String> entityPropertySet, Class startClass) {
+    private void fillClassTimers(Class clazz, Map<String, EntityTimerMapping> classTimers, Set<String> entityPropertySet, Class startClass) {
 
         parseAnnotatedElements(clazz, clazz.getDeclaredFields(), classTimers, entityPropertySet, startClass);
         parseAnnotatedElements(clazz, clazz.getDeclaredMethods(), classTimers, entityPropertySet, startClass);
@@ -48,7 +48,7 @@ public class TimersRegistry implements ITimersRegistry {
         }
     }
 
-    private void parseAnnotatedElements(Class clazz, AnnotatedElement[] annotatedElements, Map<String, TimerMapping> classTimers, Set<String> entityPropertySet, Class startClass) {
+    private void parseAnnotatedElements(Class clazz, AnnotatedElement[] annotatedElements, Map<String, EntityTimerMapping> classTimers, Set<String> entityPropertySet, Class startClass) {
 
         for (AnnotatedElement current : annotatedElements){
             if (current.isAnnotationPresent(EntityTimer.class)) {
@@ -65,7 +65,7 @@ public class TimersRegistry implements ITimersRegistry {
                     throw new RuntimeException("Property '" + propertyName + "' must have java.lang.Long type to be used with @EntityTimer annotation");
                 }
                 entityPropertySet.add(propertyName);
-                classTimers.put(timerName, new TimerMapping(timerName, propertyName, entityProperty));
+                classTimers.put(timerName, new EntityTimerMapping(timerName, propertyName, entityProperty));
             }
         }
     }

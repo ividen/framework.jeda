@@ -2,6 +2,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.memory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.Phased;
 import org.springframework.stereotype.Repository;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
@@ -32,6 +33,7 @@ public class FiredTimersStorageRepository{
     @Resource
     private JMXRegistry jmxRegistry;
 
+    private volatile boolean dirty = true;
     private Map<TimerClass, FiredTimersMemoryStorage> classToStorage = new HashMap<TimerClass, FiredTimersMemoryStorage>();
 
 
@@ -44,15 +46,8 @@ public class FiredTimersStorageRepository{
     private ConcurrentHashMap<Long, Long> bucketStartupPointCount = new ConcurrentHashMap<Long, Long>();
 
 
-    @PostConstruct
-    public void init() {
-        for (TimerClass timerClass :  timerClassRepository.getRegisteredTimerClasses()) {
-            classToStorage.put(timerClass, new FiredTimersMemoryStorage(timerClass, jedaManager, this, jmxRegistry));
-        }
-    }
-
-
     public FiredTimersMemoryStorage getFiredTimersStorage(TimerClass timerClass) {
+        lazyLoad();
         return classToStorage.get(timerClass);
     }
 
@@ -106,6 +101,7 @@ public class FiredTimersStorageRepository{
     public void stopProcessingAndWait(long bucketId) {
         lock.lock(); //interrupt??
         try{
+            lazyLoad();
             processingStoppedBucketIds.add(bucketId);
             try {
                 while (true) {
@@ -141,12 +137,6 @@ public class FiredTimersStorageRepository{
         return bucketStartupPointCount;
     }
 
-    /*
-    @Override
-    public int getPhase() {
-        return 10;
-    }
-    */
 
     /*use carefully , for jmx*/
     public void lock() {
@@ -163,5 +153,22 @@ public class FiredTimersStorageRepository{
 
     public Map<Long, AtomicLong> getBucketActiveProcessCount() {
         return bucketActiveProcessCount;
+    }
+
+    private void lazyLoad() {
+        if (dirty) {
+            lock.lock();
+            try {
+                if (dirty) {
+                    for (TimerClass timerClass :  timerClassRepository.getRegisteredTimerClasses()) {
+                        classToStorage.put(timerClass, new FiredTimersMemoryStorage(timerClass, jedaManager, this, jmxRegistry));
+                    }
+                    dirty = false;
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
     }
 }

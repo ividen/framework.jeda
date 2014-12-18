@@ -34,4 +34,8 @@ public interface IDBTimerDAO {
 
     public Set<String> getCompatibleTimerNames();
 
+    /*
+     * will be called in synchronized block
+     */
+    public void registerCompatibleTimer(String timerName);
 }

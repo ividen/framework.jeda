@@ -7,26 +7,33 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Michael Yeskov
  */
 public class LongNameSetTimerHandleMapper implements ITimerHandleMapper {
 
-    private Set<String> compatibleTimerNames;
+    private Set<String> compatibleTimerNames = new TreeSet<String>();
 
     private Map<String, Long> timerNameToKey = new HashMap<String, Long>();
     private Map<Long, String> timerKeyToName = new HashMap<Long, String>();
 
     private static final long SHIFT = 10;
 
+    private volatile boolean dirty = true;
+    private ReentrantLock lock = new ReentrantLock();
+
     @Override
     public Object toId(TimerHandle timerHandle) {
+        lazyLoad();
         return  (Long.valueOf(timerHandle.getTimerId()) * SHIFT) + timerNameToKey.get(timerHandle.getTimerName());
     }
 
     @Override
     public TimerHandle fromRs(ResultSet rs, int pz) throws SQLException {
+        lazyLoad();
         long id = rs.getLong(pz);
 
         String timerId = String.valueOf(id / SHIFT);
@@ -38,22 +45,35 @@ public class LongNameSetTimerHandleMapper implements ITimerHandleMapper {
         return compatibleTimerNames;
     }
 
-    @Required
-    public void setCompatibleTimerNames(Set<String> compatibleTimerNames) {
-        if (compatibleTimerNames.size() > 10) {
+    @Override
+    public void registerCompatibleTimer(String timerName) {
+        if (compatibleTimerNames.size() > 9) {
             throw new IllegalArgumentException("This mappers supports max 10 timerNames");
         }
-        long currentKey = 0;
-        for (String name : compatibleTimerNames) {
-            timerNameToKey.put(name , currentKey);
-            timerKeyToName.put(currentKey, name);
-            currentKey++;
-        }
-        this.compatibleTimerNames = compatibleTimerNames;
+        compatibleTimerNames.add(timerName);
     }
 
     @Override
     public int getSQLType() {
         return Types.BIGINT;
+    }
+
+    private void lazyLoad() {
+        if (dirty) {
+            lock.lock();
+            try {
+                if (dirty) {
+                    long currentKey = 0;
+                    for (String timerName : compatibleTimerNames) {
+                        timerNameToKey.put(timerName , currentKey);
+                        timerKeyToName.put(currentKey, timerName);
+                        currentKey++;
+                    }
+                    dirty = false;
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
     }
 }
