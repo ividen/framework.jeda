@@ -4,6 +4,8 @@ import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
+import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 import ru.kwanza.jeda.core.stage.SystemQueue;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +20,7 @@ public class DefaultJedaManager implements IJedaManagerInternal {
 
     private ConcurrentMap<String, SystemFlowBus> flowBuses = new ConcurrentHashMap<String, SystemFlowBus>();
     private ConcurrentMap<String, SystemStage> stages = new ConcurrentHashMap<String, SystemStage>();
-    private ConcurrentMap<String, SystemTimer> timers = new ConcurrentHashMap<String, SystemTimer>();
+    private ConcurrentMap<String, ITimer> timers = new ConcurrentHashMap<String, ITimer>();
     private ConcurrentMap<String, Object> objects = new ConcurrentHashMap<String, Object>();
     private ConcurrentMap<Object, String> names = new ConcurrentHashMap<Object, String>();
     private IPendingStore pendingStore;
@@ -104,12 +106,12 @@ public class DefaultJedaManager implements IJedaManagerInternal {
         return stages.get(stage.getName());
     }
 
+    @Override
     public ITimer registerTimer(String name, ITimer timer) {
-        SystemTimer value = new SystemTimer(name, timer);
+        SystemTimer value = new SystemTimer(name, this);
         if (null == timers.putIfAbsent(name, value)) {
             return value;
         }
-
         return timers.get(name);
     }
 

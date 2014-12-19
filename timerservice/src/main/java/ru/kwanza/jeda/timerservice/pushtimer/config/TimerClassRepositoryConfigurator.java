@@ -3,7 +3,10 @@ package ru.kwanza.jeda.timerservice.pushtimer.config;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 /**
@@ -11,6 +14,10 @@ import java.util.Map;
  * @author Michael Yeskov
  */
 public class TimerClassRepositoryConfigurator implements BeanPostProcessor{
+    @Resource(name = "jeda.IJedaManager")
+    private IJedaManagerInternal jedaManager;
+
+
     private Map<String, TimerClass> timerNameToClass;
 
     public Map<String, TimerClass> getTimerNameToClass() {

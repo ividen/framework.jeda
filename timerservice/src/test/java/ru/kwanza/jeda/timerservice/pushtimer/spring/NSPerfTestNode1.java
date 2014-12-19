@@ -7,6 +7,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.core.manager.SystemStage;
+import ru.kwanza.jeda.timerservice.pushtimer.DBTimerManager;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
 import ru.kwanza.jeda.timerservice.pushtimer.common.Inserter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
@@ -53,8 +55,11 @@ public class NSPerfTestNode1 extends AbstractJUnit4SpringContextTests {
         }
 
 
-
-        Thread.sleep(1000000000);
+        for (int i=0; i<100000; i++) {
+            Thread.sleep(1000);
+            System.out.println(((DBTimerManager) timerManager).count.get());
+        }
+        //Thread.sleep(1000000000);
 
 
         System.out.println("MultiThreadedTest end. Time=" + (System.currentTimeMillis() - startTime));

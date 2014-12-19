@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.*;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

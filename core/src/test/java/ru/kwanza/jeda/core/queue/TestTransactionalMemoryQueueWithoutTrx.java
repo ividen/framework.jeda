@@ -6,6 +6,7 @@ import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import junit.framework.TestSuite;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 /**
  * @author Guzanov Alexander

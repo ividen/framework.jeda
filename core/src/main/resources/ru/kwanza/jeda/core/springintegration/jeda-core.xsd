@@ -351,29 +351,5 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:complexType name="jeda-timer-type">
-    </xsd:complexType>
-
-    <xsd:element abstract="true" name="jeda-timer" type="jeda-timer-type">
-    </xsd:element>
-
-    <xsd:element name="timer" substitutionGroup="jeda-timer">
-        <xsd:annotation>
-            <xsd:appinfo>
-                <tool:annotation>
-                    <tool:exports type="ru.kwanza.jeda.api.ITimer"/>
-                </tool:annotation>
-            </xsd:appinfo>
-        </xsd:annotation>
-        <xsd:complexType>
-            <xsd:complexContent>
-                <xsd:extension base="jeda-timer-type">
-                    <xsd:group ref="beans:beanElements"/>
-                    <xsd:attributeGroup ref="beans:beanAttributes"/>
-                </xsd:extension>
-            </xsd:complexContent>
-        </xsd:complexType>
-    </xsd:element>
-
 </xsd:schema>
 

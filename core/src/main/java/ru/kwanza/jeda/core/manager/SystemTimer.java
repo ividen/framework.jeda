@@ -1,36 +1,48 @@
 package ru.kwanza.jeda.core.manager;
 
-import ru.kwanza.jeda.api.IEvent;
-import ru.kwanza.jeda.api.ITimer;
+import ru.kwanza.jeda.api.ISink;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
- * @author Guzanov Alexander
+ * @author Michael Yeskov
  */
-public class SystemTimer<E extends IEvent> implements ITimer<E> {
-    private ITimer timer;
+public class SystemTimer implements ITimer{
+
     private String name;
 
-    public SystemTimer(String name, ITimer timer) {
-        this.timer = timer;
+    public SystemTimer(String name) {
         this.name = name;
-    }
-
-
-    public Collection<String> cancelEvents(Collection<String> timerHandles) {
-        return timer.cancelEvents(timerHandles);
-    }
-
-    public void registerEvents(Collection timerIds) {
-        timer.registerEvents(timerIds);
-    }
-
-    public long size() {
-        return timer.size();
     }
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void interruptTimers(Collection<String> timerIds) {
+
+    }
+
+    @Override
+    public Map<String, Boolean> getIsActiveMap(Collection<String> timerIds) {
+        return null;
+    }
+
+    @Override
+    public boolean isActive(String timerId) {
+        return false;
+    }
+
+    @Override
+    public ISink<ScheduleTimerEvent> getSink() {
+        return null;
+    }
+
+    public static class SystemTimerSink {
+
     }
 }

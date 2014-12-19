@@ -7,7 +7,6 @@ import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.core.manager.SystemContextController;
 import ru.kwanza.jeda.core.manager.SystemFlowBus;
-import ru.kwanza.jeda.core.manager.SystemTimer;
 import ru.kwanza.jeda.core.resourcecontroller.FixedBatchSizeResourceController;
 import ru.kwanza.jeda.core.resourcecontroller.SmartResourceController;
 import ru.kwanza.jeda.core.resourcecontroller.StaticResourceController;
@@ -194,7 +193,6 @@ public class TestSpringIntegration extends TestCase {
 
         assertEquals(manager.getFlowBus("CPAReqFlowBus").getClass(), SystemFlowBus.class);
         assertEquals(manager.<Object, IContext>getContextController("TestContext").getClass(), SystemContextController.class);
-        assertEquals(manager.getTimer("TestTimer").getClass(), SystemTimer.class);
 
         assertEquals("CPAReqFlowBus", manager.resolveObjectName(manager.getFlowBus("CPAReqFlowBus")));
         assertEquals(ctx.getBean("CPAReqFlowBus"), manager.getFlowBus("CPAReqFlowBus"));
@@ -203,8 +201,6 @@ public class TestSpringIntegration extends TestCase {
 
         assertEquals("TestContext", manager.resolveObjectName(manager.<Object, IContext>getContextController("TestContext")));
         assertEquals(ctx.getBean("TestContext"), manager.<Object, IContext>getContextController("TestContext"));
-        assertEquals("TestTimer", manager.resolveObjectName(manager.getTimer("TestTimer")));
-        assertEquals(ctx.getBean("TestTimer"), manager.getTimer("TestTimer"));
 
         IStageInternal stage = manager.getStageInternal("TestStage20");
         manager.getStage("TestStage20");
@@ -240,7 +236,6 @@ public class TestSpringIntegration extends TestCase {
         assertTrue(manager.resolveObject("TestStage21") instanceof IStage);
         assertTrue(manager.resolveObject("CPAReqFlowBus") instanceof IFlowBus);
         assertTrue(manager.resolveObject("TestContext") instanceof IContextController);
-        assertTrue(manager.resolveObject("TestTimer") instanceof ITimer);
         assertTrue(manager.resolveObject("testBean") instanceof TestObject);
         assertNull(manager.resolveObject("Not exists"));
 

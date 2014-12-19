@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.api;
 
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 /**
  * @author Guzanov Alexander

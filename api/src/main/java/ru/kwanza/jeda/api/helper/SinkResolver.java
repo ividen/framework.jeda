@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.api.helper;
 
 import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 import java.util.Collection;
 
@@ -42,6 +43,8 @@ public class SinkResolver<E extends IEvent> implements ISink<E> {
             original = (ISink) obj;
         } else if (obj instanceof IStage) {
             original = ((IStage) obj).getSink();
+        } else if (obj instanceof ITimer) {
+            original = (ISink)((ITimer) obj).getSink();
         } else {
             throw new SinkException("Unresolved sink!");
         }

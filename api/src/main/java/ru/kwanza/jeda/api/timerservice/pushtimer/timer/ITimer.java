@@ -43,4 +43,7 @@ public interface ITimer {
      */
     public ISink<ScheduleTimerEvent> getSink();
 
+
+    public String getName();
+
 }

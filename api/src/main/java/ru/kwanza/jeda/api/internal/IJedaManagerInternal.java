@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.api.internal;
 
 import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 /**
  * @author Alexander Guzanov
@@ -14,7 +15,7 @@ public interface IJedaManagerInternal extends IJedaManager {
 
     IStage registerStage(IStageInternal stage);
 
-    ITimer registerTimer(String name, ITimer timer);
+    ITimer registerTimer(String name);
 
     void registerObject(String name, Object object);
 

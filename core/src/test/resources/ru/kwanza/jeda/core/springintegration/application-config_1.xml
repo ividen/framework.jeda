@@ -30,7 +30,6 @@
 
     <jeda-core:context-controller name="TestContext"
                                       class="ru.kwanza.jeda.core.springintegration.TestContextController"/>
-    <jeda-core:timer name="TestTimer" class="ru.kwanza.jeda.core.springintegration.TestTimer"/>
 
     <jeda-core:shared-thread-manager id="ProtocolSchaedPool" threadNamePrefix="SharedPool-1">
         <jeda-core:share-strategy-by-input-rate/>

@@ -31,6 +31,7 @@ public class TimerStageFactory extends SystemStageFactory {
     @Override
     public IStage getObject() throws Exception {
         timerClassRepository.registerNameToClassBinding(name, timerClass);
+        manager.registerTimer(name); //TODO::::
         return super.getObject();
     }
 }

@@ -48,7 +48,6 @@ public class JedaCoreNamespaceHandler extends NamespaceHandlerSupport {
 
         registerBeanDefinitionParser("flow-bus", new FlowBusParser());
         registerBeanDefinitionParser("context-controller", new ContextControllerParser());
-        registerBeanDefinitionParser("timer", new TimerParser());
 
         registerBeanDefinitionDecoratorForAttribute("registered", new RegisterBeanDecorator());
     }

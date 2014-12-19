@@ -7,6 +7,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.timerservice.pushtimer.DBTimerManager;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
 import ru.kwanza.jeda.timerservice.pushtimer.common.Inserter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
@@ -50,6 +51,11 @@ public class NSPerfTestNode2 extends AbstractJUnit4SpringContextTests {
 
         for (int i =1 ; i <= 7; i++) {
             executor.execute(new Inserter("TIMER_" + i ,jedaManager, timerManager, i * 10 + NODE_ID));
+        }
+
+        for (int i=0; i<100000; i++) {
+            Thread.sleep(1000);
+            System.out.println(((DBTimerManager) timerManager).count.get());
         }
 
 

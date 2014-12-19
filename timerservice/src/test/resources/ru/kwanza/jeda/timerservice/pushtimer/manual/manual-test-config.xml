@@ -60,7 +60,7 @@
                 <property name="password" value="${jdbc.password}"/>
                 <property name="defaultCatalog" value="${jdbc.schema}"/>
                 <property name="defaultAutoCommit" value="true"/>
-                <!--<property name="connectionProperties" value="oracle.jdbc.ReadTimeout=10000"/>-->
+                <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=60000"/>
                 <property name="maxActive" value="70" />
                 <property name="maxIdle" value="70" />
             </bean>
@@ -70,7 +70,7 @@
     <bean id="timerservice.default.Processor" class="ru.kwanza.jeda.timerservice.pushtimer.manual.Processor" />
 
 
-    <core:stage name="DEFAULT_TIMER" transaction="true">
+    <core:stage name="DEFAULT_TIMER_STAGE" transaction="true">
         <core:tx-memory-queue cloneType="SERIALIZE" maxSize="1000000"/>
         <core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="15"/>
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.processor.ExpireTimeProcessor">
