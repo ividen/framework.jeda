@@ -23,6 +23,7 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "node2-test-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Ignore
 public class ManualTestNode2 extends AbstractJUnit4SpringContextTests {
 
     @Resource

@@ -14,8 +14,6 @@ import java.util.Map;
  * @author Michael Yeskov
  */
 public class TimerClassRepositoryConfigurator implements BeanPostProcessor{
-    @Resource(name = "jeda.IJedaManager")
-    private IJedaManagerInternal jedaManager;
 
 
     private Map<String, TimerClass> timerNameToClass;

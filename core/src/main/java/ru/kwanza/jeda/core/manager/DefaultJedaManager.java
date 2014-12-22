@@ -4,6 +4,7 @@ import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
+import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 import ru.kwanza.jeda.core.stage.SystemQueue;
@@ -20,7 +21,6 @@ public class DefaultJedaManager implements IJedaManagerInternal {
 
     private ConcurrentMap<String, SystemFlowBus> flowBuses = new ConcurrentHashMap<String, SystemFlowBus>();
     private ConcurrentMap<String, SystemStage> stages = new ConcurrentHashMap<String, SystemStage>();
-    private ConcurrentMap<String, ITimer> timers = new ConcurrentHashMap<String, ITimer>();
     private ConcurrentMap<String, Object> objects = new ConcurrentHashMap<String, Object>();
     private ConcurrentMap<Object, String> names = new ConcurrentHashMap<Object, String>();
     private IPendingStore pendingStore;
@@ -43,12 +43,12 @@ public class DefaultJedaManager implements IJedaManagerInternal {
         return getStage(name).unwrap();
     }
 
-    public ITimer getTimer(String name) {
-        ITimer timer = timers.get(name);
-        if (timer == null) {
+    public SystemTimer getTimer(String name) {
+        IStage timer = stages.get(name);
+        if (timer == null ||  (!(timer instanceof ITimer))) {
             throw new ObjectNotFoundException("Timer \"" + name + "\" not found");
         }
-        return timer;
+        return (SystemTimer)timer;
     }
 
     public IPendingStore getPendingStore() {
@@ -107,12 +107,12 @@ public class DefaultJedaManager implements IJedaManagerInternal {
     }
 
     @Override
-    public ITimer registerTimer(String name, ITimer timer) {
-        SystemTimer value = new SystemTimer(name, this);
-        if (null == timers.putIfAbsent(name, value)) {
+    public ITimer registerTimer(String name, ITimerInternal timer) {
+        SystemTimer value = new SystemTimer(timer);
+        if (null == stages.putIfAbsent(name, value)) {
             return value;
         }
-        return timers.get(name);
+        return (ITimer)stages.get(name);
     }
 
     public void registerObject(String name, Object object) {
@@ -126,8 +126,6 @@ public class DefaultJedaManager implements IJedaManagerInternal {
             return ((SystemFlowBus) object).getName();
         } else if (object instanceof SystemQueue.SystemSink) {
             return ((SystemQueue.SystemSink) object).getName();
-        } else if (object instanceof SystemTimer) {
-            return ((SystemTimer) object).getName();
         } else if (object instanceof SystemContextController) {
             return ((SystemContextController) object).getName();
         } else if (object instanceof IStage) {
@@ -143,8 +141,6 @@ public class DefaultJedaManager implements IJedaManagerInternal {
         result = flowBuses.get(objectName);
         if (result != null) return result;
         result = contextControllers.get(objectName);
-        if (result != null) return result;
-        result = timers.get(objectName);
         if (result != null) return result;
         result = objects.get(objectName);
 

@@ -28,7 +28,7 @@ public class ExpireTimeProcessor implements IEventProcessor<InternalTimerFiredEv
     @Resource (name = "jeda.IJedaManager")
     private IJedaManager jedaManager;
 
-    @Resource (name = "timerservice.DBTimerManager")
+    @Resource (name = "jeda.ITimerManager")
     private ITimerManagerInternal timerManager;
 
     @Resource

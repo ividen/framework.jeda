@@ -13,7 +13,6 @@
           class="ru.kwanza.jeda.core.manager.DefaultJedaManager" scope="singleton">
         <property name="transactionManager" ref="jeda.ITransactionManagerInternal"/>
         <property name="pendingStore" ref="pendingStore"/>
-        <property name="timerManager" ref="jeda.ITimerManager"/>
     </bean>
 
     <bean id="jeda.ITransactionManagerInternal" class="ru.kwanza.jeda.core.tm.BaseTransactionManager" scope="singleton">

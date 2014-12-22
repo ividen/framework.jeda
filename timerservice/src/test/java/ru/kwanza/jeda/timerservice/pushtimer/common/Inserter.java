@@ -3,12 +3,16 @@ package ru.kwanza.jeda.timerservice.pushtimer.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.api.helper.SinkHelper;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,15 +29,20 @@ public class Inserter implements Runnable{
     private long currentId = 0;
 
 
+    private boolean useHelper = true;
+    private boolean useSink = false;
+
+
     public Inserter(IJedaManager jedaManager, ITimerManager timerManager, long runnerId) {
         this.jedaManager = jedaManager;
         this.timerManager = timerManager;
         this.runnerId = runnerId;
     }
 
-    public Inserter(String timerName, IJedaManager jedaManager, ITimerManager timerManager, long runnerId) {
+    public Inserter(String timerName, IJedaManager jedaManager, ITimerManager timerManager, long runnerId, boolean useSink) {
         this(jedaManager, timerManager, runnerId);
         this.timerName = timerName;
+        this.useSink = useSink;
     }
 
     @Override
@@ -57,17 +66,42 @@ public class Inserter implements Runnable{
 
     private void doWork() {
         List<NewTimer> timers = new ArrayList<NewTimer>(1000);
+        List<ScheduleTimerEvent> timerEvents = new ArrayList<ScheduleTimerEvent>(1000);
+        SinkHelper sinkHelper = new SinkHelper(jedaManager);
         ITransactionManagerInternal tm = jedaManager.getTransactionManager();
 
         for (int step = 1; step <= 3; step++) {
             timers.clear();
             for (int i=0; i<1000; i++) {
                 currentId++;
-                timers.add(new NewTimer(timerName, String.valueOf(currentId * ID_SHIFT + runnerId), 30000 + step * i));
+                NewTimer current = new NewTimer(timerName, String.valueOf(currentId * ID_SHIFT + runnerId), 30000 + step * i);
+                if (useSink) {
+                    ScheduleTimerEvent currentEvent = new ScheduleTimerEvent(current.getTimerId(), current.getTimeoutMS());
+                    if (useHelper) {
+                        sinkHelper.put(timerName, currentEvent);
+                    } else {
+                        timerEvents.add(currentEvent);
+                    }
+                } else {
+                    timers.add(current);
+                }
+
             }
             try {
                 tm.begin();
-                timerManager.scheduleTimers(timers);
+                if (useSink) {
+                    try {
+                        if (useHelper) {
+                            sinkHelper.flush();
+                        } else {
+                            jedaManager.getTimer(timerName).<ScheduleTimerEvent>getSink().put(timerEvents);
+                        }
+                    } catch (SinkException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    timerManager.scheduleTimers(timers);
+                }
                 tm.commit();
                 StatisticsCalculator.insert.register(timers.size());
             } catch (RuntimeException e){

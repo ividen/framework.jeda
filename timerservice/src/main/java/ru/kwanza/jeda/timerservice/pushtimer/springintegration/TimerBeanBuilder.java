@@ -51,6 +51,7 @@ class TimerBeanBuilder implements BeanBuilder{
 
     public void build(BeanDefinitionBuilder definitionBuilder) {
         definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
+        definitionBuilder.addPropertyReference("timerManager", "jeda.ITimerManager");
         definitionBuilder.addPropertyReference("timerClassRepository", "timerservice.TimerClassRepository");
 
         addPropertyReference("eventProcessor", definitionBuilder, wrapProcessor(eventProcessorDef));

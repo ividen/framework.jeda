@@ -41,4 +41,12 @@ public class Helper {
         }
         return bucketIdToEvents;
     }
+
+    public static Collection<? extends TimerHandle> toTimerHandles(String timerName, Collection<String> timerIds) {
+        List<TimerHandle> result = new ArrayList<TimerHandle>();
+        for (String timerId : timerIds) {
+            result.add(new TimerHandle(timerName, timerId));
+        }
+        return result;
+    }
 }

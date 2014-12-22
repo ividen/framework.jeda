@@ -24,6 +24,7 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "ns-test-node2-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Ignore
 public class NSPerfTestNode2 extends AbstractJUnit4SpringContextTests {
 
     @Resource
@@ -50,12 +51,11 @@ public class NSPerfTestNode2 extends AbstractJUnit4SpringContextTests {
         Executor executor = new ThreadPoolExecutor(20, 20, 10000, TimeUnit.MILLISECONDS , q);
 
         for (int i =1 ; i <= 7; i++) {
-            executor.execute(new Inserter("TIMER_" + i ,jedaManager, timerManager, i * 10 + NODE_ID));
+            executor.execute(new Inserter("TIMER_" + i ,jedaManager, timerManager, i * 10 + NODE_ID, true));
         }
 
         for (int i=0; i<100000; i++) {
             Thread.sleep(1000);
-            System.out.println(((DBTimerManager) timerManager).count.get());
         }
 
 

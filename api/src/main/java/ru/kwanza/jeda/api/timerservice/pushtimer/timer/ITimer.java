@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.api.timerservice.pushtimer.timer;
 
 import ru.kwanza.jeda.api.ISink;
+import ru.kwanza.jeda.api.IStage;
 import ru.kwanza.txn.api.Transactional;
 import ru.kwanza.txn.api.TransactionalType;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  * with JEDA-friendly interface.
  * @author Michael Yeskov
  */
-public interface ITimer {
+public interface ITimer extends IStage {
 
     /*
      * Interrupts timers in DB that was created in earlie
@@ -34,16 +35,5 @@ public interface ITimer {
      * Not batch variant use only if performance doesn't matter.
      */
     public boolean isActive(String timerId);
-
-
-
-    /*
-     * Event style api for timer creation
-     * Friendly with SinkHelper
-     */
-    public ISink<ScheduleTimerEvent> getSink();
-
-
-    public String getName();
 
 }

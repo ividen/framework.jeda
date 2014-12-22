@@ -1,8 +1,9 @@
 package ru.kwanza.jeda.core.manager;
 
-import ru.kwanza.jeda.api.ISink;
+import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.api.internal.IStageInternal;
+import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
 import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
 
 import java.util.Collection;
 import java.util.Map;
@@ -10,39 +11,27 @@ import java.util.Map;
 /**
  * @author Michael Yeskov
  */
-public class SystemTimer implements ITimer{
+public class SystemTimer extends SystemStage implements ITimer{
 
-    private String name;
+    private ITimerInternal timerInternal;
 
-    public SystemTimer(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
+    public SystemTimer(ITimerInternal timerInternal) {
+        super(timerInternal);
+        this.timerInternal = timerInternal;
     }
 
     @Override
     public void interruptTimers(Collection<String> timerIds) {
-
+        timerInternal.interruptTimers(timerIds);
     }
 
     @Override
     public Map<String, Boolean> getIsActiveMap(Collection<String> timerIds) {
-        return null;
+        return timerInternal.getIsActiveMap(timerIds);
     }
 
     @Override
     public boolean isActive(String timerId) {
-        return false;
-    }
-
-    @Override
-    public ISink<ScheduleTimerEvent> getSink() {
-        return null;
-    }
-
-    public static class SystemTimerSink {
-
+        return timerInternal.isActive(timerId);
     }
 }
