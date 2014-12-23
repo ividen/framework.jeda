@@ -12,6 +12,7 @@ import ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerComponent;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
 import ru.kwanza.jeda.timerservice.pushtimer.internalapi.ITimerManagerInternal;
 import ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic;
+import ru.kwanza.jeda.timerservice.pushtimer.timer.TimerBatcher;
 import ru.kwanza.jeda.timerservice.pushtimer.tx.PendingTxTimersStore;
 import ru.kwanza.jeda.timerservice.pushtimer.tx.Tx;
 import ru.kwanza.txn.api.Transactional;
@@ -125,8 +126,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
 
     @Override
     public ITimer getTimer(String timerName) {
-        return null;
-        //TODO:
+        return new TimerBatcher(timerName, this);
     }
 
 
