@@ -1,5 +1,8 @@
 package ru.kwanza.jeda.persistentqueue;
 
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.*;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueue;
@@ -14,7 +17,6 @@ import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.QueueObserverChain;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;
 
-import javax.transaction.Synchronization;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -36,6 +38,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     private volatile boolean active = false;
     private int maxSize;
     private AtomicInteger size = new AtomicInteger(0);
+    private TransactionTemplate newTx;
 
     public PersistentQueue(IJedaManager manager, IClusterService clusterService,
                            int maxSize, IQueuePersistenceController<E> controller) {
@@ -45,6 +48,8 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         this.persistenceController = controller;
         this.clusterService = clusterService;
         this.maxSize = maxSize;
+        this.newTx = new TransactionTemplate(manager.getTransactionManager(),
+                new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         clusterService.registerComponent(this);
     }
@@ -55,19 +60,19 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
 
     public void handleStart() {
         memoryCache = createCache();
-        ITransactionManagerInternal tm = manager.getTransactionManager();
-        tm.begin();
-        try {
-
-            Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
-            if (load != null && !load.isEmpty()) {
-                memoryCache.put(load);
+        newTx.execute(new TransactionCallbackWithoutResult(){
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                Collection<E> load = persistenceController.load(maxSize, clusterService.getCurrentNode());
+                if (load != null && !load.isEmpty()) {
+                    try {
+                        memoryCache.put(load);
+                    } catch (SinkException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
-            tm.commit();
-        } catch (Throwable e) {
-            tm.rollback();
-            throw new RuntimeException(e);
-        }
+        });
         active = true;
     }
 
@@ -82,27 +87,26 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
         return maxSize;
     }
 
-    public void handleStartRepair(Node node) {
+    public void handleStartRepair(final Node node) {
         final AbstractTransactionalMemoryQueue<E> queue = createCache();
 
-        manager.getTransactionManager().begin();
+        newTx.execute(new TransactionCallbackWithoutResult() {
+            @Override
+            protected void doInTransactionWithoutResult(TransactionStatus status) {
+                final Collection<E> elements = persistenceController.load(maxSize, node);
+                if (elements != null && !elements.isEmpty()) {
+                    try {
+                        queue.put(elements);
+                    } catch (SinkException e) {
+                    }
 
-        try {
-            final Collection<E> elements = persistenceController.load(maxSize, node);
-            if (elements != null && !elements.isEmpty()) {
-                try {
-                    queue.put(elements);
-                } catch (SinkException e) {
+                    repairableNodes.put(node, queue);
+
+                } else {
+                    clusterService.markRepaired(PersistentQueue.this, node);
                 }
-
-                repairableNodes.put(node, queue);
-
-            } else {
-                clusterService.markRepaired(this, node);
             }
-        } finally {
-            manager.getTransactionManager().commit();
-        }
+        });
     }
 
     public void handleStopRepair(Node node) {
@@ -143,7 +147,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
     public void put(final Collection<E> events) throws SinkException {
-        if (!manager.getTransactionManager().hasTransaction()) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new SinkException("Use persistent queue only on transaction!");
         }
 
@@ -168,7 +172,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
 
 
     public Collection<E> tryPut(final Collection<E> events) throws SinkException {
-        if (!manager.getTransactionManager().hasTransaction()) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new SinkException("Use persistent queue only on transaction!");
         }
 
@@ -191,7 +195,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
 
 
     public Collection<E> take(final int count) throws SourceException {
-        if (!manager.getTransactionManager().hasTransaction()) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new SourceException("Use persistent queue only on transaction!");
         }
 
@@ -264,7 +268,7 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
             } else {
                 removeQueue(node);
                 try {
-                    manager.getTransactionManager().getTransaction().registerSynchronization(new MarkRepairedSynchronization(node));
+                    TransactionSynchronizationManager.registerSynchronization(new MarkRepairedSynchronization(node));
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -304,15 +308,11 @@ public class PersistentQueue<E extends IPersistableEvent> implements IQueue<E>, 
     }
 
 
-    private class MarkRepairedSynchronization implements Synchronization {
+    private class MarkRepairedSynchronization extends TransactionSynchronizationAdapter {
         private final Node node;
 
         public MarkRepairedSynchronization(Node node) {
             this.node = node;
-        }
-
-        public void beforeCompletion() {
-
         }
 
         public void afterCompletion(int status) {
