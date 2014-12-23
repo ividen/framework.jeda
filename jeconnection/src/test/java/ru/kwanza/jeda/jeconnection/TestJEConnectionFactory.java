@@ -2,8 +2,13 @@ package ru.kwanza.jeda.jeconnection;
 
 
 import com.sleepycat.je.*;
-import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -16,23 +21,32 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 
+import static junit.framework.Assert.*;
+
 /**
  * @author Kiryl Karatsetski
  */
-public abstract class TestJEConnectionFactory extends TestCase {
+@RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+public abstract class TestJEConnectionFactory {
 
-    @Override
+    @Autowired
+    @Qualifier("connectionFactory")
+    private JEConnectionFactory factoryJE;
+    @Autowired
+    @Qualifier("connectionFactory2")
+    private JEConnectionFactory factoryJE2;
+    @Autowired
+    private IJedaManager manager;
+
+    @Before
     public void setUp() throws Exception {
         delete(new File("./target/berkeley_db"));
     }
 
+    @Test
     public void testCommitLoad() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx;
-        ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -43,9 +57,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
 
-        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -65,19 +79,15 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit(status2);
-
-        ctx.close();
+        manager.getTransactionManager().commit(status2);
     }
-
-    protected abstract String getConfigName();
 
 //    public void testCommitLoad_1() throws Exception, RollbackException {
 //        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
 //        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
 //
 //
-//        sm.getTransactionManager().begin();
+//        manager.getTransactionManager().begin();
 //        Database db = factoryJE.getTxConnection(0l).openDatabase("test",
 //                new DatabaseConfig().setAllowCreate(true).setTransactional(true));
 //        String test = "Test";
@@ -88,7 +98,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 //        String test1 = "Test1";
 //        db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
 //                new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-//        sm.getTransactionManager().commit();
+//        manager.getTransactionManager().commit();
 //
 //        FileLock lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 //        FileLock lock1 = new RandomAccessFile(new File("./target/berkeley_db/1/fileLock.lock"), "rw").getChannel().lock();
@@ -96,7 +106,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 //        lock0.release();
 //        lock1.release();
 //
-//        sm.getTransactionManager().begin();
+//        manager.getTransactionManager().begin();
 //        db = factoryJE.getTxConnection(0l).openDatabase("test", new DatabaseConfig()
 //                .setAllowCreate(true).setTransactional(true));
 //        Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -116,7 +126,7 @@ public abstract class TestJEConnectionFactory extends TestCase {
 //        assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
 //        cursor.close();
 //        cursor1.close();
-//        sm.getTransactionManager().commit();
+//        manager.getTransactionManager().commit();
 //        lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 //        lock1 = new RandomAccessFile(new File("./target/berkeley_db/1/fileLock.lock"), "rw").getChannel().lock();
 //
@@ -126,12 +136,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
 //        ctx.close();
 //    }
 
+    @Test
     public void testCommitLoad_2() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getTxConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -142,13 +149,13 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
 
         FileLock lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 
         lock0.release();
 
-        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getTxConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -168,24 +175,20 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit(status2);
+        manager.getTransactionManager().commit(status2);
         lock0 = new RandomAccessFile(new File("./target/berkeley_db/0/fileLock.lock"), "rw").getChannel().lock();
 
         lock0.release();
-
-        ctx.close();
     }
 
+    @Test
     public void testCommitLoad_3() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         Database db1 = factoryJE.getConnection(0).openDatabase("test_1",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
 
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         String test = "Test";
         db.put(null, new DatabaseEntry(SerializationHelper.longToBytes(10)),
@@ -194,9 +197,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
 
-        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -216,20 +219,16 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals("Test1", SerializationHelper.bytesToObject(value1.getData()));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit(status2);
+        manager.getTransactionManager().commit(status2);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
-        ctx.close();
     }
 
 
+    @Test
     public void testRollbacktLoad() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -240,9 +239,9 @@ public abstract class TestJEConnectionFactory extends TestCase {
         String test1 = "Test1";
         db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                 new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-        sm.getTransactionManager().rollback(status1);
+        manager.getTransactionManager().rollback(status1);
 
-        TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -258,19 +257,15 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor1.getNext(key1, value1, LockMode.DEFAULT));
         cursor.close();
         cursor1.close();
-        sm.getTransactionManager().commit(status2);
+        manager.getTransactionManager().commit(status2);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
-        ctx.close();
     }
 
+    @Test
     public void testInnerTransaction_CommitCommit() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -278,18 +273,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+            TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().commit(status2);
+            manager.getTransactionManager().commit(status2);
         }
 
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
 
-        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -305,19 +300,15 @@ public abstract class TestJEConnectionFactory extends TestCase {
 
         cursor.close();
 
-        sm.getTransactionManager().commit(status3);
+        manager.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
-        ctx.close();
     }
 
+    @Test
     public void testInnerTransaction_CommitRollback() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -325,18 +316,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+            TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().rollback(status2);
+            manager.getTransactionManager().rollback(status2);
         }
 
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
 
-        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -348,19 +339,15 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor.getNext(key, value, LockMode.DEFAULT));
         cursor.close();
 
-        sm.getTransactionManager().commit(status3);
+        manager.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
-        ctx.close();
     }
 
+    @Test
     public void testInnerTransaction_RollbackCommit() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
-
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Database db = factoryJE.getConnection(0).openDatabase("test",
                 new DatabaseConfig().setAllowCreate(true).setTransactional(true));
         String test = "Test";
@@ -368,18 +355,18 @@ public abstract class TestJEConnectionFactory extends TestCase {
                 new DatabaseEntry(SerializationHelper.objectToBytes(test)));
 
         {
-            TransactionStatus status2 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+            TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
             Database db1 = factoryJE.getConnection(0).openDatabase("test",
                     new DatabaseConfig().setAllowCreate(true).setTransactional(true));
             String test1 = "Test1";
             db1.put(null, new DatabaseEntry(SerializationHelper.longToBytes(20)),
                     new DatabaseEntry(SerializationHelper.objectToBytes(test1)));
-            sm.getTransactionManager().commit(status2);
+            manager.getTransactionManager().commit(status2);
         }
 
-        sm.getTransactionManager().rollback(status1);
+        manager.getTransactionManager().rollback(status1);
 
-        TransactionStatus status3 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         db = factoryJE.getConnection(0).openDatabase("test", new DatabaseConfig()
                 .setAllowCreate(true).setTransactional(true));
         Cursor cursor = db.openCursor(null, new CursorConfig().setReadCommitted(true));
@@ -391,19 +378,14 @@ public abstract class TestJEConnectionFactory extends TestCase {
         assertEquals(OperationStatus.NOTFOUND, cursor.getNext(key, value, LockMode.DEFAULT));
         cursor.close();
 
-        sm.getTransactionManager().commit(status3);
+        manager.getTransactionManager().commit(status3);
 
         factoryJE.closeConnection(0);
         factoryJE.closeConnection(1);
-        ctx.close();
     }
 
+    @Test
     public void testJEConnectionFactory1() {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        JEConnectionFactory factoryJE2 = (JEConnectionFactory) ctx.getBean("connectionFactory2");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
         factoryJE.setLockingTimeout(1000);
         assertEquals(1000, factoryJE.getLockingTimeout());
         assertEquals("./target/berkeley_db/", factoryJE.getPath());
@@ -429,41 +411,34 @@ public abstract class TestJEConnectionFactory extends TestCase {
         factoryJE2.closeConnection(0);
         factoryJE.closeConnection(1);
         factoryJE2.closeConnection(1);
-        ctx.close();
     }
 
+    @Test
     public void testActive() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
         factoryJE.destroy();
         try {
             factoryJE.getConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
-        TransactionStatus status1 = sm.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
 
-        sm.getTransactionManager().commit(status1);
+        manager.getTransactionManager().commit(status1);
     }
 
+    @Test
     public void testGetTxConection() throws Exception, RollbackException {
-        ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getConfigName(), TestJEConnectionFactory.class);
-        JEConnectionFactory factoryJE = (JEConnectionFactory) ctx.getBean("connectionFactory");
-        IJedaManager sm = ctx.getBean(IJedaManager.class);
 
         try {
             factoryJE.getTxConnection(0);
             fail("Expected " + JEConnectionException.class);
         } catch (JEConnectionException e) {
         }
-
-        ctx.close();
     }
 
     private void delete(File file) throws IOException {

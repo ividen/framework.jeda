@@ -1,11 +1,15 @@
 package ru.kwanza.jeda.jeconnection;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNull;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestJEConnectionException extends TestCase {
+public class TestJEConnectionException {
+    @Test
     public void testSourceException() {
         JEConnectionException e1 = new JEConnectionException();
         assertNull(e1.getMessage());
