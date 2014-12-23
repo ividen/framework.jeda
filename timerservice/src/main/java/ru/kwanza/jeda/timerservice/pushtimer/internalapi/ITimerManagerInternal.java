@@ -5,6 +5,8 @@ import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 import ru.kwanza.jeda.timerservice.pushtimer.tx.Tx;
+import ru.kwanza.txn.api.Transactional;
+import ru.kwanza.txn.api.TransactionalType;
 
 import java.util.*;
 
@@ -19,6 +21,7 @@ public interface ITimerManagerInternal extends ITimerManager{
 
     public List<TimerEntity> getReadyForFireTimers(String timerName, Set<String> timerIds);
 
+    @Transactional(TransactionalType.MANDATORY)
     public void markFiredWithOptLock(String timerName, List<TimerEntity> timersWithState);
 
 }

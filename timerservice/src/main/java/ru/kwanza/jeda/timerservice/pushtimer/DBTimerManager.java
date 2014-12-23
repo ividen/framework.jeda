@@ -44,21 +44,25 @@ public class DBTimerManager  implements ITimerManagerInternal {
     EventStatistic createStats;
 
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void scheduleTimers(long timeoutMS, Collection<TimerHandle> timerHandles) {
         scheduleTimers(Helper.toTimers(timeoutMS, timerHandles));
     }
 
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void scheduleTimers(String timerName, long timeoutMS, Collection<String> timerIds) {
         processScheduleTimerEvents(timerName, Helper.toScheduleEvents(timeoutMS, timerIds, false));
     }
 
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void reScheduleTimers(long timeoutMS, Collection<TimerHandle> timerHandles) {
         reScheduleTimers(Helper.toTimers(timeoutMS, timerHandles));
     }
 
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void reScheduleTimers(String timerName, long timeoutMS, Collection<String> timerIds) {
         processScheduleTimerEvents(timerName, Helper.toScheduleEvents(timeoutMS, timerIds, true));
     }
@@ -68,6 +72,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
     * прямой метод обработки
     */
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void scheduleTimers(Collection<NewTimer> timers) {
         Set<NewTimer> timerSet = checkDuplicates(timers);
         Tx tx = pendingTxTimersStore.getCurrentTx(this);
@@ -78,6 +83,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
      * прямой метод обработки
      */
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void reScheduleTimers(Collection<NewTimer> timers) {
         Set<NewTimer> timerSet = checkDuplicates(timers);
         Tx tx = pendingTxTimersStore.getCurrentTx(this);
@@ -88,6 +94,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
      * прямой метод обработки
      */
     @Override
+    @Transactional(TransactionalType.REQUIRED)
     public void processScheduleTimerEvents(String timerName, Collection<ScheduleTimerEvent> scheduleTimerEvents) {
         Set<ScheduleTimerEvent> eventsSet = checkDuplicates(scheduleTimerEvents);
         Tx tx = pendingTxTimersStore.getCurrentTx(this);
@@ -218,6 +225,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
     }
 
     @Override
+    @Transactional(TransactionalType.MANDATORY)
     public void markFiredWithOptLock(String timerName, List<TimerEntity> timers) {
         TimerClass timerClass = timerClassRepository.getClassByTimerName(timerName);
         try {
