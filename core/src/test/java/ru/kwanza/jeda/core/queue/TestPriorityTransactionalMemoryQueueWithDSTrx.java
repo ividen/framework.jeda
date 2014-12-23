@@ -1,13 +1,26 @@
 package ru.kwanza.jeda.core.queue;
 
 import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.*;
+import ru.kwanza.jeda.api.IEvent;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.IPriorityEvent;
+import ru.kwanza.jeda.api.SinkException;
+import ru.kwanza.jeda.api.internal.IQueue;
+import ru.kwanza.jeda.api.internal.IQueueObserver;
+import ru.kwanza.jeda.api.internal.SourceException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,95 +30,26 @@ import java.util.Iterator;
 /**
  * @author Guzanov Alexander
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextConfiguration("application-context-ds.xml")
 public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
+
+    @Autowired
+    protected PlatformTransactionManager tm;
+
+    @Mocked
     protected IJedaManager manager;
-    private ClassPathXmlApplicationContext context;
 
-    public static class StubJedaManager implements IJedaManager {
-        private PlatformTransactionManager tm;
-
-        public StubJedaManager(PlatformTransactionManager tm) {
-            this.tm = tm;
-        }
-
-        public PlatformTransactionManager getTransactionManager() {
-            return tm;
-        }
-
-        public IStage getStage(String name) {
-            return null;
-        }
-
-        public IStageInternal getStageInternal(String name) {
-            return null;
-        }
-
-        public ITimer getTimer(String name) {
-            return null;
-        }
-
-        public IPendingStore getPendingStore() {
-            throw new UnsupportedOperationException("getPendingStore");
-        }
-
-        public IContextController getContextController(String name) {
-            return null;
-        }
-
-        public IFlowBus getFlowBus(String name) {
-            return null;
-        }
-
-        public IStageInternal getCurrentStage() {
-            return null;
-        }
-
-        public void setCurrentStage(IStageInternal stage) {
-        }
-
-        public IStage registerStage(IStageInternal stage) {
-            return null;
-        }
-
-        public IFlowBus registerFlowBus(String name, IFlowBus flowBus) {
-            return null;
-        }
-
-        public IContextController registerContextController(String name, IContextController context) {
-            return null;
-        }
-
-        public ITimer registerTimer(String name, ITimer timer) {
-            return null;
-        }
-
-        public void registerObject(String name, Object object) {
-        }
-
-        public String resolveObjectName(Object object) {
-            return null;
-        }
-
-        public Object resolveObject(String objectName) {
-            return null;
-        }
+    @Before
+    public void init() {
+        new NonStrictExpectations() {{
+            manager.getTransactionManager();
+            result = tm;
+        }};
     }
 
-
-    public void setUp() throws Exception {
-        context = new ClassPathXmlApplicationContext(getContextPath(), TestPriorityTransactionalMemoryQueueWithDSTrx.class);
-        manager = new StubJedaManager((PlatformTransactionManager) context.getBean("jeda.PlatformTransactionManager"));
-    }
-
-    public String getContextPath() {
-        return "application-context-ds.xml";
-    }
-
-    public void tearDown() throws Exception {
-        context.close();
-    }
-
-
+    @Test
     public void testAllPriority() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -144,6 +88,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().commit(status7);
     }
 
+    @Test
     public void testClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -171,6 +116,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -198,6 +144,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 9, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -225,6 +172,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -248,6 +196,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -273,6 +222,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -299,6 +249,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 2, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -325,6 +276,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -336,6 +288,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -347,6 +300,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyTryPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -357,6 +311,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyTryPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -367,11 +322,13 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testMaxSize() {
         PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(manager);
         assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
+    @Test
     public void testObserver() throws SinkException, SourceException {
         IQueue queue = createQueue();
         final ArrayList<Integer> queueSize = new ArrayList<Integer>();
@@ -468,6 +425,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong count", 0, delta.size());
     }
 
+    @Test
     public void testPutCommit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -492,6 +450,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testPutPutCommit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -523,6 +482,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testPutPutRollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -545,6 +505,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testPutRollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -567,6 +528,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -593,6 +555,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 10, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -619,6 +582,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 6, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -645,6 +609,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -670,6 +635,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 10, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -695,6 +661,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 4, queue.size());
     }
 
+    @Test
     public void testPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -720,6 +687,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -749,6 +717,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -776,6 +745,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -805,6 +775,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -832,6 +803,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 2, queue.size());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -859,6 +831,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -890,6 +863,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -921,6 +895,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 5, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -952,6 +927,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -982,6 +958,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1012,6 +989,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 6, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1042,6 +1020,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1065,6 +1044,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void testTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1088,6 +1068,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1114,6 +1095,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1140,6 +1122,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTryPutCommit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1164,6 +1147,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testTryPutPutCommit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1195,6 +1179,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testTryPutPutRollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1217,6 +1202,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testTryPutRollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1239,6 +1225,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1265,6 +1252,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 10, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1291,6 +1279,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 6, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1317,6 +1306,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1342,6 +1332,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 10, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1367,6 +1358,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 4, queue.size());
     }
 
+    @Test
     public void testTryPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         PriorityTransactionalMemoryQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1392,6 +1384,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void test_2_Queue_Put_Commit() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
@@ -1410,6 +1403,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 2, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Put_Rollback() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
@@ -1428,6 +1422,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 0, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Take_Commit() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
@@ -1457,6 +1452,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 1, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Take_Rollback() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
@@ -1486,6 +1482,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 2, queue2.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1510,6 +1507,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1534,6 +1532,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1558,6 +1557,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Commit_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1584,6 +1584,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Commit_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1610,6 +1611,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Rollback_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1636,6 +1638,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Rollback_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1662,6 +1665,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1692,6 +1696,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 8, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Commit_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1722,6 +1727,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1752,6 +1758,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 3, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1782,6 +1789,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 5, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Commit_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1811,6 +1819,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 8, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Rollback_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
         TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
@@ -1840,6 +1849,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Queue size", 10, queue.size());
     }
 
+    @Test
     public void test_Clone_Copy() throws SinkException, SourceException {
         IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
@@ -1862,6 +1872,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
     }
 
 
+    @Test
     public void test_None_Copy() throws SinkException, SourceException {
         IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10);
 
@@ -1883,6 +1894,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().commit(status2);
     }
 
+    @Test
     public void test_Non_Clone_Copy() throws SinkException, SourceException {
         IQueue queue1 = new PriorityTransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
@@ -1904,6 +1916,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         manager.getTransactionManager().commit(status2);
     }
 
+    @Test
     public void test_Non_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 
@@ -1933,6 +1946,7 @@ public class TestPriorityTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertTrue("Reference equal", (event == event_copy));
     }
 
+    @Test
     public void test_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 

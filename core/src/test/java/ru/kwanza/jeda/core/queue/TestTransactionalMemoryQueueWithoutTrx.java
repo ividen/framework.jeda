@@ -1,10 +1,11 @@
 package ru.kwanza.jeda.core.queue;
 
+import junit.framework.Assert;
+import org.junit.Test;
 import org.springframework.transaction.PlatformTransactionManager;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import junit.framework.TestSuite;
 
 /**
  * @author Guzanov Alexander
@@ -74,13 +75,10 @@ public class TestTransactionalMemoryQueueWithoutTrx extends TestEventQueue {
         }
     }
 
-    public static TestSuite suite() {
-        return new TestSuite(TestTransactionalMemoryQueueWithoutTrx.class);
-    }
-
+    @Test
     public void testMaxSize() {
         TransactionalMemoryQueue memoryQueue = new TransactionalMemoryQueue(new NonTransactionalJedaManager());
-        assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
+        Assert.assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
     @Override

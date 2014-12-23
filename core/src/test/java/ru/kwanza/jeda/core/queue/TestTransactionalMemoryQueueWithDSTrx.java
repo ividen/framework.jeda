@@ -1,114 +1,56 @@
 package ru.kwanza.jeda.core.queue;
 
-import junit.framework.TestCase;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import ru.kwanza.jeda.api.*;
+import ru.kwanza.jeda.api.IEvent;
+import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
-import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.SourceException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static junit.framework.Assert.*;
+
 /**
  * @author Guzanov Alexander
  */
-public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
+@RunWith(SpringJUnit4ClassRunner.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@ContextConfiguration("application-context-ds.xml")
+public class TestTransactionalMemoryQueueWithDSTrx {
+    @Autowired
+    protected PlatformTransactionManager tm;
+
+    @Mocked
     protected IJedaManager manager;
-    private ClassPathXmlApplicationContext context;
 
-    public static class StubJedaManager implements IJedaManager {
-      private PlatformTransactionManager tm;
-
-        public StubJedaManager(PlatformTransactionManager tm) {
-            this.tm = tm;
-        }
-
-        public PlatformTransactionManager getTransactionManager() {
-            return tm;
-        }
-
-        public IStage getStage(String name) {
-            return null;
-        }
-
-        public IStageInternal getStageInternal(String name) {
-            return null;
-        }
-
-        public ITimer getTimer(String name) {
-            return null;
-        }
-
-        public IPendingStore getPendingStore() {
-            throw new UnsupportedOperationException("getPendingStore");
-        }
-
-        public IContextController getContextController(String name) {
-            return null;
-        }
-
-        public IFlowBus getFlowBus(String name) {
-            return null;
-        }
-
-        public IStageInternal getCurrentStage() {
-            return null;
-        }
-
-        public void setCurrentStage(IStageInternal stage) {
-        }
-
-        public IStage registerStage(IStageInternal stage) {
-            return null;
-        }
-
-        public IFlowBus registerFlowBus(String name, IFlowBus flowBus) {
-            return null;
-        }
-
-        public IContextController registerContextController(String name, IContextController context) {
-            return null;
-        }
-
-        public ITimer registerTimer(String name, ITimer timer) {
-            return null;
-        }
-
-        public void registerObject(String name, Object object) {
-        }
-
-        public String resolveObjectName(Object object) {
-            return null;
-        }
-
-        public Object resolveObject(String objectName) {
-            return null;
-        }
+    @Before
+    public void init(){
+        new NonStrictExpectations(){{
+            manager.getTransactionManager();result=tm;
+        }};
     }
 
-    public void setUp() throws Exception {
-        context = new ClassPathXmlApplicationContext(getContextPath(),TestTransactionalMemoryQueueWithDSTrx.class);
-        manager = new StubJedaManager((PlatformTransactionManager) context.getBean("jeda.PlatformTransactionManager"));
-    }
-
-    public String getContextPath() {
-        return "application-context-ds.xml";
-    }
-
-    public void tearDown() throws Exception {
-        context.close();
-    }
+    @Test
     public void testClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -120,22 +62,23 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9")})));
 
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 1, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -147,22 +90,23 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9")})));
 
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Sink size", 9, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -174,22 +118,23 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9")})));
 
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -205,14 +150,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("11")})).size());
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -223,20 +169,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9")})));
 
-        manager.getTransactionManager().commit(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.commit(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Wrong clogged count!", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})).size());
 
         assertEquals("Sink size", 9, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -249,20 +196,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")})));
 
 
-        manager.getTransactionManager().rollback(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.rollback(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})));
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 2, queue.size());
     }
 
+    @Test
     public void testClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -275,74 +223,80 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")})));
 
 
-        manager.getTransactionManager().rollback(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.rollback(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("11")})));
 
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{}));
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testEmptyPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{}));
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testEmptyTryPutCommit() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{})));
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testEmptyTryPutRollback() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{})));
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testMaxSize() {
         TransactionalMemoryQueue memoryQueue = new TransactionalMemoryQueue(manager);
         assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());
     }
 
+    @Test
     public void testObserver() throws SinkException, SourceException {
         IQueue queue = createQueue();
         final ArrayList<Integer> queueSize = new ArrayList<Integer>();
@@ -356,16 +310,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertNotNull("Must be NOT null", queue.getObserver());
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5"),
                 new Event("6")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                     new Event("7"),
@@ -375,29 +329,29 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
             }));
         } catch (SinkException.Clogged e) {
         }
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
 
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Wrong decline size", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("7"),
                 new Event("9"),
                 new Event("10"),
                 new Event("11")
         })).size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
 
-        TransactionStatus status4 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status4 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Wrong count", 1, queue.take(1).size());
-        manager.getTransactionManager().commit(status4);
+        tm.commit(status4);
 
-        TransactionStatus status5 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status5 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Wrong count", 5, queue.take(5).size());
-        manager.getTransactionManager().commit(status5);
+        tm.commit(status5);
 
-        TransactionStatus status6 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status6 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Wrong count", 4, queue.take(10).size());
-        manager.getTransactionManager().commit(status6);
+        tm.commit(status6);
 
 
         assertEquals("Wrong notify size for 1 put", Integer.valueOf(6), queueSize.get(0));
@@ -419,7 +373,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertNull("Must be null", queue.getObserver());
 
-        TransactionStatus status7 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status7 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                     new Event("7"),
@@ -429,19 +383,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
             }));
         } catch (SinkException.Clogged e) {
         }
-        manager.getTransactionManager().commit(status7);
+        tm.commit(status7);
 
-        TransactionStatus status8 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status8 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Wrong count", 5, queue.take(10).size());
-        manager.getTransactionManager().commit(status8);
+        tm.commit(status8);
 
         assertEquals("Wrong count", 0, queueSize.size());
         assertEquals("Wrong count", 0, delta.size());
     }
 
+    @Test
     public void testPutCommit() throws SinkException, SourceException {
         IQueue<Event> queue = createQueue();
-        TransactionStatus status9 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status9 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new Event[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -451,7 +406,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status9);
+        tm.commit(status9);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
@@ -466,9 +421,10 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testPutPutCommit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -487,7 +443,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         int i = 0;
@@ -501,9 +457,10 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testPutPutRollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -521,14 +478,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPutRollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -546,14 +504,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -564,7 +523,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -572,18 +531,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 4, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -594,7 +554,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -602,18 +562,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -624,7 +585,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -632,18 +593,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -653,11 +615,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -665,14 +627,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -682,11 +645,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -694,14 +657,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 4, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
     }
 
+    @Test
     public void testPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -711,11 +675,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -723,15 +687,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -742,7 +707,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                     new Event("11")}));
@@ -751,19 +716,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
         assertEquals("Sink size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Sink size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -784,15 +750,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Sink size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Sink size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -804,8 +771,8 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9"),
                 new Event("10")}));
 
-        manager.getTransactionManager().commit(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.commit(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                     new Event("11")}));
@@ -815,15 +782,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Sink size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -834,8 +802,8 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().rollback(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.rollback(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                     new Event("11")}));
@@ -844,15 +812,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
         assertEquals("Sink size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 2, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Sink size", 2, queue.size());
         assertEquals("WrongEstimateQueueSize", 2, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSinkExceptionClogged_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -863,8 +832,8 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().rollback(status1);
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        tm.rollback(status1);
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         try {
             queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                     new Event("11")}));
@@ -872,13 +841,14 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
             fail("Must NOT  be SinkException.Clogged");
         }
         assertEquals("Sink size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Sink size", 0, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -889,27 +859,28 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
 
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Qeuue size", 6, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -920,27 +891,28 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
 
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status3);
+        tm.rollback(status3);
         assertEquals("Qeuue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 5, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -951,27 +923,28 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
 
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status3);
+        tm.rollback(status3);
         assertEquals("Qeuue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Commit_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -982,26 +955,27 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Rollback_Begin_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1012,26 +986,27 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Queue size", 10, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Qeuue size", 6, queue.size());
     }
 
+    @Test
     public void testTakeBegin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1042,26 +1017,27 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Queue size", 10, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status3);
+        tm.rollback(status3);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1072,19 +1048,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertEquals("Elemets size", 10, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void testTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1095,19 +1072,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertEquals("Elemets size", 10, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeTakeCommit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1118,22 +1096,23 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 1, queue.size());
     }
 
+    @Test
     public void testTakeTakeRollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1144,25 +1123,26 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(5);
         assertEquals("Elemets size", 5, c.size());
         assertEquals("Queue size", 10, queue.size());
         c = queue.take(4);
         assertEquals("Elemets size", 4, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void testTakeZero() throws SourceException, SinkException {
         IQueue queue = createQueue();
 
         assertEquals("WrongQueueSize", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1171,21 +1151,22 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("6")}));
         assertEquals("WrongQueueSize", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Zero take ", queue.take(0));
         assertEquals("WrongQueueSize", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
 
         assertEquals("WrongQueueSize", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPutCommit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1195,7 +1176,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
@@ -1210,12 +1191,13 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testTryPutInterrupt() throws SourceException, SinkException {
         IQueue queue = createQueue();
 
         assertEquals("WrongQueueSize", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Thread.currentThread().interrupt();
         try {
             try {
@@ -1226,25 +1208,26 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                         new Event("5"),
                         new Event("6")}));
                 fail("MUstbe SinkClosed");
-                manager.getTransactionManager().commit(status);
+                tm.commit(status);
             } catch (SinkException.Closed e) {
                 assertEquals("WrongQueueSize", 0, queue.size());
                 assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-                manager.getTransactionManager().rollback(status);
+                tm.rollback(status);
             }
         } catch (Throwable e) {
             assertEquals("WrongQueueSize", 0, queue.size());
             assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
-            manager.getTransactionManager().rollback(status);
+            tm.rollback(status);
         }
 
         assertEquals("WrongQueueSize", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPutPutCommit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1263,7 +1246,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
         int i = 0;
@@ -1277,9 +1260,10 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         }
     }
 
+    @Test
     public void testTryPutPutRollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1297,14 +1281,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPutRollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1322,14 +1307,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Commit_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1340,7 +1326,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1348,18 +1334,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 4, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
 
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Rollback_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1370,7 +1357,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1378,18 +1365,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Begin_Rollback_Rollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1400,7 +1388,7 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1408,18 +1396,19 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Commit_Begin_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1429,11 +1418,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1441,14 +1430,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 6, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 10, queue.size());
         assertEquals("WrongEstimateQueueSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Rollback_Begin_Commit() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1458,11 +1448,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1470,14 +1460,15 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Wrong queue size", 4, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPut_Begin_Rollback_Begin_Rollback() throws SinkException, SourceException {
         TransactionalMemoryQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1487,11 +1478,11 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertNull("Not clogged!", queue.tryPut(Arrays.asList(new IEvent[]{new Event("7"),
                 new Event("8"),
                 new Event("9"),
@@ -1499,15 +1490,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
 
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 4, queue.getEstimatedCount());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Wrong queue size", 0, queue.size());
         assertEquals("WrongEstimateQueueSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void test_2_Queue_Put_Commit() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1517,15 +1509,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Put_Rollback() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1535,15 +1528,16 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
-        manager.getTransactionManager().rollback(status);
+        tm.rollback(status);
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Take_Commit() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1553,26 +1547,27 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Evnt count", 3, queue1.take(3).size());
         assertEquals("Evnt count", 1, queue2.take(1).size());
 
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Queue size", 2, queue1.size());
         assertEquals("Queue size", 1, queue2.size());
     }
 
+    @Test
     public void test_2_Queue_Take_Rollback() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
         IQueue queue2 = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue1.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1582,25 +1577,26 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("7")}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 0, queue2.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         assertEquals("Evnt count", 3, queue1.take(3).size());
         assertEquals("Evnt count", 1, queue2.take(1).size());
 
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Queue size", 5, queue1.size());
         assertEquals("Queue size", 2, queue2.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1612,19 +1608,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9"),
                 new Event("10")}));
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertNull("Must be empty", c);
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 0, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1636,19 +1633,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9"),
                 new Event("10")}));
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertNull("Must be empty", c);
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 0, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Begin_Take_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1660,19 +1658,20 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("9"),
                 new Event("10")}));
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertNull("Must be empty", c);
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Commit_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1685,20 +1684,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 10, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertEquals("Must be empty", 10, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Commit_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1711,20 +1711,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 10, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertEquals("Must Not be empty", 10, c.size());
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Rollback_Begin_Take_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1737,20 +1738,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Queue size", 0, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertNull("Must be empty", c);
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Put_Rollback_Begin_Take_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
@@ -1763,34 +1765,35 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10")}));
 
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status1);
+        tm.rollback(status1);
         assertEquals("Queue size", 0, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(100);
         assertNull("Must be empty", c);
         assertEquals("Queue size", 0, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 0, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Commit_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
@@ -1798,29 +1801,30 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Queue size", 8, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Commit_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
@@ -1828,29 +1832,30 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Queue size", 10, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Queue size", 10, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Rollback_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
@@ -1858,29 +1863,30 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().rollback(status3);
+        tm.rollback(status3);
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Queue size", 3, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Begin_Put_Rollback_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         assertEquals("Clogged Size : ", 1, queue.tryPut(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
@@ -1888,81 +1894,84 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
                 new Event("10"), new Event("11")})).size());
 
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().rollback(status3);
+        tm.rollback(status3);
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Queue size", 5, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Commit_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
         assertEquals("Qeuue size", 3, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
         assertEquals("Queue size", 3, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Queue size", 8, queue.size());
     }
 
+    @Test
     public void test_Begin_Take_Rollback_Begin_Put_Commit() throws SinkException, SourceException {
         IQueue queue = createQueue();
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
                 new Event("2"),
                 new Event("3"),
                 new Event("4"),
                 new Event("5")}));
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 5, queue.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection c = queue.take(2);
         assertEquals("Must be empty", 2, c.size());
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
         assertEquals("Qeuue size", 5, queue.size());
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         queue.put(Arrays.asList(new IEvent[]{new Event("6"),
                 new Event("7"),
                 new Event("8"),
                 new Event("9"),
                 new Event("10")}));
         assertEquals("Queue size", 5, queue.size());
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
         assertEquals("Queue size", 10, queue.size());
     }
 
+    @Test
     public void test_Clone_Copy() throws SinkException, SourceException {
         IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Event event = new Event("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
@@ -1970,20 +1979,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         Event event_copy = (Event) take.iterator().next();
 
         assertEquals("Reference equal", event, event_copy);
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
     }
 
+    @Test
     public void test_Non_Clone_Copy() throws SinkException, SourceException {
         IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         NonSerializableEvent event = new NonSerializableEvent("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
@@ -1991,20 +2001,21 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
 
         assertTrue("Reference equal", (event == event_copy));
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
     }
 
+    @Test
     public void test_Non_Copy() throws SinkException, SourceException {
         IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.NONE, 10);
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         NonSerializableEvent event = new NonSerializableEvent("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
@@ -2012,90 +2023,94 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
 
         assertTrue("Reference equal", (event == event_copy));
-        manager.getTransactionManager().commit(status2);
+        tm.commit(status2);
     }
 
+    @Test
     public void test_Non_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         NonSerializableEvent event = new NonSerializableEvent("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
 
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
 
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
 
         NonSerializableEvent event_copy = (NonSerializableEvent) take.iterator().next();
 
         assertTrue("Reference equal", (event == event_copy));
     }
 
+    @Test
     public void test_Put_interrupt_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Event event = new Event("1");
         queue.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue.size());
         assertEquals("Queue size", 1, queue.getEstimatedCount());
         Thread.currentThread().interrupt();
-        manager.getTransactionManager().commit(status);
+        tm.commit(status);
         assertEquals("Queue size", 0, queue.size());
         assertEquals("Queue size", 1, queue.getEstimatedCount());
     }
 
+    @Test
     public void test_Serialization_Copy() throws SinkException, SourceException {
         IQueue queue1 = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Event event = new Event("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
         Event event_copy = (Event) take.iterator().next();
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
 
         assertNotSame("Reference must not be equal", event, event_copy);
         assertEquals("Objects equals", event, event_copy);
     }
 
+    @Test
     public void test_TakeCLONE_Rollback() throws SinkException, SourceException {
         IQueue queue1 = new TransactionalMemoryQueue(manager, ObjectCloneType.CLONE, 10);
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Event event = new Event("1");
         queue1.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue1.size());
         assertEquals("Queue size", 1, queue1.getEstimatedCount());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue1.size());
         assertEquals("Queue size", 1, queue1.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
@@ -2103,38 +2118,39 @@ public class TestTransactionalMemoryQueueWithDSTrx extends TestCase {
         Event event_copy = (Event) take.iterator().next();
 
         assertEquals("Reference equal", event, event_copy);
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
 
 
-        TransactionStatus status3 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status3 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         take = queue1.take(1);
         assertEquals("Evnt count", 1, take.size());
         event_copy = (Event) take.iterator().next();
 
         assertNotSame("Reference NOT equal", event, event_copy);
-        manager.getTransactionManager().commit(status3);
+        tm.commit(status3);
     }
 
+    @Test
     public void test_Take_interrupt_Rollback() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
-        TransactionStatus status1 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status1 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         Event event = new Event("1");
         queue.put(Arrays.asList(new IEvent[]{event}));
         assertEquals("Queue size", 0, queue.size());
         assertEquals("Queue size", 1, queue.getEstimatedCount());
-        manager.getTransactionManager().commit(status1);
+        tm.commit(status1);
         assertEquals("Queue size", 1, queue.size());
         assertEquals("Queue size", 1, queue.getEstimatedCount());
 
-        TransactionStatus status2 = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        TransactionStatus status2 = tm.getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         Collection take = queue.take(1);
         assertEquals("Evnt count", 1, take.size());
 
         Thread.currentThread().interrupt();
-        manager.getTransactionManager().rollback(status2);
+        tm.rollback(status2);
     }
 
     protected TransactionalMemoryQueue createQueue() {

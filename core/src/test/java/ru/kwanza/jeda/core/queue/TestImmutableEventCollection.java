@@ -1,16 +1,20 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
 import ru.kwanza.jeda.api.IEvent;
-import junit.framework.TestCase;
 
 import java.util.Collection;
 import java.util.Iterator;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.fail;
 
 
 /**
  * @author Guzanov Alexander
  */
-public class TestImmutableEventCollection extends TestCase {
+public class TestImmutableEventCollection {
+    @Test
     public void testAddWithUnsupportedOperationException() {
         Collection<IEvent> events = createCollection();
 
@@ -24,6 +28,7 @@ public class TestImmutableEventCollection extends TestCase {
         fail("Expected exception");
     }
 
+    @Test
     public void testIterate() {
         Collection<Event> events = createCollection();
 
@@ -42,6 +47,7 @@ public class TestImmutableEventCollection extends TestCase {
         assertEquals("Wrong event size", 6, events.size());
     }
 
+    @Test
     public void testRemoveWithUnsupportedOperationException() {
         Collection<IEvent> events = createCollection();
         Iterator<IEvent> iterator = events.iterator();
@@ -55,6 +61,7 @@ public class TestImmutableEventCollection extends TestCase {
         fail("Expected exception");
     }
 
+    @Test
     public void testWrongIterate() {
         Collection<Event> events = createCollection();
         assertEquals("Wrong event size", 6, events.size());
@@ -89,7 +96,6 @@ public class TestImmutableEventCollection extends TestCase {
         n4.next = n5;
         n5.next = n6;
         n6.next = null;
-
 
         return new ImmutableEventCollection(n, 6);
     }
