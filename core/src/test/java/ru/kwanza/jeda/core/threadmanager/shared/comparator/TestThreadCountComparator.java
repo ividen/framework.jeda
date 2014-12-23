@@ -1,11 +1,14 @@
 package ru.kwanza.jeda.core.threadmanager.shared.comparator;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestThreadCountComparator extends TestCase {
+public class TestThreadCountComparator{
+    @Test
     public void test1() {
         ThreadCountComparator comparator = new ThreadCountComparator();
         TestStageEntry entry1 = new TestStageEntry();
@@ -21,6 +24,7 @@ public class TestThreadCountComparator extends TestCase {
         assertEquals(-1, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test2() {
         ThreadCountComparator comparator = new ThreadCountComparator();
         TestStageEntry entry1 = new TestStageEntry();

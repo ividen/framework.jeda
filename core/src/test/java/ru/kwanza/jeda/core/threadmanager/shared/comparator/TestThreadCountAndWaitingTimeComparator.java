@@ -1,13 +1,16 @@
 package ru.kwanza.jeda.core.threadmanager.shared.comparator;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.Comparator;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestThreadCountAndWaitingTimeComparator extends TestCase {
+public class TestThreadCountAndWaitingTimeComparator{
+    @Test
     public void test1() {
         ThreadCountAndWaitingTimeComparator comparator = new ThreadCountAndWaitingTimeComparator();
         comparator.setMaxWaitingTime(Long.MAX_VALUE);
@@ -25,6 +28,7 @@ public class TestThreadCountAndWaitingTimeComparator extends TestCase {
         assertEquals(-1, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test2() {
         ThreadCountAndWaitingTimeComparator comparator = new ThreadCountAndWaitingTimeComparator();
         comparator.setMaxWaitingTime(Long.MAX_VALUE);
@@ -41,6 +45,7 @@ public class TestThreadCountAndWaitingTimeComparator extends TestCase {
         assertEquals(1, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test3() {
         ThreadCountAndWaitingTimeComparator comparator = new ThreadCountAndWaitingTimeComparator();
         comparator.setMaxWaitingTime(Long.MAX_VALUE);
@@ -57,6 +62,7 @@ public class TestThreadCountAndWaitingTimeComparator extends TestCase {
         assertEquals(0, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test4() throws InterruptedException {
         ThreadCountAndWaitingTimeComparator comparator = new ThreadCountAndWaitingTimeComparator();
         comparator.setMaxWaitingTime(10 * 1000);
@@ -74,6 +80,7 @@ public class TestThreadCountAndWaitingTimeComparator extends TestCase {
         assertEquals(1, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test5() {
         Comparator comparator = new ThreadCountAndWaitingTimeComparator();
         ((ThreadCountAndWaitingTimeComparator) comparator).setMaxWaitingTime(Long.MAX_VALUE);
