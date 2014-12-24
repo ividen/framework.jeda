@@ -62,7 +62,7 @@
     <bean id="test.custom.liquibase.1" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLog" value="classpath:jeda-timerservice-default-liquibase.xml" />
         <property name="changeLogParameters">
             <map>
                 <entry key="table.name" value="JEDA_TIMERS_C1"/>
@@ -73,7 +73,7 @@
     <bean id="test.custom.liquibase.2" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLog" value="classpath:jeda-timerservice-default-liquibase.xml" />
         <property name="changeLogParameters">
             <map>
                 <entry key="table.name" value="JEDA_TIMERS_C2"/>
@@ -84,7 +84,7 @@
     <bean id="test.custom.liquibase.3" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLog" value="classpath:jeda-timerservice-default-liquibase.xml" />
         <property name="changeLogParameters">
             <map>
                 <entry key="table.name" value="JEDA_TIMERS_C3"/>
@@ -95,7 +95,7 @@
     <bean id="test.custom.liquibase.4" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:timerservice-default-liquibase.xml" />
+        <property name="changeLog" value="classpath:jeda-timerservice-default-liquibase.xml" />
         <property name="changeLogParameters">
             <map>
                 <entry key="table.name" value="JEDA_TIMERS_C4"/>
@@ -118,7 +118,7 @@
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
         <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_3" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
-        <timers:timer-class-ref ref="timerservice.default.DefaultTimerClass"/>
+        <timers:timer-class-ref ref="jeda.timerservice.default.DefaultTimerClass"/>
     </timers:timer>
 
     <timers:timer name="TIMER_4">
@@ -127,7 +127,7 @@
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class>
             <timers:dao-custom ref="test.custom.DAO" />
-            <timers:consumer-config-ref ref="timerservice.default.DefaultConsumerConfig" />
+            <timers:consumer-config-ref ref="jeda.timerservice.default.DefaultConsumerConfig" />
         </timers:timer-class>
     </timers:timer>
 

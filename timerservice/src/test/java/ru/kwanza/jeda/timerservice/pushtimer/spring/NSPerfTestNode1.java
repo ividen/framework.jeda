@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.timerservice.pushtimer.spring;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -20,6 +21,7 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "ns-test-node1-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Ignore
 public class NSPerfTestNode1 extends AbstractJUnit4SpringContextTests {
 
     @Resource

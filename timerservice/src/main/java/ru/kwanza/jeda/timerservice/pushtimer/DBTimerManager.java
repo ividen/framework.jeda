@@ -41,7 +41,7 @@ public class DBTimerManager  implements ITimerManagerInternal {
     @Resource
     private ConsumerComponent consumerComponent;
 
-    @Resource(name="timerservice.stats.create")
+    @Resource(name="jeda.timerservice.stats.create")
     EventStatistic createStats;
 
     @Override

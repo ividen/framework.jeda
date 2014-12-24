@@ -34,7 +34,7 @@ public class ExpireTimeProcessor implements IEventProcessor<InternalTimerFiredEv
     @Resource
     private FiredTimersStorageRepository firedTimersStorageRepository;
 
-    @Resource (name = "timerservice.stats.process")
+    @Resource (name = "jeda.timerservice.stats.process")
     private EventStatistic processStats;
 
     @Override

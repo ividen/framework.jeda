@@ -40,7 +40,7 @@ public class TimerClassParser  extends JedaBeanDefinitionParser {
         BeanDefinitionBuilder definitionBuilder= BeanDefinitionBuilder.genericBeanDefinition(TimerClass.class);
         definitionBuilder.addPropertyValue("timerClassName", name);
 
-        String consumerConfigId = "timerservice.default.DefaultConsumerConfig";
+        String consumerConfigId = "jeda.timerservice.default.DefaultConsumerConfig";
         if (consumerConfigDef != null) {
             consumerConfigId = consumerConfigDef.getId();
         } else if (refConsumerConfigDef != null) {

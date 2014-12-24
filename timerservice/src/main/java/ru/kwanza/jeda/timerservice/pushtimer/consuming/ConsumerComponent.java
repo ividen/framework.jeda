@@ -44,7 +44,7 @@ public class ConsumerComponent implements IClusteredComponent, Phased {
     @Resource
     private JMXRegistry jmxRegistry;
 
-    @Resource(name ="timerservice.stats.fetch")
+    @Resource(name ="jeda.timerservice.stats.fetch")
     private EventStatistic fetchStats;
 
 

@@ -17,7 +17,7 @@ import ru.kwanza.jeda.timerservice.pushtimer.springintegration.refs.TimerClassRe
  * @author Michael Yeskov
  */
 class TimerBeanBuilder implements BeanBuilder{
-    private static final String DEFAULT_TIMER_CLASS = "timerservice.default.DefaultTimerClass";
+    private static final String DEFAULT_TIMER_CLASS = "jeda.timerservice.default.DefaultTimerClass";
 
     private JedaBeanDefinition eventProcessorDef = null;
     private JedaBeanDefinition resourceControllerDef = null;
@@ -52,7 +52,7 @@ class TimerBeanBuilder implements BeanBuilder{
     public void build(BeanDefinitionBuilder definitionBuilder) {
         definitionBuilder.addPropertyReference("manager", "jeda.IJedaManager");
         definitionBuilder.addPropertyReference("timerManager", "jeda.ITimerManager");
-        definitionBuilder.addPropertyReference("timerClassRepository", "timerservice.TimerClassRepository");
+        definitionBuilder.addPropertyReference("timerClassRepository", "jeda.timerservice.TimerClassRepository");
 
         addPropertyReference("eventProcessor", definitionBuilder, wrapProcessor(eventProcessorDef));
         addPropertyReference("queue", definitionBuilder, generateQueue());

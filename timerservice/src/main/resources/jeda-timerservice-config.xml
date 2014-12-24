@@ -11,39 +11,39 @@
     <!--Entrance point-->
     <bean id="jeda.ITimerManager" class="ru.kwanza.jeda.timerservice.pushtimer.DBTimerManager"/>
 
-    <bean id="timerservice.TimerClassRepository" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository" />
+    <bean id="jeda.timerservice.TimerClassRepository" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository" />
 
-    <bean id="timerservice.liquibase" class="liquibase.integration.spring.SpringLiquibase">
+    <bean id="jeda.timerservice.liquibase" class="liquibase.integration.spring.SpringLiquibase">
         <!-- provided by client -->
         <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:timerservice-liquibase.xml" />
+        <property name="changeLog" value="classpath:jeda-timerservice-liquibase.xml" />
     </bean>
 
 
     <!--statistics monitoring-->
-    <bean id="timerservice.stats.create" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
+    <bean id="jeda.timerservice.stats.create" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
         <constructor-arg value="CREATE" />
     </bean>
 
-    <bean id="timerservice.stats.insertsMBean" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.mbeans.EventStatisticMonitoring" >
-        <constructor-arg ref="timerservice.stats.create" />
+    <bean id="jeda.timerservice.stats.insertsMBean" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.mbeans.EventStatisticMonitoring" >
+        <constructor-arg ref="jeda.timerservice.stats.create" />
     </bean>
 
-    <bean id="timerservice.stats.fetch" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
+    <bean id="jeda.timerservice.stats.fetch" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
         <constructor-arg value="FETCH" />
     </bean>
 
-    <bean id="timerservice.stats.fetchMBean" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.mbeans.EventStatisticMonitoring" >
-        <constructor-arg ref="timerservice.stats.fetch" />
+    <bean id="jeda.timerservice.stats.fetchMBean" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.mbeans.EventStatisticMonitoring" >
+        <constructor-arg ref="jeda.timerservice.stats.fetch" />
     </bean>
 
 
-    <bean id="timerservice.stats.process" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
+    <bean id="jeda.timerservice.stats.process" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.EventStatistic" >
         <constructor-arg value="PROCESS" />
     </bean>
 
     <bean id="timerservice.stats.processMBean" class="ru.kwanza.jeda.timerservice.pushtimer.monitoring.mbeans.EventStatisticMonitoring" >
-        <constructor-arg ref="timerservice.stats.process" />
+        <constructor-arg ref="jeda.timerservice.stats.process" />
     </bean>
 
 

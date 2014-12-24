@@ -24,7 +24,7 @@
     <bean id="repository.configurator" class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepositoryConfigurator" >
         <property name="timerNameToClass">
             <map>
-                <entry key="DEFAULT_TIMER" value-ref="timerservice.default.DefaultTimerClass" />
+                <entry key="DEFAULT_TIMER" value-ref="jeda.timerservice.default.DefaultTimerClass" />
             </map>
         </property>
 
