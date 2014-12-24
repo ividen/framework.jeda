@@ -1,18 +1,13 @@
 package ru.kwanza.jeda.timerservice.pushtimer.spring;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.core.manager.SystemStage;
-import ru.kwanza.jeda.timerservice.pushtimer.DBTimerManager;
-import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.timerservice.pushtimer.common.Inserter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
-import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersMemoryStorage;
 import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersStorageRepository;
 
 
@@ -25,7 +20,6 @@ import java.util.concurrent.*;
 
 @ContextConfiguration(locations = "ns-test-node1-config.xml")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-@Ignore
 public class NSPerfTestNode1 extends AbstractJUnit4SpringContextTests {
 
     @Resource

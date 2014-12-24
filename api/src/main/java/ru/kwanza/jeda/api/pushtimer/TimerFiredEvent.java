@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.api.timerservice.pushtimer.processor;
+package ru.kwanza.jeda.api.pushtimer;
 
 import ru.kwanza.jeda.api.AbstractEvent;
 

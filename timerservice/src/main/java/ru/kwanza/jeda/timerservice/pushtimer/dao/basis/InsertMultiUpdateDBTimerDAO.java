@@ -2,7 +2,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.dao.basis;
 
 import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 
 import java.sql.ResultSet;

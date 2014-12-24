@@ -1,8 +1,7 @@
 package ru.kwanza.jeda.api.internal;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 
 /**
  * @author Alexander Guzanov

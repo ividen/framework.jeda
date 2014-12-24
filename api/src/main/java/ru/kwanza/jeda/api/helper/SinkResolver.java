@@ -1,7 +1,6 @@
 package ru.kwanza.jeda.api.helper;
 
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
 
 import java.util.Collection;
 

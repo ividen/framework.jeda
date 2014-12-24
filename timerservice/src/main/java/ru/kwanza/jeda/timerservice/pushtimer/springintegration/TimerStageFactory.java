@@ -1,9 +1,8 @@
 package ru.kwanza.jeda.timerservice.pushtimer.springintegration;
 
 import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.core.springintegration.SystemStageFactory;
-import ru.kwanza.jeda.core.stage.Stage;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.timer.Timer;

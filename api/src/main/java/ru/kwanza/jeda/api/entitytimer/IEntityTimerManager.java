@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.api.timerservice.entitytimer;
+package ru.kwanza.jeda.api.entitytimer;
 
 /**
  * @author Michael Yeskov

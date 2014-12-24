@@ -3,7 +3,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.processor;
 import org.springframework.beans.factory.annotation.Required;
 import ru.kwanza.jeda.api.IEventProcessor;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.processor.TimerFiredEvent;
+import ru.kwanza.jeda.api.pushtimer.TimerFiredEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersStorageRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;

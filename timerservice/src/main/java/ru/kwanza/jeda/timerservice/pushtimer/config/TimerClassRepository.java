@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.timerservice.pushtimer.config;
 
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
 
 import java.util.*;

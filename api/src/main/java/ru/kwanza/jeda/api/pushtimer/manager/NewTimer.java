@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.api.timerservice.pushtimer.manager;
+package ru.kwanza.jeda.api.pushtimer.manager;
 
 /**
  * @author Michael Yeskov

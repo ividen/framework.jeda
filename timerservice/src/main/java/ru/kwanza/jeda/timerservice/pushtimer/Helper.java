@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.timerservice.pushtimer;
 
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.internalapi.InternalTimerFiredEvent;
 
 import java.util.*;

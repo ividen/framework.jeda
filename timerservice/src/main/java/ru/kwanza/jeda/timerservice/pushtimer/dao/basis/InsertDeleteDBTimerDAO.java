@@ -3,7 +3,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.dao.basis;
 import ru.kwanza.dbtool.core.FieldSetter;
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.dbtool.core.UpdateSetter;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerState;
 

@@ -1,13 +1,11 @@
 package ru.kwanza.jeda.timerservice.pushtimer.dao.handle;
 
-import org.springframework.beans.factory.annotation.Required;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**

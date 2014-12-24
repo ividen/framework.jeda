@@ -6,7 +6,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
 import ru.kwanza.jeda.timerservice.pushtimer.common.Inserter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;

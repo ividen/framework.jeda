@@ -3,7 +3,7 @@ package ru.kwanza.jeda.timerservice.entitytimer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import ru.kwanza.jeda.api.timerservice.entitytimer.IEntityTimerManager;
+import ru.kwanza.jeda.api.entitytimer.IEntityTimerManager;
 import ru.kwanza.jeda.timerservice.entitytimer.entity.*;
 import ru.kwanza.toolbox.fieldhelper.Property;
 

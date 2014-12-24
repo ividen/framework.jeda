@@ -1,9 +1,7 @@
 package ru.kwanza.jeda.timerservice.pushtimer.spring;
 
-import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IEventProcessor;
-import ru.kwanza.jeda.api.timerservice.pushtimer.processor.TimerFiredEvent;
-import ru.kwanza.jeda.core.manager.SystemStage;
+import ru.kwanza.jeda.api.pushtimer.TimerFiredEvent;
 
 import java.util.Collection;
 

@@ -1,6 +1,6 @@
-package ru.kwanza.jeda.api.timerservice.pushtimer.manager;
+package ru.kwanza.jeda.api.pushtimer.manager;
 
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 import ru.kwanza.txn.api.Transactional;
 import ru.kwanza.txn.api.TransactionalType;
 

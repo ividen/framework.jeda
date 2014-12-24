@@ -2,10 +2,9 @@ package ru.kwanza.jeda.core.tm;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import ru.kwanza.jeda.api.*;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 import ru.kwanza.jeda.core.queue.Event;
 import ru.kwanza.jeda.core.queue.ObjectCloneType;
 import ru.kwanza.jeda.core.queue.TransactionalMemoryQueue;

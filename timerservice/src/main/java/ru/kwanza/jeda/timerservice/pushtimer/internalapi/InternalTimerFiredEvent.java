@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.timerservice.pushtimer.internalapi;
 
-import ru.kwanza.jeda.api.timerservice.pushtimer.processor.TimerFiredEvent;
+import ru.kwanza.jeda.api.pushtimer.TimerFiredEvent;
 
 /**
  * @author Michael Yeskov

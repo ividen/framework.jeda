@@ -3,7 +3,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.dao.basis;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.RowMapper;
 import ru.kwanza.dbtool.core.*;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerState;
 import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;

@@ -3,10 +3,8 @@ package ru.kwanza.jeda.core.queue;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
-import junit.framework.TestSuite;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 
 /**
  * @author Guzanov Alexander

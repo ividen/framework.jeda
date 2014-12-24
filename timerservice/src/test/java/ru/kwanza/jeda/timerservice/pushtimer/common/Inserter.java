@@ -6,13 +6,12 @@ import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.helper.SinkHelper;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.StatisticsCalculator;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**

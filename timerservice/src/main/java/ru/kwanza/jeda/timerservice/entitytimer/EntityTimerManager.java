@@ -1,6 +1,6 @@
 package ru.kwanza.jeda.timerservice.entitytimer;
 
-import ru.kwanza.jeda.api.timerservice.entitytimer.IEntityTimerManager;
+import ru.kwanza.jeda.api.entitytimer.IEntityTimerManager;
 import ru.kwanza.toolbox.fieldhelper.Property;
 
 import javax.annotation.Resource;

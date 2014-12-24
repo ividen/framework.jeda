@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.timerservice.pushtimer.internalapi;
 
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 import ru.kwanza.jeda.timerservice.pushtimer.tx.Tx;

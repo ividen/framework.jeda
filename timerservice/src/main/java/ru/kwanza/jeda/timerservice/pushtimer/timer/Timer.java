@@ -6,8 +6,8 @@ import ru.kwanza.jeda.api.internal.IAdmissionController;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IResourceController;
-import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.internal.ITimerInternal;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
 import ru.kwanza.jeda.core.stage.Stage;
 import ru.kwanza.jeda.core.threadmanager.AbstractThreadManager;
 

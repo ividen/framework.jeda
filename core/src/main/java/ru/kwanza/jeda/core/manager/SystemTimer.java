@@ -1,9 +1,7 @@
 package ru.kwanza.jeda.core.manager;
 
-import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.internal.ITimerInternal;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 
 import java.util.Collection;
 import java.util.Map;

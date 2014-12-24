@@ -1,12 +1,11 @@
 package ru.kwanza.jeda.timerservice.pushtimer.timer;
 
-import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.Helper;
 
 import java.util.Collection;

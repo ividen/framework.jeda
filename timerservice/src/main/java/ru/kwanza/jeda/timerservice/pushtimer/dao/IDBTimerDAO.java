@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.timerservice.pushtimer.dao;
 
 import ru.kwanza.dbtool.core.UpdateException;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 
 import java.util.*;

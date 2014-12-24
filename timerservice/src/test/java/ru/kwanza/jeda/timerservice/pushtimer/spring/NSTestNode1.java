@@ -7,8 +7,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.IStage;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
 
 
 import javax.annotation.Resource;

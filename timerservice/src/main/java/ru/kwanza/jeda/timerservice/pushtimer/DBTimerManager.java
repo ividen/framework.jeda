@@ -2,10 +2,10 @@ package ru.kwanza.jeda.timerservice.pushtimer;
 
 import ru.kwanza.dbtool.core.UpdateException;
 import ru.kwanza.jeda.clusterservice.IClusterService;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.TimerHandle;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ScheduleTimerEvent;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
+import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerComponent;

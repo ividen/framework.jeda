@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
-import ru.kwanza.jeda.api.timerservice.entitytimer.IEntityTimerManager;
+import ru.kwanza.jeda.api.entitytimer.IEntityTimerManager;
 import ru.kwanza.jeda.timerservice.entitytimer.entity.EntityWithTimer1;
 import ru.kwanza.jeda.timerservice.entitytimer.entity.EntityWithTimer2;
 import ru.kwanza.jeda.timerservice.entitytimer.entity.EntityWithTimer3Child;

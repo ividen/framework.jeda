@@ -4,9 +4,8 @@ import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
-import ru.kwanza.jeda.api.timerservice.internal.ITimerInternal;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.ITimerManager;
-import ru.kwanza.jeda.api.timerservice.pushtimer.timer.ITimer;
+import ru.kwanza.jeda.api.internal.ITimerInternal;
+import ru.kwanza.jeda.api.pushtimer.ITimer;
 import ru.kwanza.jeda.core.stage.SystemQueue;
 
 import java.util.concurrent.ConcurrentHashMap;

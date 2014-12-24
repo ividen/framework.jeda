@@ -4,7 +4,7 @@ package ru.kwanza.jeda.timerservice.pushtimer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
-import ru.kwanza.jeda.api.timerservice.pushtimer.manager.NewTimer;
+import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.tx.Tx;
 

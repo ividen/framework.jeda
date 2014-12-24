@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.api.timerservice.entitytimer;
+package ru.kwanza.jeda.api.entitytimer;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
