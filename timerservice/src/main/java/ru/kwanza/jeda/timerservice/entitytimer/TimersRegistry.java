@@ -1,5 +1,6 @@
 package ru.kwanza.jeda.timerservice.entitytimer;
 
+import org.springframework.stereotype.Repository;
 import ru.kwanza.jeda.api.entitytimer.EntityTimer;
 import ru.kwanza.toolbox.fieldhelper.FieldHelper;
 import ru.kwanza.toolbox.fieldhelper.Property;
@@ -11,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Michael Yeskov
  */
+@Repository
 public class TimersRegistry implements ITimersRegistry {
 
     ConcurrentHashMap<Class, Map<String, EntityTimerMapping>> timerMappingCache = new ConcurrentHashMap<Class, Map<String, EntityTimerMapping>>();

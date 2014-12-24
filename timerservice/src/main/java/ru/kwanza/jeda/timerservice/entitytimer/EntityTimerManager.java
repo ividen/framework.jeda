@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class EntityTimerManager implements IEntityTimerManager {
 
-    @Resource(name = "timerservice.TimersRegistry")
+    @Resource
     private ITimersRegistry timersRegistry;
 
     @Override

@@ -24,7 +24,7 @@ public class TestEntityTimerManager extends AbstractJUnit4SpringContextTests {
 
     private static final long SLEEP = 1000;
 
-    @Resource(name = "timerservice.POJOTimerManager")
+    @Resource(name = "jeda.IEntityTimerManager")
     private IEntityTimerManager timerManager;
 
     @Test
