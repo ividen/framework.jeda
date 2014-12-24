@@ -48,6 +48,11 @@ public class TimerBatcher implements ITimer {
     }
 
     @Override
+    public void cancelJustScheduledTimers(Collection<String> timerIds) {
+        timerManager.cancelJustScheduledTimers(Helper.toTimerHandles(name, timerIds));
+    }
+
+    @Override
     public ISink getSink() {
         return timerSink;
     }

@@ -48,6 +48,11 @@ public class Timer extends Stage implements ITimerInternal {
     }
 
     @Override
+    public void cancelJustScheduledTimers(Collection<String> timerIds) {
+        timerBatcher.cancelJustScheduledTimers(timerIds);
+    }
+
+    @Override
     public ISink getSink() {
         return timerBatcher.getSink();
     }

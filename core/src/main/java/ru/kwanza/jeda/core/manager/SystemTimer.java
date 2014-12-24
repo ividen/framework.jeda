@@ -32,4 +32,9 @@ public class SystemTimer extends SystemStage implements ITimer{
     public boolean isActive(String timerId) {
         return timerInternal.isActive(timerId);
     }
+
+    @Override
+    public void cancelJustScheduledTimers(Collection<String> timerIds) {
+        timerInternal.cancelJustScheduledTimers(timerIds);
+    }
 }

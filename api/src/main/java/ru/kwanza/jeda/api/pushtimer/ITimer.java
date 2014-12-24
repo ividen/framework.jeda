@@ -35,4 +35,10 @@ public interface ITimer extends IStage {
      */
     public boolean isActive(String timerId);
 
+
+     /*
+     * Removes timers from current Tx synchronization
+     */
+
+    public  void cancelJustScheduledTimers(Collection<String> timerIds);
 }
