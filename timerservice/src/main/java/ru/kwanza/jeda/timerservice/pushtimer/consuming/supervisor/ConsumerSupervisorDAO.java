@@ -25,7 +25,7 @@ public class ConsumerSupervisorDAO {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
-            pst = connection.prepareStatement("SELECT failover_left_border FROM TIMERS_FAILOVER WHERE timer_class = ? AND current_node_id = ? and working_as_node_id = ?");
+            pst = connection.prepareStatement("SELECT failover_left_border FROM JEDA_TIMERS_FAILOVER WHERE timer_class = ? AND current_node_id = ? and working_as_node_id = ?");
 
             FieldSetter.setString(pst, 1, className);
             FieldSetter.setInt(pst, 2, nodeId.getCurrentNodeId());
@@ -47,7 +47,7 @@ public class ConsumerSupervisorDAO {
         Connection connection = dbTool.getJDBCConnection();
         PreparedStatement pst = null;
         try {
-            pst = connection.prepareStatement("INSERT INTO TIMERS_FAILOVER(timer_class, current_node_id, working_as_node_id, failover_left_border) VALUES (?, ?, ?, ?)");
+            pst = connection.prepareStatement("INSERT INTO JEDA_TIMERS_FAILOVER(timer_class, current_node_id, working_as_node_id, failover_left_border) VALUES (?, ?, ?, ?)");
 
             FieldSetter.setString(pst, 1, className);
             FieldSetter.setInt(pst, 2, nodeId.getCurrentNodeId());
@@ -68,7 +68,7 @@ public class ConsumerSupervisorDAO {
         PreparedStatement pst = null;
         ResultSet rs = null;
         try {
-            pst = connection.prepareStatement("SELECT MAX(failover_left_border) FROM TIMERS_FAILOVER WHERE timer_class = ? AND working_as_node_id = ? ");
+            pst = connection.prepareStatement("SELECT MAX(failover_left_border) FROM JEDA_TIMERS_FAILOVER WHERE timer_class = ? AND working_as_node_id = ? ");
 
             FieldSetter.setString(pst, 1, className);
             FieldSetter.setInt(pst, 2, effectiveNodeId);
@@ -89,7 +89,7 @@ public class ConsumerSupervisorDAO {
         Connection connection = dbTool.getJDBCConnection();
         PreparedStatement pst = null;
         try {
-            pst = connection.prepareStatement("UPDATE TIMERS_FAILOVER SET failover_left_border = ? WHERE timer_class = ? AND current_node_id = ? and working_as_node_id  = ?");
+            pst = connection.prepareStatement("UPDATE JEDA_TIMERS_FAILOVER SET failover_left_border = ? WHERE timer_class = ? AND current_node_id = ? and working_as_node_id  = ?");
 
             FieldSetter.setLong(pst, 1, failoverLeftBorder);
             FieldSetter.setString(pst, 2, className);
