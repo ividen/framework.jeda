@@ -2,6 +2,7 @@ package ru.kwanza.jeda.timerservice.pushtimer.consuming;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.kwanza.jeda.timerservice.pushtimer.LockHelper;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.consuming.supervisor.ConsumerSupervisorThread;
 import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersMemoryStorage;
@@ -30,10 +31,10 @@ public class ConsumerThread extends Thread {
     private volatile boolean alive = true;
     private volatile boolean idle = true;
 
-    private ReentrantLock stateLock = new ReentrantLock();
+    private ReentrantLock stateLock = new ReentrantLock(); //potentially "long lock" - using lockInterruptibly (closing connection under lock)
     private Condition sleepCondition = stateLock.newCondition();
 
-    private ReentrantLock processingLock = new ReentrantLock();
+    private ReentrantLock processingLock = new ReentrantLock(); //potentially "long lock" - using lockInterruptibly (working with db under lock)
 
 
     private long initialLeftBorder = 1; //inclusive
@@ -98,11 +99,7 @@ public class ConsumerThread extends Thread {
     }
 
     private boolean changeSateToIdleIfNotSuspended() {
-        try {
-            stateLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return false;
-        }
+        LockHelper.lockInterruptibly(stateLock);
         try {
             if (consumerState != ConsumerState.WORKING) {
                 return false;
@@ -121,22 +118,14 @@ public class ConsumerThread extends Thread {
         while (alive && !isInterrupted()) {
             try {
                 if (consumerState == ConsumerState.WORKING) {
-                    try {
-                        processingLock.lockInterruptibly();
-                    } catch (InterruptedException e) {
-                        return;
-                    }
+                    processingLock.lock();
                     try {
                         doWork();
                     } finally {
                         processingLock.unlock();
                     }
                 } else {
-                    try {
-                        stateLock.lockInterruptibly();
-                    } catch (InterruptedException e) {
-                        break;
-                    }
+                    stateLock.lock();
                     try {
                         if (consumerState == ConsumerState.SUSPENDED && !firedTimersMemoryStorage.isInSingleConsumerMode()) {
                             if (fetchCursor != null && fetchCursor.isOpen()) {
@@ -159,13 +148,8 @@ public class ConsumerThread extends Thread {
         }
     }
 
-    public boolean lockProcessing() {
-        try {
-            processingLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return false;
-        }
-        return true;
+    public void lockProcessing() {
+        LockHelper.lockInterruptibly(processingLock);
     }
 
     public long getInitialLeftBorder() {
@@ -221,11 +205,7 @@ public class ConsumerThread extends Thread {
      * return success of operation
      */
     public boolean pauseConsume() {
-        try {
-            stateLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return false;
-        }
+        LockHelper.lockInterruptibly(stateLock);
         try {
             if (consumerState == ConsumerState.SUSPENDED) { //worker suspended by himself or by supervisor
                 return true;
@@ -252,11 +232,7 @@ public class ConsumerThread extends Thread {
      * change State without any checks
      */
     private void setState(ConsumerState newState) {
-        try {
-            stateLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return;
-        }
+        LockHelper.lockInterruptibly(stateLock);
         try {
             consumerState = newState;
             if (consumerState == ConsumerState.WORKING) {
@@ -269,11 +245,7 @@ public class ConsumerThread extends Thread {
 
 
     public void stopAndJoin() {
-        try {
-            stateLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        LockHelper.lockInterruptibly(stateLock);
         alive = false;
         try {
             sleepCondition.signal();
@@ -284,6 +256,8 @@ public class ConsumerThread extends Thread {
         try {
             this.join();
         } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }

@@ -5,6 +5,7 @@ import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
 import ru.kwanza.jeda.core.manager.ObjectNotFoundException;
+import ru.kwanza.jeda.timerservice.pushtimer.LockHelper;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.TimerEntity;
 import ru.kwanza.jeda.timerservice.pushtimer.internalapi.InternalTimerFiredEvent;
@@ -41,7 +42,7 @@ public class FiredTimersMemoryStorage {
 
     private Map<String, IQueue> timerNameToQueue = new HashMap<String, IQueue>();
 
-    private ReentrantLock lock = new ReentrantLock();
+    private ReentrantLock lock = new ReentrantLock(); //potentially "long lock" - using lockInterruptibly (working with transaction manager under lock)
 
     private boolean dirty = true;
 
@@ -63,11 +64,7 @@ public class FiredTimersMemoryStorage {
     }
 
     public boolean isInSingleConsumerMode() {
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return true;
-        }
+        LockHelper.lockInterruptibly(lock);
 
         try {
             long currentSize = getCurrentSize();
@@ -94,11 +91,7 @@ public class FiredTimersMemoryStorage {
 
 
     public boolean canAccept(long fetchSize) {
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return false;
-        }
+        LockHelper.lockInterruptibly(lock);
         try {
             long currentSize = getCurrentSize();
             if (currentSize + fetchSize + reservedInserts <= maxLimit) {
@@ -116,11 +109,7 @@ public class FiredTimersMemoryStorage {
         if (remainingCount <= 0) {
             return;
         }
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return;
-        }
+        LockHelper.lockInterruptibly(lock);
         try {
             if (reservedInserts - remainingCount < 0 ) {
                 throw new RuntimeException("You must run canAccept first");
@@ -138,11 +127,7 @@ public class FiredTimersMemoryStorage {
         splitByNameAndFill(allEvents, timerNameToEvents, firedTimers, bucketId);
 
 
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return;
-        }
+        LockHelper.lockInterruptibly(lock);
 
         boolean pendingAddSuccess = false;
         try {
@@ -200,11 +185,7 @@ public class FiredTimersMemoryStorage {
 
     public void forgetPendingTimers(Map<Long, List<InternalTimerFiredEvent>> bucketIdToEvents)  {
 
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return;
-        }
+        LockHelper.lockInterruptibly(lock);
         try {
             for (Map.Entry<Long, List<InternalTimerFiredEvent>> entry : bucketIdToEvents.entrySet()) {
                 forgetPendingTimers(entry.getValue(), entry.getKey());
@@ -261,11 +242,7 @@ public class FiredTimersMemoryStorage {
 
 
     public long getMinPendingExpire(Integer bucketId) {
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return 0;
-        }
+        LockHelper.lockInterruptibly(lock);
         try {
             SortedMap<Long, Long> pendingMap  = getPendingMap(bucketId);
             if (pendingMap.isEmpty()){
@@ -278,11 +255,7 @@ public class FiredTimersMemoryStorage {
     }
 
     public void clearPendingTimers(long bucketId) {
-        try {
-            lock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            return;
-        }
+        LockHelper.lockInterruptibly(lock);
         try {
             getPendingMap(bucketId).clear();
         } finally {
@@ -326,7 +299,7 @@ public class FiredTimersMemoryStorage {
 
     /** external locking use carefully (intended for jmx) **/
     public void lock(){
-        lock.lock();
+        LockHelper.lockInterruptibly(lock);
     }
 
     public void unlock(){

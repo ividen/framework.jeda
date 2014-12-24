@@ -109,11 +109,9 @@ public class ConsumerSupervisorThread extends Thread {
 
 
         try {
-            hasFinishedLock.lockInterruptibly();
+            hasFinishedLock.lock();
             alive = false;
             hasFinishedCondition.signal();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             hasFinishedLock.unlock();
         }
@@ -123,6 +121,8 @@ public class ConsumerSupervisorThread extends Thread {
             this.join();
             jmxRegistry.unregister(mBeanName);
         } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+            Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }
     }
@@ -141,12 +141,7 @@ public class ConsumerSupervisorThread extends Thread {
                     processingLock.unlock();
                 }
 
-                try {
-                    hasFinishedLock.lockInterruptibly();
-                } catch (InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                    break;
-                }
+                hasFinishedLock.lock();
                 try {
                     long ts = System.currentTimeMillis();
                     long timeout = 0;
@@ -156,6 +151,7 @@ public class ConsumerSupervisorThread extends Thread {
                     }
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage(), e);
+                    break;
                 } finally {
                     hasFinishedLock.unlock();
                 }
@@ -170,12 +166,7 @@ public class ConsumerSupervisorThread extends Thread {
      * thread safe must be used by ConsumersThread
      */
     public void markHasJustFinished() {
-        try {
-            hasFinishedLock.lockInterruptibly();
-        } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
-            return;
-        }
+        hasFinishedLock.lock();
         try {
             hasJustFinished = true;
             hasFinishedCondition.signal();

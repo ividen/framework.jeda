@@ -53,7 +53,7 @@ public class FiredTimersStorageRepository{
 
     public Map<Long, Long> registerActiveProcessor(Set<Long> bucketIds) {
         Map<Long, Long> resultBucketIdToPointCount = new HashMap<Long, Long>();
-        lock.lock(); //interrupt??
+        lock.lock();
         try {
             for (long bucketId : bucketIds) {
                 if (processingStoppedBucketIds.contains(bucketId)) {
@@ -79,7 +79,7 @@ public class FiredTimersStorageRepository{
     }
 
     public void forgetActiveProcessors(Set<Long> bucketIdToForget) {
-        lock.lock(); //interrupt??
+        lock.lock();
         try {
             for (Long bucketId : bucketIdToForget) {
                 AtomicLong count = bucketActiveProcessCount.get(bucketId);
@@ -99,7 +99,7 @@ public class FiredTimersStorageRepository{
     }
 
     public void stopProcessingAndWait(long bucketId) {
-        lock.lock(); //interrupt??
+        lock.lock();
         try{
             lazyLoad();
             processingStoppedBucketIds.add(bucketId);
@@ -113,7 +113,8 @@ public class FiredTimersStorageRepository{
                 }
             } catch (InterruptedException e) {
                 logger.error(e.getMessage(), e);
-                return; //TODO: implement right
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
             }
             for (FiredTimersMemoryStorage storage : classToStorage.values()) {
                 storage.clearPendingTimers(bucketId);
@@ -124,7 +125,7 @@ public class FiredTimersStorageRepository{
     }
 
     public void resumeProcessing(long bucketId, long startupPointCount) {
-        lock.lock(); //interrupt??
+        lock.lock();
         try{
             processingStoppedBucketIds.remove(bucketId);
             bucketStartupPointCount.put(bucketId, startupPointCount);
