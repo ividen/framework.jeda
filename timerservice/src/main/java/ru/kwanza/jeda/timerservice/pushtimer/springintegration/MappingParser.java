@@ -17,7 +17,6 @@ import java.util.*;
 public class MappingParser  extends JedaBeanDefinitionParser {
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        String timerName = ((Element)element.getParentNode().getParentNode().getParentNode()).getAttribute("name");
         String tableName = ((Element)element.getParentNode()).getAttribute("tableName");
 
         BeanDefinitionBuilder definitionBuilder =  BeanDefinitionBuilder.genericBeanDefinition(TimerMapping.class);
@@ -35,8 +34,7 @@ public class MappingParser  extends JedaBeanDefinitionParser {
         }
         definitionBuilder.addPropertyValue("tableName", tableName);
 
-        return new JedaBeanDefinition("TIMER_MAPPING_" + timerName.toUpperCase(), TimerMapping.class, definitionBuilder.getBeanDefinition());
-
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), TimerMapping.class, element, parserContext );
     }
 
     private String toPropertyName(String tagName) {

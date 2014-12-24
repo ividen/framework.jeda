@@ -24,18 +24,10 @@ public class DAOParser  extends JedaBeanDefinitionParser {
 
     @Override
     protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
-        String name = ((Element)element.getParentNode()).getAttribute("name").toUpperCase();
-        if (name.isEmpty()) {
-            name = ((Element)element.getParentNode().getParentNode()).getAttribute("name").toUpperCase();
-        }
-        if (name.isEmpty()) {
-            throw new RuntimeException("Can't find name");
-        }
-
         Class daoClass = getDAOClass(element.getLocalName());
 
-        JedaBeanDefinition handleMapperDef = getHandleMapperDef(element, parserContext, name);
-        JedaBeanDefinition timerMappingDef = getTimerMappingDef(element, parserContext, name);
+        JedaBeanDefinition handleMapperDef = getHandleMapperDef(element, parserContext);
+        JedaBeanDefinition timerMappingDef = getTimerMappingDef(element, parserContext);
 
         String fetchSize = element.getAttribute("fetchSize");
         String useOracleOptimizedFetchCursor = element.getAttribute("useOracleOptimizedFetchCursor");
@@ -50,7 +42,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
             defBuilder.addPropertyValue("useOracleOptimizedFetchCursor", useOracleOptimizedFetchCursor);
         }
 
-        return new JedaBeanDefinition("DAO_" + name, IDBTimerDAO.class, defBuilder.getBeanDefinition());
+        return createJedaDefinition(defBuilder.getBeanDefinition(), IDBTimerDAO.class, element, parserContext);
     }
 
     private Class getDAOClass(String nodeName) {
@@ -68,7 +60,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
         }
     }
 
-    private JedaBeanDefinition getTimerMappingDef(Element element, ParserContext parserContext, String name) {
+    private JedaBeanDefinition getTimerMappingDef(Element element, ParserContext parserContext) {
         String tableName = element.getAttribute("tableName");
         if (tableName.isEmpty()) {
             throw new RuntimeException("tableName is required property for DAO");
@@ -80,13 +72,12 @@ public class DAOParser  extends JedaBeanDefinitionParser {
         if (timerMappingDef == null) {
             BeanDefinitionBuilder defBuilderMapping= BeanDefinitionBuilder.genericBeanDefinition(TimerMapping.class);
             defBuilderMapping.addPropertyValue("tableName", tableName);
-            timerMappingDef = new JedaBeanDefinition( "TIMER_MAPPING_" + name, TimerMapping.class, defBuilderMapping.getBeanDefinition());
-            parserContext.getRegistry().registerBeanDefinition(timerMappingDef.getId(), timerMappingDef);
+            timerMappingDef = ParseHelper.generateIdAndRegister(TimerMapping.class, defBuilderMapping.getBeanDefinition(), parserContext);
         }
         return timerMappingDef;
     }
 
-    private JedaBeanDefinition getHandleMapperDef(Element element, ParserContext parserContext, String name) {
+    private JedaBeanDefinition getHandleMapperDef(Element element, ParserContext parserContext) {
         Class handleMapperClass;
         String handleMapper = element.getAttribute("handleMapper");
         if (!handleMapper.isEmpty()) {
@@ -107,9 +98,7 @@ public class DAOParser  extends JedaBeanDefinitionParser {
             throw new RuntimeException("handleMapper is required attribute for DAO");
         }
         BeanDefinitionBuilder defBuilderHandleMapper = BeanDefinitionBuilder.genericBeanDefinition(handleMapperClass);
-        JedaBeanDefinition result = new JedaBeanDefinition("HANDLE_MAPPER_" + name , ITimerHandleMapper.class, defBuilderHandleMapper.getBeanDefinition());
-        parserContext.getRegistry().registerBeanDefinition(result.getId(), result);
-        return result;
+        return ParseHelper.generateIdAndRegister(ITimerHandleMapper.class,defBuilderHandleMapper.getBeanDefinition(), parserContext);
     }
 
 

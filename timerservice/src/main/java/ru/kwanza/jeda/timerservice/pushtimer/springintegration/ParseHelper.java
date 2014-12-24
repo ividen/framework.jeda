@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.timerservice.pushtimer.springintegration;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.NamespaceHandler;
 import org.springframework.beans.factory.xml.NamespaceHandlerResolver;
 import org.springframework.beans.factory.xml.ParserContext;
@@ -8,8 +9,6 @@ import org.springframework.beans.factory.xml.XmlReaderContext;
 import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
-import ru.kwanza.jeda.timerservice.pushtimer.consuming.ConsumerConfig;
-import ru.kwanza.jeda.timerservice.pushtimer.dao.IDBTimerDAO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,6 +60,13 @@ public class ParseHelper {
         });
 
         return result;
+    }
+
+    public static JedaBeanDefinition generateIdAndRegister(Class clazz, AbstractBeanDefinition originalDefinition, ParserContext parserContext) {
+        String beanName = parserContext.getReaderContext().generateBeanName(originalDefinition);
+        JedaBeanDefinition jedaBeanDefinition = new JedaBeanDefinition(beanName , clazz, originalDefinition);
+        parserContext.getRegistry().registerBeanDefinition(beanName, jedaBeanDefinition);
+        return jedaBeanDefinition;
     }
 
 }

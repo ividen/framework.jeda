@@ -1,6 +1,5 @@
 package ru.kwanza.jeda.timerservice.pushtimer.springintegration;
 
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
 import ru.kwanza.jeda.api.IEventProcessor;
 import ru.kwanza.jeda.api.internal.*;
@@ -12,13 +11,14 @@ import ru.kwanza.jeda.core.springintegration.JedaBeanDefinition;
 import ru.kwanza.jeda.core.threadmanager.stage.StageThreadManager;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.processor.ExpireTimeProcessor;
-import ru.kwanza.jeda.timerservice.pushtimer.springintegration.refs.RefHolder;
 import ru.kwanza.jeda.timerservice.pushtimer.springintegration.refs.TimerClassRef;
 
 /**
  * @author Michael Yeskov
  */
 class TimerBeanBuilder implements BeanBuilder{
+    private static final String DEFAULT_TIMER_CLASS = "timerservice.default.DefaultTimerClass";
+
     private JedaBeanDefinition eventProcessorDef = null;
     private JedaBeanDefinition resourceControllerDef = null;
     private JedaBeanDefinition threadManagerDef = null;
@@ -64,7 +64,7 @@ class TimerBeanBuilder implements BeanBuilder{
     }
 
     private void addTimerClass(BeanDefinitionBuilder definitionBuilder) {
-        String classId = "timerservice.default.DefaultTimerClass";
+        String classId = DEFAULT_TIMER_CLASS;
         if (timerClassDef != null) {
             classId = timerClassDef.getId();
         } else if (timerClassRefHolderDef != null) {
@@ -83,7 +83,7 @@ class TimerBeanBuilder implements BeanBuilder{
         definitionBuilder.addConstructorArgValue(name.toLowerCase() + "-processor");
         definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
-        return register("THREAD_MANAGER", IThreadManager.class, definitionBuilder.getBeanDefinition());
+        return ParseHelper.generateIdAndRegister(IThreadManager.class, definitionBuilder.getBeanDefinition(), parserContext);
     }
 
 
@@ -96,7 +96,7 @@ class TimerBeanBuilder implements BeanBuilder{
                 .genericBeanDefinition(FixedBatchSizeResourceController.class);
         definitionBuilder.addConstructorArgValue(1000);
 
-        return  register("RESOURCE_CONTROLLER", IResourceController.class, definitionBuilder.getBeanDefinition());
+        return  ParseHelper.generateIdAndRegister(IResourceController.class, definitionBuilder.getBeanDefinition(), parserContext);
     }
 
     private JedaBeanDefinition generateQueue() {
@@ -108,21 +108,14 @@ class TimerBeanBuilder implements BeanBuilder{
         definitionBuilder.addConstructorArgValue(type);
         definitionBuilder.addConstructorArgValue(Integer.MAX_VALUE);
 
-        return register("QUEUE", IQueue.class, definitionBuilder.getBeanDefinition());
+        return ParseHelper.generateIdAndRegister(IQueue.class, definitionBuilder.getBeanDefinition(), parserContext);
     }
 
     private JedaBeanDefinition wrapProcessor(JedaBeanDefinition eventProcessorDef) {
         BeanDefinitionBuilder defBuilderExpireTimeProcessor = BeanDefinitionBuilder.genericBeanDefinition(ExpireTimeProcessor.class);
         defBuilderExpireTimeProcessor.addPropertyReference("delegate", getId(eventProcessorDef));
 
-        return  register("PROCESSOR", IEventProcessor.class, defBuilderExpireTimeProcessor.getBeanDefinition());
-    }
-
-    private JedaBeanDefinition register(String namePostfix, Class clazz, AbstractBeanDefinition beanDefinition) {
-        String beanName = name.toUpperCase() + "-" + namePostfix ;
-        JedaBeanDefinition definition = new JedaBeanDefinition(beanName , clazz, beanDefinition);
-        parserContext.getRegistry().registerBeanDefinition(beanName, definition);
-        return definition;
+        return ParseHelper.generateIdAndRegister(IEventProcessor.class, defBuilderExpireTimeProcessor.getBeanDefinition(), parserContext);
     }
 
     private void addPropertyReference(String name, BeanDefinitionBuilder definitionBuilder, JedaBeanDefinition beanDefinition) {

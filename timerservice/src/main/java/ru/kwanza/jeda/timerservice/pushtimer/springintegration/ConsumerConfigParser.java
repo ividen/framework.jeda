@@ -33,9 +33,6 @@ public class ConsumerConfigParser extends JedaBeanDefinitionParser {
             }
         }
 
-        String timerName = ((Element)element.getParentNode().getParentNode()).getAttribute("name");
-        String name = "CONFIG_"  + timerName.toUpperCase();
-
-        return createJedaDefinition(name, definitionBuilder.getBeanDefinition(), ConsumerConfig.class, element, parserContext);
+        return createJedaDefinition(definitionBuilder.getBeanDefinition(), ConsumerConfig.class, element, parserContext);
     }
 }
