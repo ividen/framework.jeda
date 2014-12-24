@@ -67,7 +67,7 @@ public class ConsumerSupervisorThread extends Thread {
 
 
     public ConsumerSupervisorThread(NodeId nodeId, TimerClass timerClass,  PendingUpdatesTimeRepository pendingUpdatesTimeRepository, ConsumerSupervisorStageManager consumerSupervisorStageManager, FiredTimersStorageRepository firedTimersStorageRepository, JMXRegistry jmxRegistry, EventStatistic fetchStats) {
-        super("TimerConsumerSupervisor " + nodeId + " " + timerClass);
+        super("TimerConsumerSupervisor-" + timerClass.getTimerClassName() + "-" + nodeId);
         this.nodeId = nodeId;
         this.timerClass = timerClass;
         this.pendingUpdatesTimeRepository = pendingUpdatesTimeRepository;

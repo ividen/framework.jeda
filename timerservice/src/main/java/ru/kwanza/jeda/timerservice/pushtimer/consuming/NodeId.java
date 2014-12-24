@@ -30,10 +30,7 @@ public class NodeId {
 
     @Override
     public String toString() {
-        return "NodeId{" +
-                "currentNodeId=" + currentNodeId +
-                ", repairedNodeId=" + repairedNodeId +
-                '}';
+        return "Node" + currentNodeId + (repairedNodeId == null ? "" : "_Repair" + repairedNodeId);
     }
 
     @Override

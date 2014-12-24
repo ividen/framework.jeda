@@ -47,7 +47,7 @@ public class ConsumerThread extends Thread {
 
 
     public ConsumerThread(int id, NodeId nodeId, TimerClass timerClass, ConsumerSupervisorThread supervisor, ConsumerConfig config, FiredTimersMemoryStorage firedTimersMemoryStorage, EventStatistic fetchStats) {
-        super("TimerConsumer-" + id + "-" + timerClass.getTimerClassName() + "-Node" + nodeId.getEffectiveNodeId());
+        super("TimerConsumer-" + timerClass.getTimerClassName() + "-" + nodeId + "-" + id);
         this.nodeId = nodeId;
         this.timerClass = timerClass;
         this.supervisor = supervisor;

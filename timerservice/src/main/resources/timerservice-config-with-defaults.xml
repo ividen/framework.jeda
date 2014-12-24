@@ -10,7 +10,7 @@
     <!--using as default in timers spring namespace-->
     <bean id="timerservice.default.DefaultTimerClass"
           class="ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass">
-        <property name="timerClassName"  value="DEFAULT_TIMER_CLASS" />
+        <property name="timerClassName"  value="CLASS_DEFAULT_TIMER" />
         <property name="dbTimerDAO" ref="timerservice.default.DBTimerDAO" />
         <property name="consumerConfig" ref="timerservice.default.DefaultConsumerConfig" />
     </bean>

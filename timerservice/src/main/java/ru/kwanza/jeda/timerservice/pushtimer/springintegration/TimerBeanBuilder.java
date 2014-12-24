@@ -80,7 +80,7 @@ class TimerBeanBuilder implements BeanBuilder{
         BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder
                 .genericBeanDefinition(StageThreadManager.class);
 
-        definitionBuilder.addConstructorArgValue(name.toLowerCase() + "-processor");
+        definitionBuilder.addConstructorArgValue("TimerProcessor-" + name.toUpperCase());
         definitionBuilder.addConstructorArgReference("jeda.IJedaManager");
 
         return ParseHelper.generateIdAndRegister(IThreadManager.class, definitionBuilder.getBeanDefinition(), parserContext);

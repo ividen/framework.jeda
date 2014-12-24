@@ -110,20 +110,20 @@
 
     <timers:timer name="TIMER_2">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_2_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_2" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
     </timers:timer>
 
     <timers:timer name="TIMER_3">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_3_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_3" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="timerservice.default.DefaultTimerClass"/>
     </timers:timer>
 
     <timers:timer name="TIMER_4">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_4_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_4" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class>
             <timers:dao-custom ref="test.custom.DAO" />
@@ -133,7 +133,7 @@
 
     <timers:timer name="TIMER_5">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_5_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_5" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class>
             <timers:dao-insert-multi-update handleMapper="LongNameSet" tableName="JEDA_TIMERS_C2" />
@@ -161,14 +161,14 @@
 
     <timers:timer name="TIMER_6">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_6_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_6" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass1" />
     </timers:timer>
 
     <timers:timer name="TIMER_7">
         <core:event-processor class="ru.kwanza.jeda.timerservice.pushtimer.spring.PrintProcessor"/>
-        <core:stage-thread-manager threadNamePrefix="TIMER_7_THREAD" />
+        <core:stage-thread-manager threadNamePrefix="TimerProcessor-TIMER_7" />
         <core:fixed-batch-size-resource-controller batchSize="1000" />
         <timers:timer-class-ref ref="test.custom.timerclass2" />
     </timers:timer>
