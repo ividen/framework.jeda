@@ -122,8 +122,7 @@ public class ConsumerComponent implements IClusteredComponent, Phased {
 
         Map<TimerClass, ConsumerSupervisorThread> currentNodeMap = consumers.get(nodeId);
         if (currentNodeMap == null) {
-            //throw new IllegalStateException(nodeId + " is not started"); todo: remove when bug fixed
-            return;
+            throw new IllegalStateException(nodeId + " is not started");
         }
         for (ConsumerSupervisorThread supervisorThread : currentNodeMap.values()) {
             supervisorThread.stopAndJoin();
