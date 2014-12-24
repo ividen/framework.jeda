@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <import resource="timerservice-config.xml"/>
+    <import resource="jeda-timerservice-config.xml"/>
 
     <bean id="timerservice.default.TimerHandleMapper"  class="ru.kwanza.jeda.timerservice.pushtimer.dao.handle.LongNameSetTimerHandleMapper"/>
 

@@ -19,7 +19,7 @@
 
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
 
-    <import resource="classpath:timerservice-config-with-defaults.xml"/>
+    <import resource="classpath:jeda-timerservice-config-with-defaults.xml"/>
 
     <context:property-placeholder location="classpath:db.properties, classpath:test.properties"/>
 
