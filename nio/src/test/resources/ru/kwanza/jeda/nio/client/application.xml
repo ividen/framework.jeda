@@ -17,7 +17,6 @@
 
 
     <import resource="classpath:jeda-core-config.xml"/>
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
     <nio:client-transport-flow-bus name="client-transport-flow-bus"/>

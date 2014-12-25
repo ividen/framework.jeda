@@ -18,6 +18,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
@@ -69,8 +74,8 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
         </dependency>
 
         <dependency>

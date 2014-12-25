@@ -1,45 +1,83 @@
 package ru.kwanza.jeda.timerservice.pushtimer.tx;
 
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.api.pushtimer.manager.NewTimer;
 import ru.kwanza.jeda.api.pushtimer.manager.TimerHandle;
-import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClassRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.internalapi.ITimerManagerInternal;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
-import javax.transaction.Transaction;
 import java.util.*;
 
 /**
  * @author Michael Yeskov
  */
-public class Tx implements Synchronization {
+public class Tx implements TransactionSynchronization {
 
     private ITimerManagerInternal timerManager;
     private PendingTxTimersStore txStore;
-    private Transaction jtaTrx;
     private TimerClassRepository repository;
 
     Map<TimerClass, Set<NewTimer>> pendingSchedule = new HashMap<TimerClass, Set<NewTimer>>();
     Map<TimerClass, Set<NewTimer>> reSchedulePending = new HashMap<TimerClass, Set<NewTimer>>();
 
 
-    public Tx(ITimerManagerInternal timerManager, PendingTxTimersStore txStore, Transaction jtaTrx, TimerClassRepository repository) {
+    public Tx(ITimerManagerInternal timerManager, PendingTxTimersStore txStore, TimerClassRepository repository) {
         this.timerManager = timerManager;
         this.txStore = txStore;
-        this.jtaTrx = jtaTrx;
         this.repository = repository;
     }
 
-    public void beforeCompletion() {
+
+    public static Tx getTx(ITimerManagerInternal timerManager, PendingTxTimersStore txStore, TimerClassRepository repository) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            Tx result = (Tx) TransactionSynchronizationManager.getResource(repository);
+            if (result == null) {
+                result = new Tx(timerManager, txStore, repository);
+                TransactionSynchronizationManager.bindResource(repository, result);
+                TransactionSynchronizationManager.registerSynchronization(result);
+
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void suspend() {
+        TransactionSynchronizationManager.unbindResourceIfPossible(repository);
+    }
+
+    @Override
+    public void resume() {
+        TransactionSynchronizationManager.bindResource(repository, this);
+    }
+
+    @Override
+    public void flush() {
+
+    }
+
+    @Override
+    public void beforeCommit(boolean readonly) {
         timerManager.beforeTrxCommit(this, pendingSchedule, reSchedulePending);
     }
 
+    @Override
+    public void beforeCompletion() {
+        TransactionSynchronizationManager.unbindResourceIfPossible(repository);
+    }
+
+    @Override
+    public void afterCommit() {
+    }
+
+    @Override
     public void afterCompletion(int i) {
-        timerManager.afterTrxCommit(this, i == Status.STATUS_COMMITTED);
-        txStore.removeTx(jtaTrx);
+        timerManager.afterTrxCommit(this, i == TransactionSynchronization.STATUS_COMMITTED);
     }
 
     public void processNewTimers(Set<NewTimer> timers, boolean reSchedule) {
@@ -59,11 +97,11 @@ public class Tx implements Synchronization {
     }
 
     private void internalProcess(TimerClass timerClass, NewTimer newTimer, boolean reSchedule) {
-        Set<NewTimer> currentScheduleSet  = getRequiredSet(pendingSchedule, timerClass);
+        Set<NewTimer> currentScheduleSet = getRequiredSet(pendingSchedule, timerClass);
         Set<NewTimer> reScheduleSetCurrent = getRequiredSet(reSchedulePending, timerClass);
 
         if (!reSchedule) {
-            if ( currentScheduleSet.contains(newTimer) || reScheduleSetCurrent.contains(newTimer) ){
+            if (currentScheduleSet.contains(newTimer) || reScheduleSetCurrent.contains(newTimer)) {
                 throw new RuntimeException("Timer " + newTimer + " was already scheduled in scope of current trx.");
             }
             currentScheduleSet.add(newTimer);
@@ -88,15 +126,12 @@ public class Tx implements Synchronization {
     public void cancelScheduling(Collection<? extends TimerHandle> timerHandles) {
         for (TimerHandle timerHandle : timerHandles) {
             TimerClass timerClass = repository.getClassByTimerName(timerHandle.getTimerName());
-            Set<NewTimer> currentScheduleSet  = getRequiredSet(pendingSchedule, timerClass);
+            Set<NewTimer> currentScheduleSet = getRequiredSet(pendingSchedule, timerClass);
             Set<NewTimer> reScheduleSetCurrent = getRequiredSet(reSchedulePending, timerClass);
             currentScheduleSet.remove(timerHandle);
             reScheduleSetCurrent.remove(timerHandle);
         }
 
     }
-
-
-
 }
 

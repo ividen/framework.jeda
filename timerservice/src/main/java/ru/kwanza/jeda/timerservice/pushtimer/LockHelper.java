@@ -16,6 +16,7 @@ public class LockHelper {
             lock.lockInterruptibly();
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
+            //todo aguzanov зачем?
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         }

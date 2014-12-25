@@ -1,12 +1,11 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Guzanov Alexander
  */
+@ContextConfiguration("application-context-arjuna.xml")
 public class TestTransactionalMemoryQueueWithArjuna extends TestTransactionalMemoryQueueWithDSTrx {
-    @Override
-    public String getContextPath() {
-        return "application-context-arjuna.xml";
-    }
 }
 

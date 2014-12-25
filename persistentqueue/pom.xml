@@ -83,11 +83,6 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>ru.kwanza.jeda</groupId>
             <artifactId>jeda-core</artifactId>
         </dependency>

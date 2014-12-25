@@ -8,7 +8,6 @@
 
     <import resource="classpath:autokey-mock-config.xml"/>
     <import resource="classpath:dbtool-config.xml"/>
-    <import resource="classpath:txn-ds-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-jdbc-config.xml"/>
 
@@ -27,11 +26,21 @@
         </property>
     </bean>
 
-    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource" ref="targetDataSource">
+        </property>
+    </bean>
+
+    <bean id="targetDataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
         <property name="driverClassName" value="${jdbc.driverClass}"/>
         <property name="url" value="${jdbc.connectionUrl}"/>
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
     </bean>
+
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
 
 </beans>

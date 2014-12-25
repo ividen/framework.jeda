@@ -1,11 +1,31 @@
 package ru.kwanza.jeda.core.threadmanager;
 
-import junit.framework.TestCase;
+import mockit.Mocked;
+import mockit.NonStrictExpectations;
+import org.junit.Before;
+import org.junit.Test;
+import ru.kwanza.jeda.api.IStage;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestErrorController extends TestCase {
+public class TestErrorController {
+    @Mocked
+    private IStage stage1;
+    @Mocked
+    private IStage stage2;
+
+    @Before
+    public void init(){
+        new NonStrictExpectations(){{
+           stage1.getName();result="stage1";
+           stage2.getName();result="stage2";
+        }};
+    }
+
+    @Test
     public void testDangerousEntryEqual() {
         assertFalse(new ErrorController.DangerousEntry(new TestEvent("event1")).equals(new Object()));
 
@@ -27,9 +47,8 @@ public class TestErrorController extends TestCase {
         assertFalse(entry.equals(entry2));
     }
 
+    @Test
     public void testRegisterRemove() {
-        TestStage stage1 = new TestStage("stage1");
-        TestStage stage2 = new TestStage("stage2");
         TestEvent event1 = new TestEvent("event1");
         TestEvent event2 = new TestEvent("event2");
         TestEvent event3 = new TestEvent("event3");
@@ -109,9 +128,8 @@ public class TestErrorController extends TestCase {
         ErrorController.getInstance().removeDangerousElement(stage2, event3);
     }
 
+    @Test
     public void testWithGC() {
-        TestStage stage1 = new TestStage("stage1");
-        TestStage stage2 = new TestStage("stage2");
         TestEvent event1 = new TestEvent("event1");
         TestEvent event2 = new TestEvent("event2");
         TestEvent event3 = new TestEvent("event3");
@@ -152,10 +170,6 @@ public class TestErrorController extends TestCase {
         assertEquals("Wrong attempt count", 4, ErrorController.getInstance().registerDangerousElement(stage2, event3).getAttempts());
         assertEquals("Wrong attempt count", 5, ErrorController.getInstance().registerDangerousElement(stage2, event3).getAttempts());
         assertEquals("Wrong attempt count", 6, ErrorController.getInstance().registerDangerousElement(stage2, event3).getAttempts());
-
-        event1 = null;
-        event2 = null;
-        event3 = null;
 
         System.gc();
         System.gc();

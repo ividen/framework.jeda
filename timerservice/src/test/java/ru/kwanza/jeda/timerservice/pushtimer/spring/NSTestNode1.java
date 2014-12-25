@@ -5,6 +5,9 @@ import org.junit.Test;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.IStage;
 import ru.kwanza.jeda.api.pushtimer.manager.ITimerManager;
@@ -41,11 +44,11 @@ public class NSTestNode1 extends AbstractJUnit4SpringContextTests {
         IStage stage6 = jedaManager.getStage("TIMER_6");
         IStage stage7 = jedaManager.getStage("TIMER_7");
 
-        jedaManager.getTransactionManager().begin();
+        final TransactionStatus status1 = jedaManager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         timerManager.scheduleTimers(Arrays.asList(new NewTimer("TIMER_1", "1", 10)));
-        jedaManager.getTransactionManager().commit();
+        jedaManager.getTransactionManager().commit(status1);
 
-        jedaManager.getTransactionManager().begin();
+        final TransactionStatus status2 = jedaManager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         timerManager.scheduleTimers(Arrays.asList(
                 new NewTimer("TIMER_1", "2", 10),
                 new NewTimer("TIMER_2", "1", 10),
@@ -55,7 +58,7 @@ public class NSTestNode1 extends AbstractJUnit4SpringContextTests {
                 new NewTimer("TIMER_6", "1", 10),
                 new NewTimer("TIMER_7", "1", 10)
         ));
-        jedaManager.getTransactionManager().commit();
+        jedaManager.getTransactionManager().commit(status2);
 
 
         System.out.println("done");

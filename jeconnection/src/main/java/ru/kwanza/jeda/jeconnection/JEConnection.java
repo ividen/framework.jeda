@@ -2,10 +2,13 @@ package ru.kwanza.jeda.jeconnection;
 
 import com.sleepycat.je.Database;
 import com.sleepycat.je.DatabaseConfig;
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.transaction.support.*;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,21 +41,24 @@ public class JEConnection {
         return environment;
     }
 
-    public Database openDatabase(String name, DatabaseConfig config) {
+    public Database openDatabase(final String name, final DatabaseConfig config) {
         Database database = databases.get(name);
         if (database == null) {
             lock.lock();
             try {
                 if ((database = databases.get(name)) == null) {
-                    ITransactionManagerInternal transactionManager = factory.manager.getTransactionManager();
-                    transactionManager.suspend();
+                    final PlatformTransactionManager transactionManager = factory.manager.getTransactionManager();
+                    TransactionTemplate template = new TransactionTemplate(transactionManager,
+                            new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_NOT_SUPPORTED));
 
-                    try {
-                        database = environment.openDatabase(null, name, config);
-                        databases.put(name, database);
-                    } finally {
-                        transactionManager.resume();
-                    }
+                    database = template.execute(new TransactionCallback<Database>() {
+                        @Override
+                        public Database doInTransaction(TransactionStatus status) {
+                            return environment.openDatabase(null, name, config);
+                        }
+
+                    });
+                    databases.put(name, database);
                 }
             } finally {
                 lock.unlock();
@@ -62,36 +68,47 @@ public class JEConnection {
     }
 
     protected void enlist() {
-        ITransactionManagerInternal transactionManager = factory.manager.getTransactionManager();
-        if (transactionManager.hasTransaction()) {
-            Transaction transaction = transactionManager.getTransaction();
+        final JtaTransactionManager tm = (JtaTransactionManager) factory.manager.getTransactionManager();
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+
+            final Transaction transaction;
+            try {
+                transaction = tm.getTransactionManager().getTransaction();
+            } catch (SystemException e) {
+                throw new JEConnectionException(e);
+            }
+
             if (!enlistment.contains(transaction)) {
                 if (null == enlistment.putIfAbsent(transaction, transaction)) {
                     try {
                         transaction.enlistResource(this.getEnvironment());
-                        transaction.registerSynchronization(new CleanupAfterCompletion(transaction));
+                        TransactionSynchronizationManager.registerSynchronization(new CleanupAfterCompletion());
                     } catch (Exception e) {
-                        delistTransaction(enlistment.remove(transaction),Status.STATUS_NO_TRANSACTION);
-                        throw new JEConnectionException(e);
+                        enlistment.remove(transaction);
                     }
                 }
             }
         }
+
     }
 
     protected void enlistTx() {
-        ITransactionManagerInternal transactionManager = factory.manager.getTransactionManager();
-        if (!transactionManager.hasTransaction()) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new JEConnectionException("Expected active transaction!");
         }
 
-
-        Transaction transaction = transactionManager.getTransaction();
+        final JtaTransactionManager tm = (JtaTransactionManager) factory.manager.getTransactionManager();
+        final Transaction transaction;
+        try {
+            transaction = tm.getTransactionManager().getTransaction();
+        } catch (SystemException e) {
+            throw new JEConnectionException(e);
+        }
         if (!enlistment.contains(transaction)) {
             if (null == enlistment.putIfAbsent(transaction, transaction)) {
                 try {
                     transaction.enlistResource(this.getEnvironment());
-                    transaction.registerSynchronization(new CleanupAndCloseAfterComplete(transaction));
+                    TransactionSynchronizationManager.registerSynchronization(new CleanupAndCloseAfterComplete(transaction));
                 } catch (Exception e) {
                     throw new JEConnectionException(e);
                 }
@@ -100,38 +117,33 @@ public class JEConnection {
 
     }
 
-    private void delistTransaction(Transaction transaction, int status) {
-        enlistment.remove(transaction);
+    class CleanupAfterCompletion extends TransactionSynchronizationAdapter {
+        @Override
+        public void suspend() {
+            TransactionSynchronizationManager.unbindResourceIfPossible(environment);
+        }
+
+        @Override
+        public void resume() {
+            TransactionSynchronizationManager.bindResource(environment, environment);
+        }
+
+        @Override
+        public void beforeCompletion() {
+            TransactionSynchronizationManager.unbindResourceIfPossible(environment);
+        }
     }
 
-    private class CleanupAfterCompletion implements Synchronization {
+    private class CleanupAndCloseAfterComplete extends TransactionSynchronizationAdapter {
         private Transaction transaction;
 
-        private CleanupAfterCompletion(Transaction transaction) {
+        public CleanupAndCloseAfterComplete(Transaction transaction) {
             this.transaction = transaction;
         }
 
-        public void beforeCompletion() {
-        }
-
+        @Override
         public void afterCompletion(int status) {
-            delistTransaction(transaction,status);
-        }
-    }
-
-    private class CleanupAndCloseAfterComplete implements Synchronization {
-        private Transaction transaction;
-
-        private CleanupAndCloseAfterComplete(Transaction transaction) {
-            this.transaction = transaction;
-        }
-
-
-        public void beforeCompletion() {
-        }
-
-        public void afterCompletion(int status) {
-            delistTransaction(transaction,status);
+            enlistment.remove(transaction);
             factory.closeConnection(nodeId);
         }
     }

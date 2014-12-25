@@ -1,17 +1,19 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.SourceException;
-import junit.framework.TestCase;
 
 import java.util.Collection;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestAbstractObservableQueue extends TestCase {
+public class TestAbstractObservableQueue {
     public static class TestQueue<E extends IEvent> extends AbstractObservableMemoryQueue<E> {
         public int getEstimatedCount() {
             return 0;
@@ -53,6 +55,7 @@ public class TestAbstractObservableQueue extends TestCase {
         }
     }
 
+    @Test
     public void testNotify() {
         TestObserver observer = new TestObserver();
         TestQueue testQueue = new TestQueue();

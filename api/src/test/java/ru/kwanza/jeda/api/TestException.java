@@ -43,20 +43,6 @@ public class TestException extends TestCase {
         assertEquals(e4.getCause().getClass(), RuntimeException.class);
     }
 
-    public void testMarkTransactionRollbackException() {
-        MarkTransactionRollbackException e1 = new MarkTransactionRollbackException();
-        assertNull(e1.getMessage());
-        assertNull(e1.getCause());
-        MarkTransactionRollbackException e2 = new MarkTransactionRollbackException("Test");
-        assertEquals(e2.getMessage(), "Test");
-        assertNull(e2.getCause());
-        MarkTransactionRollbackException e3 = new MarkTransactionRollbackException("Test", new RuntimeException());
-        assertEquals(e3.getMessage(), "Test");
-        assertEquals(e3.getCause().getClass(), RuntimeException.class);
-        MarkTransactionRollbackException e4 = new MarkTransactionRollbackException(new RuntimeException());
-        assertEquals(e4.getMessage(), "java.lang.RuntimeException");
-        assertEquals(e4.getCause().getClass(), RuntimeException.class);
-    }
 
     public void testBusException() {
         BusException e1 = new BusException();

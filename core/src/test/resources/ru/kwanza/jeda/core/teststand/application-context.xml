@@ -4,14 +4,15 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
 
-    <bean id="jtaTransactionManager"
-          class="com.atomikos.icatch.jta.AtomikosTransactionManager"
-          init-method="init" destroy-method="close">
-        <property name="forceShutdown" value="true"/>
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <constructor-arg>
+            <bean id="jtaTransactionManager"
+                  class="com.atomikos.icatch.jta.AtomikosTransactionManager"
+                  init-method="init" destroy-method="close">
+                <property name="forceShutdown" value="true"/>
+            </bean>
+        </constructor-arg>
     </bean>
-
-
 </beans>

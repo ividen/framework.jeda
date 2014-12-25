@@ -1,20 +1,23 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.SourceException;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static junit.framework.Assert.*;
 
-public abstract class TestEventQueue extends TestCase {
+
+public abstract class TestEventQueue{
     protected abstract IQueue createQueue();
 
+    @Test
     public void testClogged() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -73,6 +76,7 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("WrongQueueEstimateSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testEmptyPut() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -81,6 +85,7 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyTryPut() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -90,6 +95,7 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("WrongQueueEstimateSize", 0, queue.getEstimatedCount());
     }
 
+    @Test
     public void testObserving() throws SinkException, SourceException {
         IQueue queue = createQueue();
         final ArrayList<Integer> queueSize = new ArrayList<Integer>();
@@ -170,6 +176,7 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("Wrong count", 0, delta.size());
     }
 
+    @Test
     public void testPutMany() throws SinkException, SourceException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
@@ -203,17 +210,20 @@ public abstract class TestEventQueue extends TestCase {
         assertNull("No events", queue.take(1000));
     }
 
+    @Test
     public void testPutTake() throws SinkException, SourceException {
         IQueue queue = createQueue();
         passTake(queue);
     }
 
+    @Test
     public void testPutTake2Pass() throws SinkException, SourceException {
         IQueue queue = createQueue();
         passTake(queue);
         passTake(queue);
     }
 
+    @Test
     public void testSinkClosedException() {
         IQueue queue = createQueue();
 
@@ -230,6 +240,7 @@ public abstract class TestEventQueue extends TestCase {
         }
     }
 
+    @Test
     public void testSinkExceptionClogged() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -301,6 +312,7 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("WrongQueueEstimateSize", 10, queue.getEstimatedCount());
     }
 
+    @Test
     public void testSourceException() throws SinkException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new Event("1"),
@@ -319,6 +331,7 @@ public abstract class TestEventQueue extends TestCase {
         }
     }
 
+    @Test
     public void testTakeZero() throws SourceException, SinkException {
         IQueue queue = createQueue();
 
@@ -334,11 +347,13 @@ public abstract class TestEventQueue extends TestCase {
         assertEquals("WrongEstimateQueueSize", 6, queue.getEstimatedCount());
     }
 
+    @Test
     public void testTryPutTake() throws SinkException, SourceException {
         IQueue queue = createQueue();
         tryPutTake(queue);
     }
 
+    @Test
     public void testTryPutTake2Pass() throws SinkException, SourceException {
         IQueue queue = createQueue();
         tryPutTake(queue);

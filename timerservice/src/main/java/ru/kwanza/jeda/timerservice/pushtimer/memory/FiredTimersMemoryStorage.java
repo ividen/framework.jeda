@@ -1,5 +1,10 @@
 package ru.kwanza.jeda.timerservice.pushtimer.memory;
 
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IQueue;
@@ -25,6 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FiredTimersMemoryStorage {
 
 
+    private TransactionTemplate newTx;
     private TimerClass timerClass;
     private IJedaManagerInternal jedaManager;
     private FiredTimersStorageRepository repository;
@@ -46,11 +52,14 @@ public class FiredTimersMemoryStorage {
 
     private boolean dirty = true;
 
-    public FiredTimersMemoryStorage(TimerClass timerClass, IJedaManagerInternal jedaManager, FiredTimersStorageRepository repository, JMXRegistry jmxRegistry) {
+    public FiredTimersMemoryStorage(TimerClass timerClass, IJedaManagerInternal jedaManager,
+                                    FiredTimersStorageRepository repository, JMXRegistry jmxRegistry) {
         this.timerClass = timerClass;
         this.jedaManager = jedaManager;
         this.repository = repository;
         this.jmxRegistry = jmxRegistry;
+        this.newTx = new TransactionTemplate(jedaManager.getTransactionManager(),
+                new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
         maxLimit = timerClass.getConsumerConfig().getFiredTimersMaxLimit();
         singleConsumerModeLimit = timerClass.getConsumerConfig().getFiredTimersSingleConsumerModeLimit();
@@ -123,7 +132,7 @@ public class FiredTimersMemoryStorage {
 
     public void accept(List<TimerEntity> firedTimers, long bucketId) {
         List<InternalTimerFiredEvent> allEvents = new ArrayList<InternalTimerFiredEvent>();
-        Map<String, List<InternalTimerFiredEvent>> timerNameToEvents = new HashMap<String, List<InternalTimerFiredEvent>>();
+        final Map<String, List<InternalTimerFiredEvent>> timerNameToEvents = new HashMap<String, List<InternalTimerFiredEvent>>();
         splitByNameAndFill(allEvents, timerNameToEvents, firedTimers, bucketId);
 
 
@@ -133,30 +142,27 @@ public class FiredTimersMemoryStorage {
         try {
             checkDirty();
             pendingAddSuccess = addPendingTimers(allEvents, bucketId);
-            jedaManager.getTransactionManager().begin();
 
-            for (Map.Entry<String, List<InternalTimerFiredEvent>> entry : timerNameToEvents.entrySet()) {
-                IQueue queue = timerNameToQueue.get(entry.getKey());
-                try {
-                    queue.put(entry.getValue());
-                } catch (SinkException e) {
-                    throw new RuntimeException("Can't put fired timers in memory for TimerName=" + entry.getKey(), e);
+
+            newTx.execute(new TransactionCallbackWithoutResult() {
+                @Override
+                protected void doInTransactionWithoutResult(TransactionStatus status) {
+                    for (Map.Entry<String, List<InternalTimerFiredEvent>> entry : timerNameToEvents.entrySet()) {
+                        IQueue queue = timerNameToQueue.get(entry.getKey());
+                        try {
+                            queue.put(entry.getValue());
+                        } catch (SinkException e) {
+                            throw new RuntimeException("Can't put fired timers in memory for TimerName=" + entry.getKey(), e);
+                        }
+                    }
                 }
-            }
+            });
 
-            jedaManager.getTransactionManager().commit();
             if (firedTimers.size() > reservedInserts) {
                 throw new RuntimeException(firedTimers.size() + " is more than reservedInserts = " + reservedInserts);
             }
             reservedInserts -= firedTimers.size();
         } catch (Throwable e) {
-            try {
-                if (jedaManager.getTransactionManager().hasTransaction()) {
-                    jedaManager.getTransactionManager().rollback();
-                }
-            } catch (Throwable e1) {
-                //ignore
-            }
             if (pendingAddSuccess) {
                 forgetPendingTimers(allEvents, bucketId);
             }

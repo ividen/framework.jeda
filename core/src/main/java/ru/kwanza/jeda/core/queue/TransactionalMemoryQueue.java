@@ -32,9 +32,9 @@ public class TransactionalMemoryQueue<E extends IEvent> extends AbstractTransact
         lastNode = lastNode.next = new Node<E>(e);
     }
 
-    protected void processTake(Tx tx, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
+    protected void processTake(TxSync txSync, int c, ArrayList<E> result, ObjectOutputStreamEx oos) {
         Node last = firstNode;
-        last = iterateOverNodeAndTake(last, tx, c, result, oos);
+        last = iterateOverNodeAndTake(last, txSync, c, result, oos);
 
 
         if (last != firstNode) {

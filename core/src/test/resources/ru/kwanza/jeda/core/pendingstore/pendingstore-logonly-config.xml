@@ -6,18 +6,23 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
 
-    <import resource="classpath:txn-ds-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
     <jeda-core:flow-bus name="TestFlowBus1" class="ru.kwanza.jeda.core.pendingstore.env.TestFlowBus1"/>
 
-
-    <bean id="dataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
-        <property name="driverClassName" value="${dbunit.driverClass}"/>
-        <property name="url" value="${dbunit.connectionUrl}"/>
-        <property name="username" value="${dbunit.username}"/>
-        <property name="password" value="${dbunit.password}"/>
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <property name="targetDataSource">
+            <bean id="targetDataSource" destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </bean>
+        </property>
     </bean>
 
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
+    </bean>
 </beans>

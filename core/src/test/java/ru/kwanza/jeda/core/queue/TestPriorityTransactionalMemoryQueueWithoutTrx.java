@@ -1,17 +1,20 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
+import org.springframework.transaction.PlatformTransactionManager;
 import ru.kwanza.jeda.api.*;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IStageInternal;
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.pushtimer.ITimer;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
 public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriorityEventQueue {
     public static class NonTransactionalJedaManager implements IJedaManager {
-        public ITransactionManagerInternal getTransactionManager() {
+        public PlatformTransactionManager getTransactionManager() {
             return null;
         }
 
@@ -75,6 +78,7 @@ public class TestPriorityTransactionalMemoryQueueWithoutTrx extends TestPriority
         }
     }
 
+    @Test
     public void testMaxSize() {
         PriorityTransactionalMemoryQueue memoryQueue = new PriorityTransactionalMemoryQueue(new NonTransactionalJedaManager());
         assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());

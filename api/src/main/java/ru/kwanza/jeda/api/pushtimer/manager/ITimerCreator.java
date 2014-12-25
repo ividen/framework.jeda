@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.api.pushtimer.manager;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kwanza.jeda.api.pushtimer.ScheduleTimerEvent;
-import ru.kwanza.txn.api.Transactional;
-import ru.kwanza.txn.api.TransactionalType;
 
 import java.util.Collection;
 
@@ -22,7 +22,7 @@ public interface ITimerCreator {
      * If timer already registered in this tx  then exception will be thrown immediate.
      * If has duplicates in supplied collection exception will be thrown immediate.
      */
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void scheduleTimers(Collection<NewTimer> timers);
 
     /*
@@ -30,11 +30,11 @@ public interface ITimerCreator {
      * If timer already registered in this tx  then exception will be thrown immediate.
      * If has duplicates in supplied collection exception will be thrown immediate.
      */
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void scheduleTimers(long timeoutMS, Collection<TimerHandle> timerHandles);
 
 
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void scheduleTimers(String timerName, long timeoutMS, Collection<String> timerIds);
 
 
@@ -43,7 +43,7 @@ public interface ITimerCreator {
      * If timer already registered in this tx previous value will be lost
      * If has duplicates in supplied collection exception will be thrown immediate.
      */
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void reScheduleTimers(Collection<NewTimer> timers);
 
     /*
@@ -51,15 +51,15 @@ public interface ITimerCreator {
      * If timer already registered in this tx previous value will be lost
      * If has duplicates in supplied collection exception will be thrown immediate.
      */
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void reScheduleTimers(long timeoutMS, Collection<TimerHandle> timerHandles);
 
 
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void reScheduleTimers(String timerName, long timeoutMS, Collection<String> timerIds);
 
 
-    @Transactional(TransactionalType.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processScheduleTimerEvents(String timerName, Collection<ScheduleTimerEvent> scheduleTimerEvents);
 
 

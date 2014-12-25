@@ -77,11 +77,6 @@
             <artifactId>dbtool-orm</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

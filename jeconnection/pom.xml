@@ -73,8 +73,8 @@
         </dependency>
 
         <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
         </dependency>
 
         <dependency>
