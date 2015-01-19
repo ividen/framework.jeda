@@ -11,6 +11,12 @@ import java.util.concurrent.locks.Lock;
  */
 public class LockHelper {
     private static Logger logger = LoggerFactory.getLogger(LockHelper.class);
+
+    /*
+    * Большинство реализаций lockInterruptibly вызывают внутри метод Thread.interrupted(), который сбрасывает interrupted статус у потока.
+    * Соответственно, что бы поток, обрабатывающий исключения на верхнем уровне, имел возможность проверить interrupted статус мы его заново устанавливаем
+    * Фактически данный метод оборачивает checked исключение InterruptedException в unchecked RuntimeException, но с возможностью проверить isInterrupted в будущем.
+    */
     public static void lockInterruptibly(Lock lock) {
         try {
             lock.lockInterruptibly();

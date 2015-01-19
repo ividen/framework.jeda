@@ -13,7 +13,6 @@
     <import resource="classpath:dbtool-orm-config.xml" />
     <import resource="classpath:jeda-core-config.xml" />
     <import resource="classpath:pendingstore-logonly-config.xml"/>
-    <import resource="classpath:txn-ds-config.xml"/>
 
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
 
@@ -50,6 +49,10 @@
         <property name="password" value="TIGER" />
     </bean>
     -->
+
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
+    </bean>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <constructor-arg name="targetDataSource">
