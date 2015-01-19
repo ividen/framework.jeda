@@ -11,7 +11,6 @@
                http://www.kwanza-systems.ru/schema/jeda-context http://www.kwanza-systems.ru/schema/jeda-context.xsd
                http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
     <import resource="classpath:autokey-mock-config.xml"/>

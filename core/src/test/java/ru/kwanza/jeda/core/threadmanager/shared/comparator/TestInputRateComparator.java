@@ -1,11 +1,14 @@
 package ru.kwanza.jeda.core.threadmanager.shared.comparator;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestInputRateComparator extends TestCase {
+public class TestInputRateComparator{
+    @Test
     public void test1() {
         InputRateComparator comparator = new InputRateComparator();
         TestStageEntry entry1 = new TestStageEntry();
@@ -21,6 +24,7 @@ public class TestInputRateComparator extends TestCase {
         assertEquals(-1, comparator.compare(entry2, entry1));
     }
 
+    @Test
     public void test2() {
         InputRateComparator comparator = new InputRateComparator();
         TestStageEntry entry1 = new TestStageEntry();

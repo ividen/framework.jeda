@@ -1,11 +1,10 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.springframework.test.context.ContextConfiguration;
+
 /**
  * @author Guzanov Alexander
  */
+@ContextConfiguration("application-context-atomikos.xml")
 public class TestTransactionalMemoryQueueWithAtamikos extends TestTransactionalMemoryQueueWithDSTrx {
-    @Override
-    public String getContextPath() {
-        return "application-context-atomikos.xml";
-    }
 }

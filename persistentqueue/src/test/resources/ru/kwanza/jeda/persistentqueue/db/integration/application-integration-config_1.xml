@@ -12,7 +12,6 @@
 
     <import resource="classpath:dbtool-config.xml"/>
     <import resource="classpath:dbtool-orm-config.xml"/>
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:jeda-clusterservice-db-config.xml"/>
     <import resource="classpath:jeda-core-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>

@@ -37,7 +37,7 @@ public class DefaultPendingStoreTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         ctx = new ClassPathXmlApplicationContext(getContextFileName(), DefaultPendingStoreTest.class);
-        conn = ctx.getBean("dataSource", BasicDataSource.class).getConnection();
+        conn = ctx.getBean("targetDataSource", BasicDataSource.class).getConnection();
         manager = ctx.getBean(IJedaManager.class);
         dbUnitUtil = new DBUnitUtil(conn);
         pendingStore = manager.getPendingStore();

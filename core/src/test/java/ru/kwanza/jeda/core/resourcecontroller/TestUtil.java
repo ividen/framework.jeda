@@ -1,12 +1,16 @@
 package ru.kwanza.jeda.core.resourcecontroller;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author Guzanov Alexander
  */
-public class TestUtil extends TestCase {
+public class TestUtil {
 
+    @Test
     public void test_smooth_average() {
         assertTrue(Math.abs(1.35 - Util.smooth_average(1.5, 1, 0.7)) < 0.0000000000001);
         assertTrue(Math.abs(1.245 - Util.smooth_average(1.2, 1.35, 0.7)) < 0.0000000000001);

@@ -1,7 +1,7 @@
 package ru.kwanza.jeda.api;
 
-import ru.kwanza.jeda.api.internal.ITransactionManagerInternal;
 import ru.kwanza.jeda.api.pushtimer.ITimer;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * @author Guzanov Alexander
@@ -18,7 +18,7 @@ public interface IJedaManager {
 
     ITimer getTimer(String name);
 
-    ITransactionManagerInternal getTransactionManager();
+    PlatformTransactionManager getTransactionManager();
 
     IPendingStore getPendingStore();
 

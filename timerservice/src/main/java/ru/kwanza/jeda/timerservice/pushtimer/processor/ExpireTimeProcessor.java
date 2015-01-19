@@ -1,6 +1,7 @@
 package ru.kwanza.jeda.timerservice.pushtimer.processor;
 
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import ru.kwanza.jeda.api.IEventProcessor;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.pushtimer.TimerFiredEvent;
@@ -103,7 +104,7 @@ public class ExpireTimeProcessor implements IEventProcessor<InternalTimerFiredEv
             }
 
             try {
-                jedaManager.getTransactionManager().getTransaction().registerSynchronization(
+                TransactionSynchronizationManager.registerSynchronization(
                         new ProcessorTx(firedTimersStorageRepository, timerClass, bucketIdToEventsFiltered));
             } catch (Exception e) {
                 throw new RuntimeException(e);

@@ -48,10 +48,6 @@
             <artifactId>spring-tx</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>ru.kwanza.txn</groupId>
-            <artifactId>txn</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>ru.kwanza.jeda</groupId>

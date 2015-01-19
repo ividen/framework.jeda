@@ -1,18 +1,18 @@
 package ru.kwanza.jeda.timerservice.pushtimer.processor;
 
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import ru.kwanza.jeda.timerservice.pushtimer.config.TimerClass;
-import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersStorageRepository;
 import ru.kwanza.jeda.timerservice.pushtimer.internalapi.InternalTimerFiredEvent;
+import ru.kwanza.jeda.timerservice.pushtimer.memory.FiredTimersStorageRepository;
 
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Michael Yeskov
  */
-public class ProcessorTx implements Synchronization{
+public class ProcessorTx extends TransactionSynchronizationAdapter{
 
     private FiredTimersStorageRepository repository;
     private TimerClass timerClass;
@@ -25,13 +25,8 @@ public class ProcessorTx implements Synchronization{
     }
 
     @Override
-    public void beforeCompletion() {
-
-    }
-
-    @Override
     public void afterCompletion(int status) {
-        if (status == Status.STATUS_COMMITTED) {
+        if (status == TransactionSynchronization.STATUS_COMMITTED) {
             repository.getFiredTimersStorage(timerClass).forgetPendingTimers(bucketIdToEvents);
         }
         repository.forgetActiveProcessors(bucketIdToEvents.keySet());

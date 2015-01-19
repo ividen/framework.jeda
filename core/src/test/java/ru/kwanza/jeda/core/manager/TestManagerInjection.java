@@ -3,6 +3,9 @@ package ru.kwanza.jeda.core.manager;
 import junit.framework.TestCase;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.jeda.api.IJedaManager;
 
 /**
@@ -13,8 +16,8 @@ public class TestManagerInjection extends TestCase {
         ApplicationContext ctx = new ClassPathXmlApplicationContext("application-context.xml", TestManagerInjection.class);
         IJedaManager manager = ctx.getBean(IJedaManager.class);
 
-        manager.getTransactionManager().begin();
+        final TransactionStatus status = manager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
 
-        manager.getTransactionManager().commit();
+        manager.getTransactionManager().commit(status);
     }
 }

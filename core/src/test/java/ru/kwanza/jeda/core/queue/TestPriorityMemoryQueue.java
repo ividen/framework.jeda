@@ -1,16 +1,15 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
 import ru.kwanza.jeda.api.internal.IQueue;
-import junit.framework.TestSuite;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Guzanov Alexander
  */
 public class TestPriorityMemoryQueue extends TestPriorityEventQueue {
-    public static TestSuite suite() {
-        return new TestSuite(TestPriorityMemoryQueue.class);
-    }
-
+    @Test
     public void testMaxSize() {
         PriorityMemoryQueue memoryQueue = new PriorityMemoryQueue();
         assertEquals("MaxSize wrong", Integer.MAX_VALUE, memoryQueue.getMaxSize());

@@ -1,25 +1,27 @@
 package ru.kwanza.jeda.core.queue;
 
+import org.junit.Test;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IQueue;
 import ru.kwanza.jeda.api.internal.IQueueObserver;
 import ru.kwanza.jeda.api.internal.SourceException;
-import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static junit.framework.Assert.*;
 import static ru.kwanza.jeda.api.IPriorityEvent.Priority;
 
 /**
  * @author Guzanov Alexander
  */
-public abstract class TestPriorityEventQueue extends TestCase {
+public abstract class TestPriorityEventQueue {
     protected abstract IQueue createQueue();
 
+    @Test
     public void testAllPriority() throws SinkException, SourceException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", Priority.LOW)}));
@@ -40,6 +42,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertNull("Must be empty", queue.take(1));
     }
 
+    @Test
     public void testClogged() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -94,6 +97,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testEmptyPut() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -101,6 +105,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testEmptyTryPut() throws SinkException {
         IQueue queue = createQueue();
         assertEquals("Wrong queue size", 0, queue.size());
@@ -108,6 +113,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Wrong queue size", 0, queue.size());
     }
 
+    @Test
     public void testObserver() throws SinkException, SourceException {
         IQueue queue = createQueue();
         final ArrayList<Integer> queueSize = new ArrayList<Integer>();
@@ -188,6 +194,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Wrong count", 0, delta.size());
     }
 
+    @Test
     public void testPriorityPutClogged() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -236,6 +243,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Priority wrong", Priority.NORMAL, next.getPriority());
     }
 
+    @Test
     public void testPutMany() throws SinkException, SourceException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1"),
@@ -269,17 +277,20 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertNull("No events", queue.take(1000));
     }
 
+    @Test
     public void testPutTake() throws SinkException, SourceException {
         IQueue queue = createQueue();
         passTake(queue);
     }
 
+    @Test
     public void testPutTake2Pass() throws SinkException, SourceException {
         IQueue queue = createQueue();
         passTake(queue);
         passTake(queue);
     }
 
+    @Test
     public void testPutTakeDiffPriority() throws SinkException, SourceException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1", Priority.NORMAL),
@@ -360,6 +371,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertNull("No events", events);
     }
 
+    @Test
     public void testSinkClosedException() {
         IQueue queue = createQueue();
 
@@ -376,6 +388,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         }
     }
 
+    @Test
     public void testSinkExceptionClogged() throws SinkException, SourceException {
         IQueue queue = createQueue();
 
@@ -442,6 +455,7 @@ public abstract class TestPriorityEventQueue extends TestCase {
         assertEquals("Sink size", 10, queue.size());
     }
 
+    @Test
     public void testSourceException() throws SinkException {
         IQueue queue = createQueue();
         queue.put(Arrays.asList(new IEvent[]{new PriorityEvent("1"),
@@ -460,11 +474,13 @@ public abstract class TestPriorityEventQueue extends TestCase {
         }
     }
 
+    @Test
     public void testTryPutTake() throws SinkException, SourceException {
         IQueue queue = createQueue();
         tryPutTake(queue);
     }
 
+    @Test
     public void testTryPutTake2Pass() throws SinkException, SourceException {
         IQueue queue = createQueue();
         tryPutTake(queue);
