@@ -19,12 +19,12 @@ import java.net.InetSocketAddress;
 public class HttpRequestEvent implements IDelegatingTransportEvent {
     private static final String URI = "/ws_test-1/ws/soap";
 
-    private  HttpFilterChainBuilder filterChainBuilder;
+    private FilterChain filterChain;
     private ConnectionConfig connectionConfig;
     private String body;
 
-    public HttpRequestEvent(HttpFilterChainBuilder filterChainBuilder, String body) {
-        this.filterChainBuilder = filterChainBuilder;
+    public HttpRequestEvent(FilterChain filterChain, String body) {
+        this.filterChain = filterChain;
         connectionConfig = new ConnectionConfig(new InetSocketAddress("localhost", 8080),
                 true, true, 1000);
         this.body = body;
@@ -42,7 +42,7 @@ public class HttpRequestEvent implements IDelegatingTransportEvent {
 
     @Override
     public FilterChain getProcessingFilterChain() {
-        return filterChainBuilder.getHttpDefaultFixedSize();
+        return filterChain;
     }
 
     @Override

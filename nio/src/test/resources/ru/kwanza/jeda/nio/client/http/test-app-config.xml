@@ -14,12 +14,16 @@
     <import resource="classpath:txn-ds-config.xml"/>
 
     <import resource="classpath:jeda-core-config.xml"/>
-    <import resource="classpath:txn-jta-config.xml"/>
     <import resource="classpath:pendingstore-logonly-config.xml"/>
 
 
 
     <context:property-placeholder location="classpath:test.properties"/>
+
+
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
+    </bean>
 
     <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
         <constructor-arg name="targetDataSource">
@@ -40,10 +44,6 @@
 
     <nio:client-transport-flow-bus name="client-transport-flow-bus"/>
 
-    <bean id="filterChainBuilder" class="ru.kwanza.jeda.nio.client.http.HttpFilterChainBuilder">
-        <property name="defMaxBufferCapacity" value="1000000" />
-    </bean>
-
 
     <core:stage name="responseStage" transaction="true">
         <core:tx-memory-queue cloneType="NONE" maxSize="1000000"/>
@@ -51,4 +51,8 @@
         <core:event-processor class="ru.kwanza.jeda.nio.client.http.ResponseProcessor"/>
         <core:stage-thread-manager threadNamePrefix="response_stage" idleTimeout="50000" maxThreadCount="15"/>
     </core:stage>
+    
+    <bean id="httpFilterChainHolder" class="ru.kwanza.jeda.nio.client.http.HttpFilterChainHolder">
+        <property name="maxBufferCapacity" value="10000000" />
+    </bean>
 </beans>

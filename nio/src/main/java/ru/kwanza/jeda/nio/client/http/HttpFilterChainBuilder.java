@@ -18,33 +18,10 @@ import javax.annotation.Resource;
 /**
  * @author Michael Yeskov
  */
-@Component
+
 public class HttpFilterChainBuilder {
-    @Resource
-    private IJedaManager jedaManager;
 
-    private long defMaxBufferCapacity = 10000000;
-    private int defChunkedMaxHeaderSize = 10000000;
-    private FilterChain httpDefaultFixedSize;
-    private FilterChain httpDefaultChunked;
-
-    @PostConstruct
-    public void init() {
-        httpDefaultChunked = buildHttp(new ChunkedTransferEncoding(defChunkedMaxHeaderSize), defMaxBufferCapacity);
-        httpDefaultFixedSize = buildHttp(new FixedLengthTransferEncoding(), defMaxBufferCapacity);
-    }
-
-
-    public FilterChain getHttpDefaultFixedSize() {
-        return httpDefaultFixedSize;
-    }
-
-    public FilterChain getHttpDefaultChunked() {
-        return httpDefaultChunked;
-    }
-
-
-    public FilterChain buildCustom(TransferEncoding transferEncoding, SSLEngineConfigurator sslEngineConfigurator, long customMaxBufferCapacity) {
+    public static FilterChain buildCustom(IJedaManager jedaManager, SSLEngineConfigurator sslEngineConfigurator, long customMaxBufferCapacity) {
         FilterChainBuilder builder = FilterChainBuilder.stateless();
 
         builder.add(new TransportFilter());
@@ -53,9 +30,7 @@ public class HttpFilterChainBuilder {
             builder.add(new SSLFilter(null, sslEngineConfigurator));
         }
 
-        HttpClientFilter clientFilter = new HttpClientFilter();
-        clientFilter.addTransferEncoding(transferEncoding);
-        builder.add(clientFilter);
+        builder.add(new HttpClientFilter());
 
         builder.add(new AccumulatingHttpClientFilter(customMaxBufferCapacity));
         builder.add(new DelegatingHttpClientHandler(jedaManager));
@@ -63,28 +38,12 @@ public class HttpFilterChainBuilder {
         return builder.build();
     }
 
-    public FilterChain buildHttps(TransferEncoding transferEncoding, SSLEngineConfigurator sslEngineConfigurator, long customMaxBufferCapacity) {
-        return buildCustom(transferEncoding, sslEngineConfigurator, customMaxBufferCapacity);
+    public static FilterChain buildHttps(IJedaManager jedaManager, SSLEngineConfigurator sslEngineConfigurator, long customMaxBufferCapacity) {
+        return buildCustom(jedaManager, sslEngineConfigurator, customMaxBufferCapacity);
     }
 
-    public FilterChain buildHttp(TransferEncoding transferEncoding, long customMaxBufferCapacity) {
-        return buildCustom(transferEncoding, null, customMaxBufferCapacity);
+    public static FilterChain buildHttp(IJedaManager jedaManager, long customMaxBufferCapacity) {
+        return buildCustom(jedaManager, null, customMaxBufferCapacity);
     }
 
-
-    public long getDefMaxBufferCapacity() {
-        return defMaxBufferCapacity;
-    }
-
-    public void setDefMaxBufferCapacity(long defMaxBufferCapacity) {
-        this.defMaxBufferCapacity = defMaxBufferCapacity;
-    }
-
-    public int getDefChunkedMaxHeaderSize() {
-        return defChunkedMaxHeaderSize;
-    }
-
-    public void setDefChunkedMaxHeaderSize(int defChunkedMaxHeaderSize) {
-        this.defChunkedMaxHeaderSize = defChunkedMaxHeaderSize;
-    }
 }

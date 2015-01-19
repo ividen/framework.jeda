@@ -1,16 +1,14 @@
 package ru.kwanza.jeda.nio.client.http;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import ru.kwanza.jeda.api.IFlowBus;
 import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
-import ru.kwanza.jeda.nio.client.ClientMain;
-import ru.kwanza.jeda.nio.client.ITransportEvent;
 
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 
 /**
  * @author Michael Yeskov
@@ -18,22 +16,25 @@ import java.util.Collection;
 public class HttpClient {
     public static void main(String[] args) throws SinkException, InterruptedException {
         ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("test-app-config.xml", HttpClient.class);
-        IJedaManager systemManager = ctx.getBean(IJedaManager.class);
-        IFlowBus flowBus = systemManager.getFlowBus("client-transport-flow-bus");
-        HttpFilterChainBuilder filterChainBuilder = (HttpFilterChainBuilder)ctx.getBean("filterChainBuilder");
+        IJedaManager jedaManager = ctx.getBean(IJedaManager.class);
+        IFlowBus flowBus = jedaManager.getFlowBus("client-transport-flow-bus");
+        HttpFilterChainHolder filterChainHolder = (HttpFilterChainHolder)ctx.getBean("httpFilterChainHolder");
 
-        HttpRequestEvent requestEvent = new HttpRequestEvent(filterChainBuilder, "Test message");
 
-        systemManager.getTransactionManager().begin();
+        HttpRequestEvent requestEvent = new HttpRequestEvent(filterChainHolder.getHttpFilterChain(), "Msg 2" );
+
+        final TransactionStatus status1 = jedaManager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
         flowBus.put(Arrays.asList(requestEvent));
-        systemManager.getTransactionManager().commit();
+        jedaManager.getTransactionManager().commit(status1);
 
         Thread.sleep(10000);
 
-        systemManager.getTransactionManager().begin();
-        flowBus.put(Arrays.asList(requestEvent));
-        systemManager.getTransactionManager().commit();
 
+        IDelegatingTransportEvent soapEvent = new ApplicationSoapEvent("Test message", filterChainHolder.getHttpFilterChain());
+
+        final TransactionStatus status2 = jedaManager.getTransactionManager().getTransaction(new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW));
+        flowBus.put(Arrays.asList(soapEvent));
+        jedaManager.getTransactionManager().commit(status2);
 
         while (true) {
             Thread.currentThread().join(1000);
