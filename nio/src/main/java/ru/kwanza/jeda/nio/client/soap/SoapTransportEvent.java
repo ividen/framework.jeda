@@ -7,16 +7,17 @@ import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.Protocol;
 import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.memory.Buffers;
+import ru.kwanza.jeda.api.AbstractEvent;
 import ru.kwanza.jeda.nio.client.ConnectionConfig;
 import ru.kwanza.jeda.nio.client.http.IDelegatingTransportEvent;
-import ru.kwanza.toolbox.attribute.AttributeHolder;
+
 
 import java.nio.charset.Charset;
 
 /**
  * @author Michael Yeskov
  */
-public class SOAPTransportEvent implements IDelegatingTransportEvent {
+public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingTransportEvent {
 
     protected String message;
     protected String URI;
@@ -26,18 +27,24 @@ public class SOAPTransportEvent implements IDelegatingTransportEvent {
     protected SOAPVersion soapVersion;
     protected String soapAction;
 
+    protected T requestObject;
 
 
-    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain) {
+    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain, T requestObject) {
         this.message = message;
         this.URI = URI;
         this.connectionConfig = connectionConfig;
         this.responseStageName = responseStageName;
         this.filterChain = filterChain;
+        this.requestObject = requestObject;
+        this.soapVersion = SOAPVersion.SOAP1_2; //no SOAP action is specified so we assume SOAP 1.2
     }
 
-    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain, SOAPVersion soapVersion, String soapAction) {
-        this(message, connectionConfig, URI, responseStageName, filterChain);
+    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain, T requestObject, SOAPVersion soapVersion, String soapAction) {
+        this(message, connectionConfig, URI, responseStageName, filterChain, requestObject);
+        if ((soapVersion == SOAPVersion.SOAP1_1) && (soapAction == null)) {
+            throw new IllegalArgumentException("Soap action must be specified for SOAP 1.1");
+        }
         this.soapVersion = soapVersion;
         this.soapAction = soapAction;
     }
@@ -62,18 +69,19 @@ public class SOAPTransportEvent implements IDelegatingTransportEvent {
 
         final Buffer wrap = Buffers.wrap(null, message.getBytes(Charset.forName("UTF-8")));
 
-        StringBuilder contentType = new StringBuilder("application/soap+xml;charset=UTF-8");
+        StringBuilder contentType = new StringBuilder();
         StringBuilder actionBuilder = null;
-
-        if (soapAction != null) {
-            if (soapVersion == SOAPVersion.SOAP1_2) {
+        if (soapVersion == SOAPVersion.SOAP1_2) {
+            contentType.append("application/soap+xml;charset=UTF-8");
+            if (soapAction != null) {
                 contentType.append(";action=\"");
                 contentType.append(soapAction);
                 contentType.append("\"");
-            } else if (soapVersion == SOAPVersion.SOAP1_1)  {
-                actionBuilder = new StringBuilder("\"");
-                actionBuilder.append(soapAction).append("\"");
             }
+        } else {
+            contentType.append("text/xml;charset=UTF-8");
+            actionBuilder = new StringBuilder("\"");
+            actionBuilder.append(soapAction).append("\"");
         }
 
         final HttpRequestPacket.Builder requestBuilder = HttpRequestPacket.builder();
@@ -94,8 +102,7 @@ public class SOAPTransportEvent implements IDelegatingTransportEvent {
         return HttpContent.builder(requestBuilder.build()).content(wrap).last(true).build();
     }
 
-    @Override
-    public AttributeHolder getAttributes() {
-        return null;
+    public T getRequestObject() {
+        return requestObject;
     }
 }
