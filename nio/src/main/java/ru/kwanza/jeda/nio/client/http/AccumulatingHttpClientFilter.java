@@ -27,8 +27,7 @@ public class AccumulatingHttpClientFilter extends BaseFilter {
             return ctx.getInvokeAction();
         } else {
             if (content.getContent().capacity() > maxBufferCapacity) {
-                ctx.getConnection().closeSilently();
-                ctx.notifyUpstream(new BufferOverflowEvent(maxBufferCapacity));
+                ctx.notifyUpstream(new BufferOverflowEvent(maxBufferCapacity)); //upstream filter must close connection properly
                 return ctx.getStopAction();
             } else {
                 return ctx.getStopAction(content);
