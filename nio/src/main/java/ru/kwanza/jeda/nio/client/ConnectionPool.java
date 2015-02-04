@@ -126,8 +126,12 @@ class ConnectionPool extends AbstractResourceController {
                     getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
                 }
             }
-            batchSize.incrementAndGet();
         }
+        /*
+          result == null означает невозможность установить соединение
+          Вернуть bachSize необходимо, даже если соединение было не удачным
+        */
+        batchSize.incrementAndGet();
     }
 
     public static ConnectionPool getPool(Connection connection) {
