@@ -17,6 +17,7 @@ import ru.kwanza.jeda.nio.client.ConnectionContext;
 import ru.kwanza.jeda.nio.client.ITransportEvent;
 import ru.kwanza.jeda.nio.client.http.exception.ConnectionException;
 import ru.kwanza.jeda.nio.client.http.exception.TimeoutException;
+import ru.kwanza.jeda.nio.client.http.exception.UnexpectedConnectionTermination;
 import ru.kwanza.jeda.nio.client.timeouthandler.TimeoutHandler;
 
 import java.io.IOException;
@@ -49,21 +50,21 @@ public class DelegatingHttpClientHandler extends AbstractFilter {
 
     @Override
     public NextAction read(FilterChainContext ctx) throws IOException {
-        IDelegatingTransportEvent requestEvent = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
+        ConnectionContext context = getConnectionContext(ctx);
+        IDelegatingTransportEvent requestEvent = (IDelegatingTransportEvent)context.getRequestEvent();
         HttpContent content = (HttpContent) ctx.getMessage();
         HttpStatus httpStatus = ((HttpResponsePacket) content.getHttpHeader()).getHttpStatus();
 
-        pushResponse(ctx, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, content, null, httpStatus));
+        pushResponse(context, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, content, null, httpStatus));
 
-        releaseConnection(ctx);
+        releaseConnection(ctx); //release должен быть после push response иначе мы пошлем сообщение о том, что connection был прерван вместо ответа
 
         return ctx.getStopAction();
     }
 
     public NextAction handleEvent(FilterChainContext ctx, FilterChainEvent event) throws IOException {
         if (event instanceof BufferOverflowEvent){
-            IDelegatingTransportEvent requestEvent = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
-            pushResponse(ctx, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, null, (BufferOverflowEvent) event, null));
+            pushExceptionResponse(ctx, (BufferOverflowEvent)event);
 
             forceCloseConnection(ctx.getConnection());
 
@@ -73,12 +74,40 @@ public class DelegatingHttpClientHandler extends AbstractFilter {
         }
     }
 
-    private void pushResponse(FilterChainContext ctx, String stageName, HttpResponseEvent event) {
-        ConnectionContext context = null;
-        if (ctx != null) {
-            context = getConnectionContext(ctx);
+    @Override
+    public NextAction handleClose(final FilterChainContext ctx) throws IOException {
+        try {
+            TimeoutHandler.checkTimedOut(ctx.getConnection());
+        } catch (Exception e) {
+            pushExceptionSkipDuplicates(ctx, new TimeoutException(e));
+        }
+        pushExceptionSkipDuplicates(ctx, new UnexpectedConnectionTermination()); //send exception on unexpected connection termination
+
+        return ctx.getInvokeAction();
+    }
+
+    @Override
+    public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
+        pushExceptionResponse(ctx, error);
+        forceCloseConnection(ctx.getConnection());
+    }
+
+    private void pushExceptionSkipDuplicates(FilterChainContext ctx, Throwable error) {
+        if (getConnectionContext(ctx).get(ALREADY_SEND_RESPONSE) == null) { //silently skip duplicates because they can normally happens
+            pushExceptionResponse(ctx, error);
+        }
+    }
+
+    private void pushExceptionResponse(FilterChainContext ctx, Throwable error) {
+        ConnectionContext context = getConnectionContext(ctx);
+        IDelegatingTransportEvent requestEvent = (IDelegatingTransportEvent)context.getRequestEvent();
+        pushResponse(context, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, null, error, null));
+    }
+
+    private void pushResponse(ConnectionContext context, String stageName, HttpResponseEvent event) {
+        if (context != null) { //additional check for unexpected double response
             if (context.get(ALREADY_SEND_RESPONSE) != null) {
-                log.debug("Already send response for this connection. Skipping event = {}", event);
+                log.warn("Already send response for this connection. Skipping event = {}", event);
                 return;
             }
         }
@@ -92,26 +121,6 @@ public class DelegatingHttpClientHandler extends AbstractFilter {
         } catch (SinkException e) {
             log.error("Exception while pushing HttpResponseEvent to stage " + stageName + ". Event will be discarded", e);
         }
-    }
-
-    @Override
-    public NextAction handleClose(final FilterChainContext ctx) throws IOException {
-        try {
-            TimeoutHandler.checkTimedOut(ctx.getConnection());
-        } catch (Exception e) {
-            IDelegatingTransportEvent event = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
-            pushResponse(ctx, event.getResponseStageName(), new HttpResponseEvent(event, null, new TimeoutException(e), null));
-        }
-
-        return ctx.getInvokeAction();
-    }
-
-    @Override
-    public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
-        IDelegatingTransportEvent event = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
-        pushResponse(ctx, event.getResponseStageName(), new HttpResponseEvent(event, null, error, null));
-
-        forceCloseConnection(ctx.getConnection());
     }
 
     private void forceCloseConnection(Connection connection) {
