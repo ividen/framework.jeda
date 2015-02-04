@@ -94,10 +94,16 @@ public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
 
     private IStageInternal createDirectionStage(String stageName, InetSocketAddress endpoint, IJedaManagerInternal manager) {
         ConnectionPool connectionPool = registry.getConnectionPool(endpoint);
-        return new Stage(manager, stageName,
-                new EventProcessor(transport, connectionPool),
-                directionQueueFactory.create(manager, endpoint),
-                threadManager, null, connectionPool, false);
+        IStageInternal result;
+        try {
+            result = new Stage(manager, stageName,
+                    new EventProcessor(transport, connectionPool),
+                    directionQueueFactory.create(manager, endpoint),
+                    threadManager, null, connectionPool, false);
+        } catch (RuntimeException e) { //can be when concurrent threads try to register stage with single pool(as resource controller)
+            result = manager.getStageInternal(stageName);
+        }
+        return result;
     }
 
     private String getStageName(InetSocketAddress key) {
