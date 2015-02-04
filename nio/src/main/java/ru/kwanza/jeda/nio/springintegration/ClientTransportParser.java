@@ -26,9 +26,14 @@ class ClientTransportParser extends JedaBeanDefinitionParser {
         String name = element.getAttribute("name");
         definitionBuilder.addPropertyValue("name", name);
 
-        String connectionPoolSizeObserver = element.getAttribute("connectionPoolSizeObserver");
+        String connectionPoolSizeObserver = element.getAttribute("connectionPoolSizeObserver");  //TODO: myeskov  это свойство лишнее?
         if (StringUtils.hasText(connectionPoolSizeObserver)) {
             definitionBuilder.addPropertyReference("connectionPoolSizeObserver", connectionPoolSizeObserver);
+        }
+
+        String connectionPoolConfigurator = element.getAttribute("connectionPoolConfigurator");
+        if (StringUtils.hasText(connectionPoolConfigurator)) {
+            definitionBuilder.addPropertyReference("connectionPoolConfigurator", connectionPoolConfigurator);
         }
 
         String directionQueueFactory = element.getAttribute("directionQueueFactory");
