@@ -106,8 +106,10 @@ public class SystemQueue<E extends IEvent> implements IQueue<E> {
             result.addAll(admissionResult);
         }
 
-        if (queueResult != null && admissionController != null) {
-            admissionController.degrade(queueResult);
+        if (queueResult != null) {
+            if (admissionController != null) {
+                admissionController.degrade(queueResult);
+            }
             result.addAll(queueResult);
         }
 
