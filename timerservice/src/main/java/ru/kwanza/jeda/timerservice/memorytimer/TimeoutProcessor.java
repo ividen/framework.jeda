@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IJedaManager;
-import ru.kwanza.jeda.api.helper.FlushResult;
+import ru.kwanza.jeda.api.helper.IDeclineProcessor;
 import ru.kwanza.jeda.api.helper.SinkHelper;
 
 import java.util.ArrayList;

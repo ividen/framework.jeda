@@ -1,7 +1,4 @@
-package ru.kwanza.jeda.timerservice.memorytimer;
-
-import ru.kwanza.jeda.api.helper.FlushResult;
-import ru.kwanza.jeda.api.helper.SinkHelper;
+package ru.kwanza.jeda.api.helper;
 
 /**
  * @author Michael Yeskov

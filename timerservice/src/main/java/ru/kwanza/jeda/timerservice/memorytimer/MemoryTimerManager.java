@@ -1,8 +1,8 @@
 package ru.kwanza.jeda.timerservice.memorytimer;
 
-import org.springframework.stereotype.Component;
 import ru.kwanza.jeda.api.IEvent;
 import ru.kwanza.jeda.api.IJedaManager;
+import ru.kwanza.jeda.api.helper.IDeclineProcessor;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
