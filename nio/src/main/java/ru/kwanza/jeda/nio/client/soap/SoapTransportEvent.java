@@ -8,6 +8,7 @@ import org.glassfish.grizzly.http.Protocol;
 import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.memory.Buffers;
 import ru.kwanza.jeda.api.AbstractEvent;
+import ru.kwanza.jeda.api.helper.RequestAware;
 import ru.kwanza.jeda.nio.client.ConnectionConfig;
 import ru.kwanza.jeda.nio.client.http.IDelegatingTransportEvent;
 
@@ -17,7 +18,7 @@ import java.nio.charset.Charset;
 /**
  * @author Michael Yeskov
  */
-public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingTransportEvent {
+public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingTransportEvent, RequestAware<T> {
 
     protected String message;
     protected String URI;
@@ -102,7 +103,10 @@ public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingT
         return HttpContent.builder(requestBuilder.build()).content(wrap).last(true).build();
     }
 
-    public T getRequestObject() {
+    @Override
+    public T getRequestEvent() {
         return requestObject;
     }
+
+
 }
