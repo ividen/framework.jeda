@@ -1,4 +1,4 @@
-package ru.kwanza.jeda.nio.client.http;
+package ru.kwanza.jeda.nio.client.http.exception;
 
 /**
  * @author Michael Yeskov

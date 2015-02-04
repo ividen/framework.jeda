@@ -13,6 +13,9 @@ import ru.kwanza.jeda.api.ISink;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.nio.client.AbstractFilter;
 import ru.kwanza.jeda.nio.client.ITransportEvent;
+import ru.kwanza.jeda.nio.client.http.exception.ConnectionException;
+import ru.kwanza.jeda.nio.client.http.exception.TimeoutException;
+import ru.kwanza.jeda.nio.client.timeouthandler.TimeoutHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -64,5 +67,23 @@ public class DelegatingHttpClientHandler extends AbstractFilter {
         } catch (SinkException e) {
             log.error("Exception while pushing HttpResponseEvent to stage " + stageName + ". Event will be discarded", e);
         }
+    }
+
+    @Override
+    public NextAction handleClose(final FilterChainContext ctx) throws IOException {
+        try {
+            TimeoutHandler.checkTimedOut(ctx.getConnection());
+        } catch (Exception e) {
+            IDelegatingTransportEvent event = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
+            pushResponse(event.getResponseStageName(), new HttpResponseEvent(event, null, new TimeoutException(e), null));
+        }
+
+        return ctx.getInvokeAction();
+    }
+
+    @Override
+    public void exceptionOccurred(FilterChainContext ctx, Throwable error) {
+        IDelegatingTransportEvent event = (IDelegatingTransportEvent)getConnectionContext(ctx).getRequestEvent();
+        pushResponse(event.getResponseStageName(), new HttpResponseEvent(event, null, error, null));
     }
 }
