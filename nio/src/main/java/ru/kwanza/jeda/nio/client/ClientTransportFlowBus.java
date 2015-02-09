@@ -4,7 +4,6 @@ import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.strategies.SameThreadIOStrategy;
 import ru.kwanza.jeda.api.IFlowBus;
-import ru.kwanza.jeda.api.IJedaManager;
 import ru.kwanza.jeda.api.SinkException;
 import ru.kwanza.jeda.api.internal.IJedaManagerInternal;
 import ru.kwanza.jeda.api.internal.IStageInternal;
@@ -15,11 +14,13 @@ import ru.kwanza.jeda.core.threadmanager.shared.SharedThreadManager;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Guzanov Alexander
  */
 public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
+    private ReentrantLock lock = new ReentrantLock();
     private IJedaManagerInternal manager;
     private IDirectionQueueFactory directionQueueFactory;
     private TCPNIOTransport transport;
@@ -83,27 +84,38 @@ public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
             }
 
             if (stage == null) {
-                stage = createDirectionStage(stageName, endpoint, manager);
-                manager.registerStage(stage);
-                stage = manager.getStageInternal(stageName);
+                stage = createStageIfAbsent(stageName, endpoint, manager);
             }
 
             stage.<ITransportEvent>getSink().put(e.getValue());
         }
     }
 
+    private IStageInternal createStageIfAbsent(String stageName, InetSocketAddress endpoint, IJedaManagerInternal manager) {
+        lock.lock();
+        try {
+            IStageInternal stage = null;
+            try {
+                stage = manager.getStageInternal(stageName);
+            } catch (ObjectNotFoundException e) {
+            }
+            if (stage == null) {
+                stage = createDirectionStage(stageName, endpoint, manager);
+                manager.registerStage(stage);
+                stage = manager.getStageInternal(stageName);
+            }
+            return stage;
+        } finally {
+            lock.unlock();
+        }
+    }
+
     private IStageInternal createDirectionStage(String stageName, InetSocketAddress endpoint, IJedaManagerInternal manager) {
         ConnectionPool connectionPool = registry.getConnectionPool(endpoint);
-        IStageInternal result;
-        try {
-            result = new Stage(manager, stageName,
+        return new Stage(manager, stageName,
                     new EventProcessor(transport, connectionPool),
                     directionQueueFactory.create(manager, endpoint),
                     threadManager, null, connectionPool, false);
-        } catch (RuntimeException e) { //can be when concurrent threads try to register stage with single pool(as resource controller)
-            result = manager.getStageInternal(stageName);
-        }
-        return result;
     }
 
     private String getStageName(InetSocketAddress key) {
@@ -123,9 +135,7 @@ public class ClientTransportFlowBus implements IFlowBus<ITransportEvent> {
             }
 
             if (stage == null) {
-                stage = createDirectionStage(stageName, endpoint, manager);
-                manager.registerStage(stage);
-                stage = manager.getStageInternal(stageName);
+                stage = createStageIfAbsent(stageName, endpoint, manager);
             }
 
             Collection<ITransportEvent> decline = stage.<ITransportEvent>getSink().tryPut(e.getValue());
