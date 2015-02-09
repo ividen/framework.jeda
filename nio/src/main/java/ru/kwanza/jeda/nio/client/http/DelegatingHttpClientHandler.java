@@ -101,7 +101,9 @@ public class DelegatingHttpClientHandler extends AbstractFilter {
     private void pushExceptionResponse(FilterChainContext ctx, Throwable error) {
         ConnectionContext context = getConnectionContext(ctx);
         IDelegatingTransportEvent requestEvent = (IDelegatingTransportEvent)context.getRequestEvent();
-        pushResponse(context, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, null, error, null));
+        if (requestEvent != null) { //can be null when keep alive connection is closed by timeout
+            pushResponse(context, requestEvent.getResponseStageName(), new HttpResponseEvent(requestEvent, null, error, null));
+        }
     }
 
     private void pushResponse(ConnectionContext context, String stageName, HttpResponseEvent event) {
