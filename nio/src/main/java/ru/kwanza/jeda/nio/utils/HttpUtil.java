@@ -30,7 +30,7 @@ public abstract class HttpUtil {
         final HttpResponsePacket responseHeader;
         responseHeader =
                 HttpResponsePacket.builder(request).protocol(request.getProtocol()).status(500).contentLength(0)
-                        .contentType("text/html")
+                        .contentType("text/xml")
                         .reasonPhrase("Internal Server Error: " + e.getLocalizedMessage()).build();
 
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
