@@ -12,7 +12,7 @@ import java.net.InetSocketAddress;
 public class ApplicationSoapEvent extends SOAPTransportEvent{
 
     public ApplicationSoapEvent(String message, FilterChain filterChain) {
-        super(message, null, "/ws_test-1/ws/soap", "responseStage", filterChain, new Object());
+        super(message, null, "/ws_test-1/ws/soap", null, "responseStage", filterChain, new Object());
         connectionConfig = new ConnectionConfig(new InetSocketAddress("localhost", 8080),
                 true, true, 1000);
     }

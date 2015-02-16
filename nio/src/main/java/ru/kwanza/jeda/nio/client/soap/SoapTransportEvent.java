@@ -23,6 +23,7 @@ public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingT
     protected String message;
     protected String URI;
     protected ConnectionConfig connectionConfig;
+    protected String hostName;
     protected String responseStageName;
     protected FilterChain filterChain;
     protected SOAPVersion soapVersion;
@@ -31,18 +32,19 @@ public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingT
     protected T requestObject;
 
 
-    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain, T requestObject) {
+    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String hostName, String responseStageName, FilterChain filterChain, T requestObject) {
         this.message = message;
         this.URI = URI;
         this.connectionConfig = connectionConfig;
+        this.hostName = hostName;
         this.responseStageName = responseStageName;
         this.filterChain = filterChain;
         this.requestObject = requestObject;
         this.soapVersion = SOAPVersion.SOAP1_2; //no SOAP action is specified so we assume SOAP 1.2
     }
 
-    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String responseStageName, FilterChain filterChain, T requestObject, SOAPVersion soapVersion, String soapAction) {
-        this(message, connectionConfig, URI, responseStageName, filterChain, requestObject);
+    public SOAPTransportEvent(String message, ConnectionConfig connectionConfig, String URI, String hostName, String responseStageName, FilterChain filterChain, T requestObject, SOAPVersion soapVersion, String soapAction) {
+        this(message, connectionConfig, URI, hostName, responseStageName, filterChain, requestObject);
         if ((soapVersion == SOAPVersion.SOAP1_1) && (soapAction == null)) {
             throw new IllegalArgumentException("Soap action must be specified for SOAP 1.1");
         }
@@ -86,9 +88,11 @@ public class SOAPTransportEvent<T> extends AbstractEvent implements IDelegatingT
         }
 
         final HttpRequestPacket.Builder requestBuilder = HttpRequestPacket.builder();
-        requestBuilder.method("POST").uri(URI).protocol(Protocol.HTTP_1_1).chunked(false).contentLength(wrap.capacity())
-                .header(Header.Host, connectionConfig.getEndpoint().getHostName() + ":" + connectionConfig.getEndpoint().getPort())
-                .contentType(contentType.toString());
+        requestBuilder.method("POST").uri(URI).protocol(Protocol.HTTP_1_1).chunked(false).contentLength(wrap.capacity()).contentType(contentType.toString());
+
+        if (hostName != null) {
+            requestBuilder.header(Header.Host, hostName + ":" + connectionConfig.getEndpoint().getPort());
+        }
 
         if (actionBuilder != null) {
             requestBuilder.header("SOAPAction", actionBuilder.toString());
