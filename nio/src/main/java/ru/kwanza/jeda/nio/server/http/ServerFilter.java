@@ -48,7 +48,7 @@ class ServerFilter extends BaseFilter {
                 CONTENT.set(ctx.getConnection(), requestContent);
             }
 
-            return ctx.getSuspendAction();
+            return ctx.getStopAction();
         } else if (requestContent != null) {
             requestContent.append(chunkContent);
             requestContent.setLast(true);

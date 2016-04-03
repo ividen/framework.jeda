@@ -462,19 +462,19 @@
         <tag>HEAD</tag>
     </scm>
 
+
     <distributionManagement>
         <repository>
             <id>kwanza-releases</id>
             <name>libs-release</name>
-            <url>http://artifactory.kwanza-systems.ru/libs-release-local</url>
+            <url>http://artifactory.kwanza-systems.ru/libs-release-public</url>
         </repository>
 
         <snapshotRepository>
             <id>kwanza-snapshots</id>
             <name>snapshots</name>
-            <url>http://artifactory.kwanza-systems.ru/libs-snapshot-local</url>
+            <url>http://artifactory.kwanza-systems.ru/libs-snapshot-public</url>
         </snapshotRepository>
     </distributionManagement>
-
 
 </project>

@@ -13,14 +13,11 @@ import javax.annotation.Resource;
 @Repository
 public class PendingTxTimersStore {
 
-    @Resource(name = "jeda.IJedaManager")
-    private IJedaManager manager;
-
     @Resource
     private TimerClassRepository repository;
 
     public Tx getCurrentTx(ITimerManagerInternal timerManager) {
-        return Tx.getTx(timerManager, this, repository);
+        return Tx.getTx(timerManager, repository);
     }
 
 }

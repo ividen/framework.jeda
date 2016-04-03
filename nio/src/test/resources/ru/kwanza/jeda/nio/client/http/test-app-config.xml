@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:nio="http://www.kwanza-systems.ru/schema/jeda-nio"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:core="http://www.kwanza-systems.ru/schema/jeda-core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+               http://www.springframework.org/schema/beans/spring-beans.xsd
+               http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+               http://www.kwanza-systems.ru/schema/jeda-nio http://www.kwanza-systems.ru/schema/jeda-nio.xsd http://www.kwanza-systems.ru/schema/jeda-core http://www.kwanza-systems.ru/schema/jeda-core.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="classpath:txn-ds-config.xml"/>
+
+    <import resource="classpath:jeda-core-config.xml"/>
+    <import resource="classpath:pendingstore-logonly-config.xml"/>
+
+
+
+    <context:property-placeholder location="classpath:test.properties"/>
+
+
+    <bean id="jeda.PlatformTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <constructor-arg ref="dataSource"/>
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy">
+        <constructor-arg name="targetDataSource">
+            <bean destroy-method="close" class="org.apache.commons.dbcp.BasicDataSource">
+                <property name="driverClassName" value="${jdbc.driverClass}"/>
+                <property name="url" value="${jdbc.connectionUrl}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+                <property name="defaultCatalog" value="${jdbc.schema}"/>
+                <property name="defaultAutoCommit" value="true"/>
+                <property name="connectionProperties" value="oracle.jdbc.ReadTimeout=60000"/>
+                <property name="maxActive" value="70" />
+                <property name="maxIdle" value="70" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <nio:client-transport-flow-bus name="client-transport-flow-bus"/>
+
+
+    <core:stage name="responseStage" transaction="true">
+        <core:tx-memory-queue cloneType="NONE" maxSize="1000000"/>
+        <core:fixed-batch-size-resource-controller batchSize="1000" maxThreadCount="10"/>
+        <core:event-processor class="ru.kwanza.jeda.nio.client.http.ResponseProcessor"/>
+        <core:stage-thread-manager threadNamePrefix="response_stage" idleTimeout="50000" maxThreadCount="15"/>
+    </core:stage>
+    
+    <bean id="httpFilterChainHolder" class="ru.kwanza.jeda.nio.client.http.HttpFilterChainHolder">
+        <property name="maxBufferCapacity" value="10000000" />
+    </bean>
+</beans>

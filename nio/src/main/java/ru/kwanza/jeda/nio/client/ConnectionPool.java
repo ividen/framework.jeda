@@ -101,14 +101,12 @@ class ConnectionPool extends AbstractResourceController {
         ConnectionContext context = ConnectionContext.getContext(result);
 
         if (context != null) {
-            try {
-                if (context.getRequestEvent().getConnectionConfig().isKeepAlive()) {
-                    returnConnection(result, context.getRequestEvent().getConnectionConfig());
-                } else {
-                    result.closeSilently();
-                }
-            } finally {
-               context.clear();
+            ConnectionConfig connectionConfig = context.getRequestEvent().getConnectionConfig();
+            context.clear();
+            if (connectionConfig.isKeepAlive()) {
+                returnConnection(result, connectionConfig);
+            } else {
+                result.closeSilently();
             }
         }
     }
@@ -126,8 +124,12 @@ class ConnectionPool extends AbstractResourceController {
                     getStage().getThreadManager().adjustThreadCount(getStage(), getThreadCount());
                 }
             }
-            batchSize.incrementAndGet();
         }
+        /*
+          result == null означает невозможность установить соединение
+          Вернуть bachSize необходимо, даже если соединение было не удачным
+        */
+        batchSize.incrementAndGet();
     }
 
     public static ConnectionPool getPool(Connection connection) {

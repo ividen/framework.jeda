@@ -31,6 +31,9 @@ public class ConnectionContext implements Map<Object, Object> {
     }
 
     void setRequestEvent(ITransportEvent requestEvent) {
+        if (this.requestEvent != null) {
+            throw new IllegalStateException("Previous request must be cleared first");
+        }
         this.requestEvent = requestEvent;
     }
 

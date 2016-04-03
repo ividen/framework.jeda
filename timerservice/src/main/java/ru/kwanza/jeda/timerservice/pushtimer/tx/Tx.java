@@ -15,28 +15,27 @@ import java.util.*;
  * @author Michael Yeskov
  */
 public class Tx implements TransactionSynchronization {
+    private static final Object TX_KEY = new Object();
 
     private ITimerManagerInternal timerManager;
-    private PendingTxTimersStore txStore;
     private TimerClassRepository repository;
 
     Map<TimerClass, Set<NewTimer>> pendingSchedule = new HashMap<TimerClass, Set<NewTimer>>();
     Map<TimerClass, Set<NewTimer>> reSchedulePending = new HashMap<TimerClass, Set<NewTimer>>();
 
 
-    public Tx(ITimerManagerInternal timerManager, PendingTxTimersStore txStore, TimerClassRepository repository) {
+    public Tx(ITimerManagerInternal timerManager, TimerClassRepository repository) {
         this.timerManager = timerManager;
-        this.txStore = txStore;
         this.repository = repository;
     }
 
 
-    public static Tx getTx(ITimerManagerInternal timerManager, PendingTxTimersStore txStore, TimerClassRepository repository) {
+    public static Tx getTx(ITimerManagerInternal timerManager, TimerClassRepository repository) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            Tx result = (Tx) TransactionSynchronizationManager.getResource(repository);
+            Tx result = (Tx) TransactionSynchronizationManager.getResource(TX_KEY);
             if (result == null) {
-                result = new Tx(timerManager, txStore, repository);
-                TransactionSynchronizationManager.bindResource(repository, result);
+                result = new Tx(timerManager, repository);
+                TransactionSynchronizationManager.bindResource(TX_KEY, result);
                 TransactionSynchronizationManager.registerSynchronization(result);
 
             }
@@ -48,12 +47,12 @@ public class Tx implements TransactionSynchronization {
 
     @Override
     public void suspend() {
-        TransactionSynchronizationManager.unbindResourceIfPossible(repository);
+        TransactionSynchronizationManager.unbindResourceIfPossible(TX_KEY);
     }
 
     @Override
     public void resume() {
-        TransactionSynchronizationManager.bindResource(repository, this);
+        TransactionSynchronizationManager.bindResource(TX_KEY, this);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class Tx implements TransactionSynchronization {
 
     @Override
     public void beforeCompletion() {
-        TransactionSynchronizationManager.unbindResourceIfPossible(repository);
+        TransactionSynchronizationManager.unbindResourceIfPossible(TX_KEY);
     }
 
     @Override
